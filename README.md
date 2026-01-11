@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nezu Dashboard (Frontend)
 
-## Getting Started
+The modern administrative dashboard for the **Nezu Intent Manager**. Built with **Next.js 14** (App Router), this interface allows users to view intent status, manage devices (boards), and monitor system activity in real-time.
 
-First, run the development server:
+## 🚀 Technologies
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS
+- **State/Fetching**: React Hooks, SWR (or Axios)
+- **Icons**: Lucide React
+- **Deployment**: Vercel
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Installation & Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/NezuSas/intentflow-dashboard.git
+   cd intentflow-dashboard
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Install Dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-## Learn More
+3. **Environment Setup:**
+   Create a `.env.local` file in the root directory:
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure the connection to your backend:
+   ```env
+   # Default local backend URL
+   NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 Deployment (Vercel)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is optimized for **Vercel**.
 
-## Deploy on Vercel
+1. Import the repository into Vercel.
+2. The framework preset should detect **Next.js** automatically.
+3. **Environment Variables**:
+   - `NEXT_PUBLIC_API_URL`: Set this to your production backend URL (e.g., `https://intentflow-api.onrender.com`).
+4. Click **Deploy**.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📂 Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/`: App Router pages and layouts.
+- `src/components/`: Reusable UI components.
+- `src/services/`: API integration services.
+- `src/types/`: TypeScript definitions for Intents and Boards.

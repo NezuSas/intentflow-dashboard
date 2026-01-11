@@ -1,0 +1,184 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.tableContainer {
+  background: var(--surface);
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 1rem;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badgeActive {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.badgeInactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.roleSelect {
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.actionButton {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background: var(--border);
+}
+
+.deleteButton {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+}
+
+.deleteButton:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85); /* Darker background overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px); /* More blur */
+}
+
+.modal {
+  background: #0f172a; /* Solid dark background */
+  padding: 3rem;       /* Increased padding */
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 600px;    /* Slightly wider */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;         /* Gap between sections */
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem; /* Increased spacing between fields */
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.input {
+  width: 100%;
+  padding: 1rem; /* More padding in inputs */
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.primaryButton {
+  background: var(--primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
