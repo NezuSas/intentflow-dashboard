@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import styles from "./dashboard.module.css";
 import { authService } from "@/services/authService";
+import { API_URL } from "@/config/api";
 
 interface DashboardStats {
   total_intents_30d: number;
@@ -40,9 +41,7 @@ export default function DashboardHomePage() {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-        const API_URL = `${baseUrl}/api/intents/stats/`;
-        const response = await authService.fetchWithAuth(API_URL);
+        const response = await authService.fetchWithAuth(`${API_URL}/intents/stats/`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch stats (${response.status})`);
