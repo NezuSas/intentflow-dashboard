@@ -6,69 +6,73 @@ import type {
 } from "../domain/Subscription";
 
 import type {
-  SubscriptionRepository,
-} from "../domain/SubscriptionRepository";
+  SubscriptionPlanRepository,
+} from "../domain/SubscriptionPlanRepository";
+
+import type {
+  ClientSubscriptionRepository,
+} from "../domain/ClientSubscriptionRepository";
 
 export class SubscriptionService {
   constructor(
-    private readonly repository:
-      SubscriptionRepository
+    private readonly planRepository:
+      SubscriptionPlanRepository,
+    private readonly clientSubscriptionRepository:
+      ClientSubscriptionRepository
   ) {}
 
-  getPlans(): Promise<SubscriptionPlan[]> {
-    return this.repository.getPlans();
+  getPlans():
+    Promise<SubscriptionPlan[]> {
+    return this.planRepository.getAll();
   }
 
   getClientSubscriptions():
     Promise<ClientSubscription[]> {
-    return this.repository
-      .getClientSubscriptions();
+    return this.clientSubscriptionRepository
+      .getAll();
   }
 
   createPlan(
     data: SubscriptionPlanPayload
   ): Promise<void> {
-    return this.repository.createPlan(data);
+    return this.planRepository
+      .create(data);
   }
 
   updatePlan(
     id: number,
     data: SubscriptionPlanPayload
   ): Promise<void> {
-    return this.repository.updatePlan(
-      id,
-      data
-    );
+    return this.planRepository
+      .update(id, data);
   }
 
   deletePlan(
     id: number
   ): Promise<void> {
-    return this.repository.deletePlan(id);
+    return this.planRepository
+      .delete(id);
   }
 
   createClientSubscription(
     data: ClientSubscriptionPayload
   ): Promise<void> {
-    return this.repository
-      .createClientSubscription(data);
+    return this.clientSubscriptionRepository
+      .create(data);
   }
 
   updateClientSubscription(
     id: number,
     data: ClientSubscriptionPayload
   ): Promise<void> {
-    return this.repository
-      .updateClientSubscription(
-        id,
-        data
-      );
+    return this.clientSubscriptionRepository
+      .update(id, data);
   }
 
   deleteClientSubscription(
     id: number
   ): Promise<void> {
-    return this.repository
-      .deleteClientSubscription(id);
+    return this.clientSubscriptionRepository
+      .delete(id);
   }
 }
