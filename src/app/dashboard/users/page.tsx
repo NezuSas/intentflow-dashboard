@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./users.module.css";
 import { userService, User } from "@/services/userService";
+import { getErrorMessage } from "@/utils/errors";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -29,9 +30,12 @@ export default function UsersPage() {
       const data = await userService.getUsers();
       setUsers(data);
       setError(null);
-    } catch (err: any) {
-      console.error("Fetch users error:", err);
-      setError(err.message);
+    } catch (err: unknown) {
+      console.error(
+        "Fetch users error:",
+        getErrorMessage(err)
+      );
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -70,8 +74,8 @@ export default function UsersPage() {
       }
       setIsModalOpen(false);
       fetchUsers();
-    } catch (err: any) {
-      alert(`Error saving user: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error saving user: ${getErrorMessage(err)}`);
     }
   };
 
@@ -80,8 +84,8 @@ export default function UsersPage() {
     try {
       await userService.deleteUser(userId);
       setUsers(users.filter(u => u.id !== userId));
-    } catch (err: any) {
-      alert(`Error deleting user: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error deleting user: ${getErrorMessage(err)}`);
     }
   };
 
@@ -89,8 +93,8 @@ export default function UsersPage() {
     try {
       await userService.toggleActive(user.id);
       setUsers(users.map(u => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
-    } catch (err: any) {
-      alert(`Error toggling status: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error toggling status: ${getErrorMessage(err)}`);
     }
   };
 
@@ -98,8 +102,8 @@ export default function UsersPage() {
     try {
       await userService.changeRole(userId, newRole);
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    } catch (err: any) {
-      alert(`Error changing role: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error changing role: ${getErrorMessage(err)}`);
     }
   };
 
