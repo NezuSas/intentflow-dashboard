@@ -1,10 +1,15 @@
 import type {
+  IntentListQuery,
+  IntentRepository,
+} from "../domain/IntentRepository";
+
+import type {
   Intent,
 } from "../domain/Intent";
 
 import type {
-  IntentRepository,
-} from "../domain/IntentRepository";
+  PaginatedResponse,
+} from "@/core/Pagination";
 
 export class IntentService {
   constructor(
@@ -12,7 +17,9 @@ export class IntentService {
       IntentRepository
   ) {}
 
-  getIntents(): Promise<Intent[]> {
-    return this.repository.getAll();
+  list(
+    query?: IntentListQuery
+  ): Promise<PaginatedResponse<Intent>> {
+    return this.repository.list(query);
   }
 }

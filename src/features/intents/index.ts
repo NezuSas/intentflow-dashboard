@@ -7,6 +7,7 @@ export type {
 
 export type {
   IntentRepository,
+  IntentListQuery,
 } from "./domain/IntentRepository";
 
 export { IntentService } from "./application/IntentService";
