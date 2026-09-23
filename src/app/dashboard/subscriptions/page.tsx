@@ -351,7 +351,6 @@ export default function SubscriptionsPage() {
                     <option value="FREE">FREE</option>
                     <option value="BASIC">BASIC</option>
                     <option value="PREMIUM">PREMIUM</option>
-                    <option value="CIAL">CIAL</option>
                   </Select>
                 </FormField>
                 <FormField label="Price (USD)"><Input type="number" step="0.01" value={planForm.price} onChange={e => setPlanForm({...planForm, price: parseFloat(e.target.value)})} required /></FormField>

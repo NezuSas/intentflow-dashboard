@@ -275,9 +275,6 @@ export default function ClientsPage() {
                   <option value="PREMIUM">
                     PREMIUM
                   </option>
-                  <option value="CIAL">
-                    CIAL
-                  </option>
                 </Select>
               </FormField>
 
