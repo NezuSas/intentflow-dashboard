@@ -10,7 +10,7 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -175,6 +175,7 @@ export default function ClientsPage() {
 
       {error && <ErrorState message={error} />}
 
+      <TablePanel title="Clients" pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
       <Table label="Client management">
           <thead>
             <tr>
@@ -251,10 +252,7 @@ export default function ClientsPage() {
             )}
           </tbody>
       </Table>
-
-      {meta && (
-        <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />
-      )}
+      </TablePanel>
 
       <Modal open={isModalOpen} title={editingClient ? "Edit Client" : "Create New Client"} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>

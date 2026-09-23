@@ -14,7 +14,7 @@ import type {
   DashboardStats,
 } from "@/features/dashboard";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Card, ErrorState, LoadingState, Modal, PageHeader, StatusBadge, Table } from "@/shared/components";
+import { Button, Card, ErrorState, LoadingState, Modal, PageHeader, StatusBadge, Table, TablePanel } from "@/shared/components";
 import { CloudServerOutlined, FileTextOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 
 export default function DashboardHomePage() {
@@ -130,11 +130,7 @@ export default function DashboardHomePage() {
             ))}
           </div>
 
-          <Card>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>
-              Recent Activity
-            </h2>
-            
+          <TablePanel title="Recent Activity">
             {stats && stats.recent_intents.length > 0 ? (
               <Table label="Recent activity">
                   <thead>
@@ -188,7 +184,7 @@ export default function DashboardHomePage() {
             ) : (
               <div style={{ textAlign: "center", marginTop: "4rem" }}>No recent activity to display.</div>
             )}
-          </Card>
+          </TablePanel>
         </>
       )}
       {errorModalOpen && selectedIntent && (

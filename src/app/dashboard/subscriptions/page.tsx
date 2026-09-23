@@ -15,7 +15,7 @@ import type {
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 import type { PageMeta } from "@/core/Pagination";
-import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel, Textarea } from "@/shared/components";
 
 const PAGE_SIZE = 20;
 
@@ -230,7 +230,7 @@ export default function SubscriptionsPage() {
       {error && <ErrorState message={error} />}
 
       <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: 600 }}>Available Plans</h2>
+        <TablePanel title="Available Plans" pagination={plansMeta && <Pagination page={plansMeta.page} totalPages={Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))} totalCount={plansMeta.count} hasPrevious={Boolean(plansMeta.previous)} hasNext={Boolean(plansMeta.next)} onPrevious={() => setPlansPage((page) => Math.max(1, page - 1))} onNext={() => setPlansPage((page) => page + 1)} />}>
         <Table label="Available plans">
             <thead>
               <tr>
@@ -268,11 +268,11 @@ export default function SubscriptionsPage() {
               )}
             </tbody>
         </Table>
-        {plansMeta && <Pagination page={plansMeta.page} totalPages={Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))} totalCount={plansMeta.count} hasPrevious={Boolean(plansMeta.previous)} hasNext={Boolean(plansMeta.next)} onPrevious={() => setPlansPage((page) => Math.max(1, page - 1))} onNext={() => setPlansPage((page) => page + 1)} />}
+        </TablePanel>
       </section>
 
       <section>
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: 600 }}>Client Subscriptions</h2>
+        <TablePanel title="Client Subscriptions" pagination={subscriptionsMeta && <Pagination page={subscriptionsMeta.page} totalPages={Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))} totalCount={subscriptionsMeta.count} hasPrevious={Boolean(subscriptionsMeta.previous)} hasNext={Boolean(subscriptionsMeta.next)} onPrevious={() => setSubscriptionsPage((page) => Math.max(1, page - 1))} onNext={() => setSubscriptionsPage((page) => page + 1)} />}>
         <Table label="Client subscriptions">
             <thead>
               <tr>
@@ -310,7 +310,7 @@ export default function SubscriptionsPage() {
               )}
             </tbody>
         </Table>
-        {subscriptionsMeta && <Pagination page={subscriptionsMeta.page} totalPages={Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))} totalCount={subscriptionsMeta.count} hasPrevious={Boolean(subscriptionsMeta.previous)} hasNext={Boolean(subscriptionsMeta.next)} onPrevious={() => setSubscriptionsPage((page) => Math.max(1, page - 1))} onNext={() => setSubscriptionsPage((page) => page + 1)} />}
+        </TablePanel>
       </section>
 
       {/* PLAN MODAL */}

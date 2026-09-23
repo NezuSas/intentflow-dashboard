@@ -17,7 +17,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
+import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, StatusBadge, Table, TableEmpty, TablePanel, Textarea } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -168,6 +168,7 @@ export default function CommandsPage() {
 
       {error && <ErrorState message={error} />}
 
+      <TablePanel title="ADB Commands" pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
       <Table label="ADB command management">
           <thead>
             <tr>
@@ -221,8 +222,7 @@ export default function CommandsPage() {
             )}
           </tbody>
       </Table>
-
-      {meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}
+      </TablePanel>
 
       <Modal open={isModalOpen} title={editingCommand ? "Edit Command" : "New ADB Command"} description={editingCommand ? "Modify this command's execution string and accessibility." : "Define a new command to be executed on the boards."} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>

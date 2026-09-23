@@ -16,8 +16,8 @@ describe("Table adapter", () => {
     });
 
     expect(element.props.dataSource).toEqual([
-      { key: "intent-1", cells: ["1", "Success"] },
-      { key: "intent-2", cells: ["2", "Error"] },
+      { key: "intent-1", cells: [{ content: "1", props: {} }, { content: "Success", props: {} }] },
+      { key: "intent-2", cells: [{ content: "2", props: {} }, { content: "Error", props: {} }] },
     ]);
     expect(element.props.columns.map((column: { title: string }) => column.title)).toEqual(["ID", "Status"]);
   });
@@ -31,5 +31,22 @@ describe("Table adapter", () => {
 
     expect(element.props.dataSource).toEqual([]);
     expect(empty.props.description).toBe("No intents found.");
+  });
+
+  it("handles TableEmpty directly under tbody", () => {
+    const element = Table({ label: "Users", children: [header("ID"), createElement("tbody", null, createElement(TableEmpty, { colSpan: 1, label: "No users found." }))] });
+
+    expect(element.props.dataSource).toEqual([]);
+    expect(element.props.locale.emptyText.props.description).toBe("No users found.");
+  });
+
+  it("preserves cell styling and mouse actions", () => {
+    const onMouseDown = () => undefined;
+    const status = createElement("td", { style: { cursor: "pointer" }, onMouseDown }, "Error");
+    const element = Table({ label: "Intents", children: [header("Status"), createElement("tbody", null, createElement("tr", { key: 4 }, status))] });
+    const cell = element.props.dataSource[0].cells[0];
+
+    expect(cell.content).toBe("Error");
+    expect(element.props.columns[0].onCell(element.props.dataSource[0])).toEqual({ style: { cursor: "pointer" }, onMouseDown });
   });
 });
