@@ -67,4 +67,58 @@ describe("AuthenticatedFetcher", () => {
       new Headers(fetcher.mock.calls[1][1].headers).get("Authorization")
     ).toBe("Bearer new-token");
   });
+
+  it("ends the session when a 401 has no refresh token", async () => {
+    const fetcher = vi.fn().mockResolvedValue(response(401));
+    const clear = vi.fn();
+    const notifyLogout = vi.fn();
+    const tokens: AuthTokenManager = {
+      getAccessToken: () => "expired-token",
+      getRefreshToken: () => null,
+      hasSession: () => true,
+      setTokens: () => undefined,
+      clear,
+      refreshAccessToken: vi.fn(),
+    };
+    const authenticatedFetcher = new AuthenticatedFetcher(
+      tokens,
+      { notifyLogout },
+      fetcher
+    );
+
+    await expect(
+      authenticatedFetcher.fetch("https://api.example.com/protected")
+    ).rejects.toThrow("Authentication required");
+
+    expect(fetcher).toHaveBeenCalledOnce();
+    expect(clear).toHaveBeenCalledOnce();
+    expect(notifyLogout).toHaveBeenCalledOnce();
+  });
+
+  it("ends the session when the refreshed token also gets a 401", async () => {
+    const fetcher = vi.fn().mockResolvedValue(response(401));
+    const clear = vi.fn();
+    const notifyLogout = vi.fn();
+    const tokens: AuthTokenManager = {
+      getAccessToken: () => "expired-token",
+      getRefreshToken: () => "refresh-token",
+      hasSession: () => true,
+      setTokens: () => undefined,
+      clear,
+      refreshAccessToken: async () => "new-token",
+    };
+    const authenticatedFetcher = new AuthenticatedFetcher(
+      tokens,
+      { notifyLogout },
+      fetcher
+    );
+
+    await expect(
+      authenticatedFetcher.fetch("https://api.example.com/protected")
+    ).rejects.toThrow("Authentication required");
+
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(clear).toHaveBeenCalledOnce();
+    expect(notifyLogout).toHaveBeenCalledOnce();
+  });
 });

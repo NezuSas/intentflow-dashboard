@@ -13,25 +13,37 @@ import type {
 import type {
   Client,
 } from "@/features/clients";
+import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
 import type { PageMeta } from "@/core/Pagination";
 import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel, Textarea } from "@/shared/components";
 
 const PAGE_SIZE = 20;
 
+const loadSubscriptionCatalogs = async () => {
+  const [clients, plans] = await Promise.all([
+    clientService.getClientCatalog(),
+    subscriptionService.getPlanCatalog(),
+  ]);
+  return { clients: clients as Client[], plans: plans as SubscriptionPlan[] };
+};
+
 export default function SubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [planCatalog, setPlanCatalog] = useState<SubscriptionPlan[]>([]);
   const [clientSubs, setClientSubs] = useState<ClientSubscription[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+  const catalog = useLazyCatalog(loadSubscriptionCatalogs);
+  const clients = catalog.data?.clients ?? [];
+  const planCatalog = catalog.data?.plans ?? [];
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [subscriptionsLoading, setSubscriptionsLoading] = useState(true);
   const [plansPage, setPlansPage] = useState(1);
   const [subscriptionsPage, setSubscriptionsPage] = useState(1);
   const [plansMeta, setPlansMeta] = useState<PageMeta | null>(null);
   const [subscriptionsMeta, setSubscriptionsMeta] = useState<PageMeta | null>(null);
   const [isSubmittingPlan, setIsSubmittingPlan] = useState(false);
   const [isSubmittingSubscription, setIsSubmittingSubscription] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [plansError, setPlansError] = useState<string | null>(null);
+  const [subscriptionsError, setSubscriptionsError] = useState<string | null>(null);
 
   // Modal states
   const [activeModal, setActiveModal] = useState<'PLAN' | 'SUBSCRIPTION' | null>(null);
@@ -55,31 +67,42 @@ export default function SubscriptionsPage() {
   });
 
   useEffect(() => {
-    void fetchData();
-  }, [plansPage, subscriptionsPage]); // eslint-disable-line react-hooks/exhaustive-deps
+    let cancelled = false;
+    setPlansLoading(true);
+    void subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE })
+      .then((response) => {
+        if (cancelled) return;
+        setPlans(response.data);
+        setPlansMeta(response.meta);
+        setPlansError(null);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setPlansError(getErrorMessage(err));
+      })
+      .finally(() => {
+        if (!cancelled) setPlansLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [plansPage]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [plansData, subsData, clientsData, planCatalogData] = await Promise.all([
-        subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE }),
-        subscriptionService.listClientSubscriptions({ page: subscriptionsPage, pageSize: PAGE_SIZE }),
-        clientService.getClientCatalog(),
-        subscriptionService.getPlanCatalog(),
-      ]);
-      setPlans(plansData.data);
-      setPlansMeta(plansData.meta);
-      setClientSubs(subsData.data);
-      setSubscriptionsMeta(subsData.meta);
-      setClients(clientsData as Client[]);
-      setPlanCatalog(planCatalogData as SubscriptionPlan[]);
-      setError(null);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
+    setSubscriptionsLoading(true);
+    void subscriptionService.listClientSubscriptions({ page: subscriptionsPage, pageSize: PAGE_SIZE })
+      .then((response) => {
+        if (cancelled) return;
+        setClientSubs(response.data);
+        setSubscriptionsMeta(response.meta);
+        setSubscriptionsError(null);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setSubscriptionsError(getErrorMessage(err));
+      })
+      .finally(() => {
+        if (!cancelled) setSubscriptionsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [subscriptionsPage]);
 
   const refreshPlans = async () => {
     const plansData = await subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE });
@@ -145,6 +168,7 @@ export default function SubscriptionsPage() {
       });
     }
     setActiveModal('SUBSCRIPTION');
+    void catalog.load().catch(() => {});
   };
 
   const handlePlanSubmit = async (e: React.FormEvent) => {
@@ -158,6 +182,7 @@ export default function SubscriptionsPage() {
         await subscriptionService.createPlan(planForm);
       }
       setActiveModal(null);
+      catalog.invalidate();
       await refreshPlans();
     } catch (err: unknown) {
       alert(
@@ -199,6 +224,7 @@ export default function SubscriptionsPage() {
     if (!confirm("Delete this plan?")) return;
     try {
       await subscriptionService.deletePlan(id);
+      catalog.invalidate();
       await refreshPlans();
     } catch (err: unknown) {
       alert(getErrorMessage(err));
@@ -215,10 +241,6 @@ export default function SubscriptionsPage() {
     }
   };
 
-  if (loading && plans.length === 0) {
-    return <LoadingState label="Loading subscriptions..." />;
-  }
-
   return (
     <Page>
       <PageHeader title="Subscription Management" actions={<div style={{ display: "flex", gap: "1rem" }}>
@@ -227,10 +249,12 @@ export default function SubscriptionsPage() {
         </div>
       } />
 
-      {error && <ErrorState message={error} />}
+      {plansError && <ErrorState message={plansError} />}
+      {subscriptionsError && <ErrorState message={subscriptionsError} />}
 
       <section style={{ marginBottom: '3rem' }}>
         <TablePanel title="Available Plans" pagination={plansMeta && <Pagination page={plansMeta.page} totalPages={Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))} totalCount={plansMeta.count} hasPrevious={Boolean(plansMeta.previous)} hasNext={Boolean(plansMeta.next)} onPrevious={() => setPlansPage((page) => Math.max(1, page - 1))} onNext={() => setPlansPage((page) => page + 1)} />}>
+        {plansLoading && plans.length === 0 ? <LoadingState label="Loading plans..." /> : (
         <Table label="Available plans">
             <thead>
               <tr>
@@ -268,11 +292,13 @@ export default function SubscriptionsPage() {
               )}
             </tbody>
         </Table>
+        )}
         </TablePanel>
       </section>
 
       <section>
         <TablePanel title="Client Subscriptions" pagination={subscriptionsMeta && <Pagination page={subscriptionsMeta.page} totalPages={Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))} totalCount={subscriptionsMeta.count} hasPrevious={Boolean(subscriptionsMeta.previous)} hasNext={Boolean(subscriptionsMeta.next)} onPrevious={() => setSubscriptionsPage((page) => Math.max(1, page - 1))} onNext={() => setSubscriptionsPage((page) => page + 1)} />}>
+        {subscriptionsLoading && clientSubs.length === 0 ? <LoadingState label="Loading client subscriptions..." /> : (
         <Table label="Client subscriptions">
             <thead>
               <tr>
@@ -310,6 +336,7 @@ export default function SubscriptionsPage() {
               )}
             </tbody>
         </Table>
+        )}
         </TablePanel>
       </section>
 
@@ -342,6 +369,9 @@ export default function SubscriptionsPage() {
       {/* SUBSCRIPTION MODAL */}
       {activeModal === 'SUBSCRIPTION' && (
         <Modal open title={editingItem ? "Update Subscription" : "Assign Plan to Client"} description={editingItem ? "Modify an existing client's access level and payment status." : "Grant a specific client access to a subscription plan."} onClose={() => setActiveModal(null)}>
+          {!catalog.data ? (
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <LoadingState label="Loading form options..." />
+          ) : (
             <form onSubmit={handleSubSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 <FormField label="Select Client">
@@ -377,6 +407,7 @@ export default function SubscriptionsPage() {
                 <Button type="submit" variant="primary" loading={isSubmittingSubscription} loadingLabel="Saving...">Save Subscription</Button>
               </ActionGroup>
             </form>
+          )}
         </Modal>
       )}
     </Page>

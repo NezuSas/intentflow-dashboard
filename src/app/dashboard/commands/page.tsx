@@ -16,16 +16,26 @@ import type {
 import type {
   ADBVersion,
 } from "@/features/versions";
+import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
 import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, StatusBadge, Table, TableEmpty, TablePanel, Textarea } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
 
+const loadCommandCatalogs = async () => {
+  const [versions, plans] = await Promise.all([
+    versionService.getVersions(),
+    subscriptionService.getPlanCatalog(),
+  ]);
+  return { versions, plans: plans as SubscriptionPlan[] };
+};
+
 export default function CommandsPage() {
   const [commands, setCommands] = useState<ADBCommand[]>([]);
-  const [versions, setVersions] = useState<ADBVersion[]>([]);
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const catalog = useLazyCatalog(loadCommandCatalogs);
+  const versions: ADBVersion[] = catalog.data?.versions ?? [];
+  const plans = catalog.data?.plans ?? [];
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState<PageMeta | null>(null);
@@ -51,16 +61,9 @@ export default function CommandsPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [commandsData, versionsData, plansData] =
-        await Promise.all([
-          commandService.listCommands({ page, pageSize: PAGE_SIZE }),
-          versionService.getVersions(),
-          subscriptionService.getPlanCatalog(),
-        ]);
+      const commandsData = await commandService.listCommands({ page, pageSize: PAGE_SIZE });
       setCommands(commandsData.data);
       setMeta(commandsData.meta);
-      setVersions(versionsData);
-      setPlans(plansData as SubscriptionPlan[]);
       setError(null);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
@@ -106,6 +109,7 @@ export default function CommandsPage() {
       });
     }
     setIsModalOpen(true);
+    void catalog.load().catch(() => {});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -225,6 +229,9 @@ export default function CommandsPage() {
       </TablePanel>
 
       <Modal open={isModalOpen} title={editingCommand ? "Edit Command" : "New ADB Command"} description={editingCommand ? "Modify this command's execution string and accessibility." : "Define a new command to be executed on the boards."} onClose={() => setIsModalOpen(false)}>
+          {!catalog.data ? (
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <LoadingState label="Loading form options..." />
+          ) : (
             <form onSubmit={handleSubmit}>
               <FormField label="Command Key (Identifier)" required>
                 <Input
@@ -257,6 +264,7 @@ export default function CommandsPage() {
                 <Button type="submit" variant="primary" loading={submitting}>Save Command</Button>
               </ActionGroup>
             </form>
+          )}
       </Modal>
     </Page>
   );
