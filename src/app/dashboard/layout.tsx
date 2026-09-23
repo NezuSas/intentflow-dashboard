@@ -130,7 +130,7 @@ function DashboardLayoutContent({
 
       <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>
-          <div className="gradient-text" style={{ fontSize: "1.5rem", fontWeight: 800 }}>
+          <div className={styles.brand}>
             IntentFlow
           </div>
           {/* Close button for mobile */}
