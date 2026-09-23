@@ -18,7 +18,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Modal, Pagination, Table } from "@/shared/components";
+import { Button, CheckboxGroup, FormField, Input, Modal, Pagination, Table, Textarea } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -233,115 +233,35 @@ export default function CommandsPage() {
 
       <Modal open={isModalOpen} title={editingCommand ? "Edit Command" : "New ADB Command"} description={editingCommand ? "Modify this command's execution string and accessibility." : "Define a new command to be executed on the boards."} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
-                <label>Command Key (Identifier)</label>
-                <input 
-                  className={styles.input} 
+              <FormField label="Command Key (Identifier)" required>
+                <Input
                   value={formData.key}
                   placeholder="e.g. SCREEN_OFF"
                   onChange={(e) => setFormData({...formData, key: e.target.value})}
                   required
                 />
-              </div>
-              <div className={styles.formGroup}>
-                <label>ADB Command String</label>
-                <input 
-                  className={styles.input} 
+              </FormField>
+              <FormField label="ADB Command String" required>
+                <Textarea
                   value={formData.command}
                   placeholder="e.g. input keyevent 26"
                   onChange={(e) => setFormData({...formData, command: e.target.value})}
                   required
                   style={{ fontFamily: 'monospace', fontSize: '1rem' }}
                 />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Description</label>
-                <textarea 
-                  className={styles.input} 
+              </FormField>
+              <FormField label="Description">
+                <Textarea
                   style={{ minHeight: '100px', resize: 'vertical' }}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Available Versions</label>
-                <div style={{ display: "grid", gap: "0.5rem" }}>
-                  {versions.length === 0 ? (
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
-                      No versions available.
-                    </span>
-                  ) : (
-                    versions.map((version) => (
-                      <label
-                        key={version.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          color: "var(--text)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.versions.includes(version.id)}
-                          onChange={(event) => {
-                            const isChecked = event.target.checked;
-                            setFormData((current) => ({
-                              ...current,
-                              versions: isChecked
-                                ? [...current.versions, version.id]
-                                : current.versions.filter((id) => id !== version.id),
-                            }));
-                          }}
-                        />
-                        {version.code}
-                      </label>
-                    ))
-                  )}
-                </div>
-              </div>
-              <div className={styles.formGroup}>
-                <label>Subscription Plans</label>
-                <div style={{ display: "grid", gap: "0.5rem" }}>
-                  {plans.length === 0 ? (
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
-                      No subscription plans available.
-                    </span>
-                  ) : (
-                    plans.map((plan) => (
-                      <label
-                        key={plan.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          color: "var(--text)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.subscription_plans.includes(plan.id)}
-                          onChange={(event) => {
-                            const isChecked = event.target.checked;
-                            setFormData((current) => ({
-                              ...current,
-                              subscription_plans: isChecked
-                                ? [...current.subscription_plans, plan.id]
-                                : current.subscription_plans.filter((id) => id !== plan.id),
-                            }));
-                          }}
-                        />
-                        {plan.name}
-                      </label>
-                    ))
-                  )}
-                </div>
-              </div>
-              <div className={styles.modalActions}>
-                <button type="button" className={styles.secondaryButton} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton} disabled={submitting}>{submitting ? "Saving..." : "Save Command"}</button>
+              </FormField>
+              <FormField label="Available Versions"><CheckboxGroup options={versions.map((version) => ({ id: version.id, label: version.code }))} value={formData.versions} onChange={(versions) => setFormData((current) => ({ ...current, versions }))} /></FormField>
+              <FormField label="Subscription Plans"><CheckboxGroup options={plans.map((plan) => ({ id: plan.id, label: plan.name }))} value={formData.subscription_plans} onChange={(subscription_plans) => setFormData((current) => ({ ...current, subscription_plans }))} /></FormField>
+              <div>
+                <Button type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                <Button type="submit" variant="primary" loading={submitting}>Save Command</Button>
               </div>
             </form>
       </Modal>

@@ -11,7 +11,7 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, ErrorState, LoadingState, Modal, PageHeader, Pagination, StatusBadge, Table, TableEmpty } from "@/shared/components";
+import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -259,11 +259,8 @@ export default function ClientsPage() {
 
       <Modal open={isModalOpen} title={editingClient ? "Edit Client" : "Create New Client"} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
-                <label>Client Name</label>
-
-                <input
-                  className={styles.input}
+              <FormField label="Client Name" required>
+                <Input
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({
@@ -273,13 +270,10 @@ export default function ClientsPage() {
                   }
                   required
                 />
-              </div>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>Business Type</label>
-
-                <select
-                  className={styles.input}
+              <FormField label="Business Type">
+                <Select
                   value={formData.type}
                   onChange={(e) =>
                     setFormData({
@@ -294,14 +288,11 @@ export default function ClientsPage() {
                   <option value="COMPANY">
                     COMPANY
                   </option>
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>Subscription</label>
-
-                <select
-                  className={styles.input}
+              <FormField label="Subscription">
+                <Select
                   value={
                     formData.subscription_level
                   }
@@ -325,14 +316,11 @@ export default function ClientsPage() {
                   <option value="CIAL">
                     CIAL
                   </option>
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>ID / TAX Number</label>
-
-                <input
-                  className={styles.input}
+              <FormField label="ID / TAX Number">
+                <Input
                   value={
                     formData.identification_number
                   }
@@ -344,13 +332,10 @@ export default function ClientsPage() {
                     })
                   }
                 />
-              </div>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>Contact Email</label>
-
-                <input
-                  className={styles.input}
+              <FormField label="Contact Email">
+                <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) =>
@@ -360,31 +345,23 @@ export default function ClientsPage() {
                     })
                   }
                 />
-              </div>
+              </FormField>
 
-              <div
-                className={styles.modalActions}
-              >
-                <button
+              <div>
+                <Button
                   type="button"
-                  className={
-                    styles.secondaryButton
-                  }
                   onClick={() =>
                     setIsModalOpen(false)
                   }
                 >
                   Cancel
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="submit"
-                  className={
-                    styles.primaryButton
-                  }
-                >
-                  Save Client
-                </button>
+                  variant="primary"
+                  loading={submitting}
+                >Save Client</Button>
               </div>
             </form>
       </Modal>
