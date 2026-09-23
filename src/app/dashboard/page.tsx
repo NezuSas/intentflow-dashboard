@@ -14,6 +14,7 @@ import type {
   DashboardStats,
 } from "@/features/dashboard";
 import { getErrorMessage } from "@/utils/errors";
+import { Button, Card, ErrorState, LoadingState, Modal, PageHeader, StatusBadge, Table } from "@/shared/components";
 
 export default function DashboardHomePage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -93,40 +94,29 @@ export default function DashboardHomePage() {
     },
   ] : [];
 
-  const getStatusClass = (status: string) => {
+  const getStatusVariant = (status: string): "success" | "error" | "neutral" => {
     switch (status.toLowerCase()) {
       case 'ok':
-      case 'success': return 'status-chip--success';
+      case 'success': return 'success';
       case 'error':
-      case 'failed': return 'status-chip--error';
-      default: return 'status-chip--neutral';
+      case 'failed': return 'error';
+      default: return 'neutral';
     }
   };
 
   return (
     <div>
-      <div className={styles.header}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <h1 style={{ fontSize: "1.875rem", fontWeight: 700 }}>Dashboard Overview</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            Monitor your system’s performance and activity.
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Dashboard Overview" description="Monitor your system’s performance and activity." />
 
       {loading ? (
-        <div style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>
-          Loading dashboard...
-        </div>
+        <LoadingState label="Loading dashboard..." />
       ) : error ? (
-        <div style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--error))" }}>
-          Error: {error}
-        </div>
+        <ErrorState message={`Error: ${error}`} />
       ) : (
         <>
           <div className={styles.statsGrid}>
             {statCards.map((stat) => (
-              <div key={stat.label} className={styles.statCard}>
+              <Card key={stat.label} className={styles.statCard}>
                 <div className={styles.statCardHeader}>
                   <span className={styles.statIcon}>{stat.icon}</span>
                   <span className={`${styles.statMeta} ${styles[`statMeta${stat.tone}`]}`}>
@@ -135,19 +125,18 @@ export default function DashboardHomePage() {
                 </div>
                 <div className={styles.statValue}>{stat.value}</div>
                 <div className={styles.statLabel}>{stat.label}</div>
-              </div>
+              </Card>
             ))}
           </div>
 
-          <div className="glass-panel" style={{ padding: "2rem", minHeight: "300px" }}>
+          <Card>
             <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>
               Recent Activity
             </h2>
             
             {stats && stats.recent_intents.length > 0 ? (
-              <div className="nezu-table-container">
-                <table className="nezu-table">
-                  <thead className="nezu-table__header">
+              <Table label="Recent activity">
+                  <thead>
                     <tr>
                       <th>Command</th>
                       <th>Board</th>
@@ -158,21 +147,20 @@ export default function DashboardHomePage() {
                   </thead>
                   <tbody>
                     {stats.recent_intents.map((intent) => (
-                      <tr key={intent.id} className="nezu-table__row">
-                        <td className="nezu-table__cell nezu-table__emphasis">{intent.command_key}</td>
-                        <td className="nezu-table__cell">
+                      <tr key={intent.id}>
+                        <td>{intent.command_key}</td>
+                        <td>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span>{intent.board?.name || "Unknown"}</span>
-                            <span className="nezu-table__meta">{intent.board?.adb_identifier}</span>
+                            <small>{intent.board?.adb_identifier}</small>
                           </div>
                         </td>
-                        <td className="nezu-table__cell">
-                          <span className="nezu-table__emphasis">
+                        <td>
+                          <strong>
                             {intent.board?.client_detail?.name || "Unknown"}
-                          </span>
+                          </strong>
                         </td>
                         <td 
-                        className="nezu-table__cell"
                         style={{ 
                           cursor: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? "pointer" : "default",
                           userSelect: "none"
@@ -185,110 +173,39 @@ export default function DashboardHomePage() {
                           }
                         }}
                       >
-                        <span className={`status-chip ${getStatusClass(intent.status)}`}>
+                        <StatusBadge variant={getStatusVariant(intent.status)}>
                           {intent.status} {intent.status?.toString().toUpperCase().trim() === 'ERROR' && '🔍'}
-                        </span>
+                        </StatusBadge>
                       </td>
-                        <td className="nezu-table__cell nezu-table__cell--muted">
+                        <td>
                           {new Date(intent.executed_at).toLocaleString()}
                         </td>
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
+              </Table>
             ) : (
               <div style={{ color: "hsl(var(--muted-foreground))", textAlign: "center", marginTop: "4rem" }}>
                 No recent activity to display.
               </div>
             )}
-          </div>
+          </Card>
         </>
       )}
       {errorModalOpen && selectedIntent && (
-        <div
-          className="nezu-modal-overlay"
-          onClick={handleCloseErrorModal}
-        >
-          <div
-            className="nezu-modal nezu-modal--error"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="nezu-modal__header">
-              <div>
-                <h2 className="nezu-modal__title">
-                  Error Details
-                </h2>
-                <p className="nezu-modal__description">
-                  Intent #{selectedIntent.id} - {selectedIntent.command_key}
-                </p>
-              </div>
-              <button
-                onClick={handleCloseErrorModal}
-                className="nezu-modal__close"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="nezu-modal__body">
-              <div className="nezu-modal__section">
-                <h3 className="nezu-modal__label">
-                  Board
-                </h3>
-                <p className="nezu-modal__value">
-                  {selectedIntent.board?.name} ({selectedIntent.board?.adb_identifier})
-                </p>
-              </div>
-
-              <div className="nezu-modal__section">
-                <h3 className="nezu-modal__label">
-                  Command
-                </h3>
-                <code className="nezu-modal__code">
-                  {selectedIntent.resolved_command}
-                </code>
-              </div>
-
-              <div className="nezu-modal__section">
-                <h3 className="nezu-modal__label">
-                  Error Output
-                </h3>
-                <pre className="nezu-modal__error-output">
-                  {selectedIntent.output || "No error output available"}
-                </pre>
-              </div>
-
-              <div className="nezu-modal__section">
-                <h3 className="nezu-modal__label">
-                  Executed At
-                </h3>
-                <p className="nezu-modal__value">
-                  {new Date(selectedIntent.executed_at).toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="nezu-modal__footer">
-              <button
-                onClick={handleCloseErrorModal}
-                className="btn btn-primary"
-              >
-                Close
-              </button>
-            </div>
+        <Modal open title="Error Details" description={`Intent #${selectedIntent.id} - ${selectedIntent.command_key}`} onClose={handleCloseErrorModal} footer={<Button variant="primary" onClick={handleCloseErrorModal}>Close</Button>}>
+          <div>
+            <h3>Board</h3>
+            <p>{selectedIntent.board?.name} ({selectedIntent.board?.adb_identifier})</p>
+            <h3>Command</h3>
+            <code>{selectedIntent.resolved_command}</code>
+            <h3>Error Output</h3>
+            <pre>{selectedIntent.output || "No error output available"}</pre>
+            <h3>Executed At</h3>
+            <p>{new Date(selectedIntent.executed_at).toLocaleString()}</p>
           </div>
-        </div>
+        </Modal>
       )}
-
-      <style jsx>{`
-        .hover-row:hover {
-          background: rgba(255, 255, 255, 0.02);
-        }
-      `}</style>
     </div>
   );
 }

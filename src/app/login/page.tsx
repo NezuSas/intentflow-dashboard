@@ -9,6 +9,7 @@ import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 
 import { getErrorMessage } from "@/utils/errors";
+import { Button, FormField, Input } from "@/shared/components";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -52,12 +53,8 @@ export default function LoginPage() {
         )}
 
         <form className={styles.form} onSubmit={handleLogin}>
-          <div className="input-group">
-            <label className="input-label" htmlFor="email">
-              Email Address
-            </label>
-            <input
-              className="input-field"
+          <FormField label="Email Address">
+            <Input
               type="email"
               id="email"
               placeholder="admin@intentflow.com"
@@ -65,14 +62,10 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </div>
+          </FormField>
 
-          <div className="input-group">
-            <label className="input-label" htmlFor="password">
-              Password
-            </label>
-            <input
-              className="input-field"
+          <FormField label="Password">
+            <Input
               type="password"
               id="password"
               placeholder="••••••••"
@@ -80,15 +73,17 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-          </div>
+          </FormField>
 
-          <button
+          <Button
             type="submit"
-            className={`btn btn-primary ${styles.submitButton}`}
-            disabled={loading}
+            variant="primary"
+            className={styles.submitButton}
+            loading={loading}
+            loadingLabel="Authenticating..."
           >
-            {loading ? "Authenticating..." : "Sign In"}
-          </button>
+            Sign In
+          </Button>
         </form>
 
         <div className={styles.footer}>

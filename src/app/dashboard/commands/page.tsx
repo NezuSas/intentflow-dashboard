@@ -18,7 +18,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, CheckboxGroup, FormField, Input, Modal, Pagination, Table, Textarea } from "@/shared/components";
+import { Button, CheckboxGroup, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -160,17 +160,14 @@ export default function CommandsPage() {
   };
 
   if (loading && commands.length === 0) {
-    return <div className={styles.container}>Loading commands...</div>;
+    return <LoadingState label="Loading commands..." />;
   }
 
   return (
     <div className={styles.container}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 className={styles.title} style={{ marginBottom: 0 }}>ADB Command Management</h1>
-        <Button variant="primary" onClick={() => handleOpenModal(null)}>+ New Command</Button>
-      </div>
+      <PageHeader title="ADB Command Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New Command</Button>} />
 
-      {error && <div className="error-card" style={{ marginBottom: '1rem' }}>{error}</div>}
+      {error && <ErrorState message={error} />}
 
       <Table label="ADB command management">
           <thead>
@@ -186,7 +183,7 @@ export default function CommandsPage() {
           </thead>
           <tbody>
             {commands.length === 0 ? (
-              <tr><td colSpan={7} style={{ textAlign: "center", padding: "2rem" }}>No commands found.</td></tr>
+              <TableEmpty colSpan={7} label="No commands found." />
             ) : (
               commands.map((command) => (
                 <tr key={command.id}>
@@ -200,12 +197,9 @@ export default function CommandsPage() {
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {command.subscription_plans_detail && command.subscription_plans_detail.length > 0 ? (
                         command.subscription_plans_detail.map((plan) => (
-                          <span
-                            key={plan.id}
-                            className="status-chip status-chip--neutral"
-                          >
+                          <StatusBadge key={plan.id} variant="neutral">
                             {plan.name}
-                          </span>
+                          </StatusBadge>
                         ))
                       ) : (
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>All Plans</span>
@@ -213,14 +207,14 @@ export default function CommandsPage() {
                     </div>
                   </td>
                   <td>
-                    <span className={`${styles.badge} ${command.is_active ? styles.badgeActive : styles.badgeInactive}`}>
+                    <StatusBadge variant={command.is_active ? "success" : "neutral"}>
                       {command.is_active ? "Active" : "Inactive"}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className={styles.actionButton} onClick={() => handleOpenModal(command)}>✎</button>
-                      <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDelete(command.id)}>🗑</button>
+                      <Button onClick={() => handleOpenModal(command)}>✎</Button>
+                      <Button variant="danger" onClick={() => handleDelete(command.id)}>🗑</Button>
                     </div>
                   </td>
                 </tr>

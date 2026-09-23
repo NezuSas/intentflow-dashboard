@@ -6,7 +6,7 @@ import {
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
-import styles from "../users/users.module.css";
+import styles from "@/shared/components/page.module.css";
 import type {
   SubscriptionPlan,
   ClientSubscription,
@@ -16,6 +16,7 @@ import type {
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 import type { PageMeta } from "@/core/Pagination";
+import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
 
 const PAGE_SIZE = 20;
 
@@ -216,25 +217,22 @@ export default function SubscriptionsPage() {
   };
 
   if (loading && plans.length === 0) {
-    return <div className={styles.container}>Loading subscriptions...</div>;
+    return <LoadingState label="Loading subscriptions..." />;
   }
 
   return (
     <div className={styles.container}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 className={styles.title} style={{ marginBottom: 0 }}>Subscription Management</h1>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className={styles.secondaryButton} onClick={() => handleOpenPlanModal()}>+ New Plan</button>
-          <button className={styles.primaryButton} onClick={() => handleOpenSubModal()}>+ New Subscription</button>
+      <PageHeader title="Subscription Management" actions={<div style={{ display: "flex", gap: "1rem" }}>
+          <Button onClick={() => handleOpenPlanModal()}>+ New Plan</Button>
+          <Button variant="primary" onClick={() => handleOpenSubModal()}>+ New Subscription</Button>
         </div>
-      </div>
+      } />
 
-      {error && <div className="error-card" style={{ marginBottom: '1rem' }}>{error}</div>}
+      {error && <ErrorState message={error} />}
 
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: 600 }}>Available Plans</h2>
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
+        <Table label="Available plans">
             <thead>
               <tr>
                 <th>Name</th>
@@ -247,7 +245,7 @@ export default function SubscriptionsPage() {
             </thead>
             <tbody>
               {plans.length === 0 ? (
-                <tr><td colSpan={6} style={{ textAlign: "center", padding: "2rem" }}>No plans found.</td></tr>
+                <TableEmpty colSpan={6} label="No plans found." />
               ) : (
                 plans.map((plan) => (
                   <tr key={plan.id}>
@@ -256,29 +254,27 @@ export default function SubscriptionsPage() {
                     <td>${plan.price}</td>
                     <td>{plan.max_boards}</td>
                     <td>
-                      <span className={`${styles.badge} ${plan.is_active ? styles.badgeActive : styles.badgeInactive}`}>
+                      <StatusBadge variant={plan.is_active ? "success" : "neutral"}>
                         {plan.is_active ? "Active" : "Inactive"}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className={styles.actionButton} onClick={() => handleOpenPlanModal(plan)}>✎</button>
-                        <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeletePlan(plan.id)}>🗑</button>
+                        <Button onClick={() => handleOpenPlanModal(plan)}>✎</Button>
+                        <Button variant="danger" onClick={() => handleDeletePlan(plan.id)}>🗑</Button>
                       </div>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
-          </table>
-        </div>
-        {plansMeta && <div className="table-pagination"><span>{plansMeta.count} total · Page {plansMeta.page} of {Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))}</span><div><button className={styles.secondaryButton} disabled={!plansMeta.previous} onClick={() => setPlansPage((page) => Math.max(1, page - 1))}>Previous</button><button className={styles.secondaryButton} disabled={!plansMeta.next} onClick={() => setPlansPage((page) => page + 1)}>Next</button></div></div>}
+        </Table>
+        {plansMeta && <Pagination page={plansMeta.page} totalPages={Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))} totalCount={plansMeta.count} hasPrevious={Boolean(plansMeta.previous)} hasNext={Boolean(plansMeta.next)} onPrevious={() => setPlansPage((page) => Math.max(1, page - 1))} onNext={() => setPlansPage((page) => page + 1)} />}
       </section>
 
       <section>
         <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: 600 }}>Client Subscriptions</h2>
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
+        <Table label="Client subscriptions">
             <thead>
               <tr>
                 <th>Client</th>
@@ -291,7 +287,7 @@ export default function SubscriptionsPage() {
             </thead>
             <tbody>
               {clientSubs.length === 0 ? (
-                <tr><td colSpan={6} style={{ textAlign: "center", padding: "2rem" }}>No client subscriptions found.</td></tr>
+                <TableEmpty colSpan={6} label="No client subscriptions found." />
               ) : (
                 clientSubs.map((sub) => (
                   <tr key={sub.id}>
@@ -300,125 +296,89 @@ export default function SubscriptionsPage() {
                     <td>{new Date(sub.start_date).toLocaleDateString()}</td>
                     <td>{sub.end_date ? new Date(sub.end_date).toLocaleDateString() : "Permanent"}</td>
                     <td>
-                      <span className={`${styles.badge} ${sub.is_active ? styles.badgeActive : styles.badgeInactive}`}>
+                      <StatusBadge variant={sub.is_active ? "success" : "neutral"}>
                         {sub.is_active ? "ACTIVE" : "INACTIVE"}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className={styles.actionButton} onClick={() => handleOpenSubModal(sub)}>✎</button>
-                        <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeleteSub(sub.id)}>🗑</button>
+                        <Button onClick={() => handleOpenSubModal(sub)}>✎</Button>
+                        <Button variant="danger" onClick={() => handleDeleteSub(sub.id)}>🗑</Button>
                       </div>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
-          </table>
-        </div>
-        {subscriptionsMeta && <div className="table-pagination"><span>{subscriptionsMeta.count} total · Page {subscriptionsMeta.page} of {Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))}</span><div><button className={styles.secondaryButton} disabled={!subscriptionsMeta.previous} onClick={() => setSubscriptionsPage((page) => Math.max(1, page - 1))}>Previous</button><button className={styles.secondaryButton} disabled={!subscriptionsMeta.next} onClick={() => setSubscriptionsPage((page) => page + 1)}>Next</button></div></div>}
+        </Table>
+        {subscriptionsMeta && <Pagination page={subscriptionsMeta.page} totalPages={Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))} totalCount={subscriptionsMeta.count} hasPrevious={Boolean(subscriptionsMeta.previous)} hasNext={Boolean(subscriptionsMeta.next)} onPrevious={() => setSubscriptionsPage((page) => Math.max(1, page - 1))} onNext={() => setSubscriptionsPage((page) => page + 1)} />}
       </section>
 
       {/* PLAN MODAL */}
       {activeModal === 'PLAN' && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div style={{ marginBottom: '1rem' }}>
-              <h2 className={styles.modalTitle} style={{ marginBottom: '0.5rem' }}>{editingItem ? "Edit Subscription Plan" : "Create New Plan"}</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                {editingItem ? "Update pricing, board limits, and access tier details." : "Define a new service tier for your customers."}
-              </p>
-            </div>
-            
+        <Modal open title={editingItem ? "Edit Subscription Plan" : "Create New Plan"} description={editingItem ? "Update pricing, board limits, and access tier details." : "Define a new service tier for your customers."} onClose={() => setActiveModal(null)}>
             <form onSubmit={handlePlanSubmit}>
-              <div className={styles.formGroup}>
-                <label>Plan Name</label>
-                <input className={styles.input} value={planForm.name} placeholder="e.g. Pro Monthly" onChange={e => setPlanForm({...planForm, name: e.target.value})} required />
-              </div>
+              <FormField label="Plan Name"><Input value={planForm.name} placeholder="e.g. Pro Monthly" onChange={e => setPlanForm({...planForm, name: e.target.value})} required /></FormField>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className={styles.formGroup}>
-                  <label>Service Tier</label>
-                  <select className={styles.input} value={planForm.plan_type} onChange={e => setPlanForm({...planForm, plan_type: e.target.value})}>
+                <FormField label="Service Tier">
+                  <Select value={planForm.plan_type} onChange={e => setPlanForm({...planForm, plan_type: e.target.value})}>
                     <option value="FREE">FREE</option>
                     <option value="BASIC">BASIC</option>
                     <option value="PREMIUM">PREMIUM</option>
                     <option value="CIAL">CIAL</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Price (USD)</label>
-                  <input className={styles.input} type="number" step="0.01" value={planForm.price} onChange={e => setPlanForm({...planForm, price: parseFloat(e.target.value)})} required />
-                </div>
+                  </Select>
+                </FormField>
+                <FormField label="Price (USD)"><Input type="number" step="0.01" value={planForm.price} onChange={e => setPlanForm({...planForm, price: parseFloat(e.target.value)})} required /></FormField>
               </div>
-              <div className={styles.formGroup}>
-                <label>Max Hardware Boards</label>
-                <input className={styles.input} type="number" value={planForm.max_boards} onChange={e => setPlanForm({...planForm, max_boards: parseInt(e.target.value)})} required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Public Description</label>
-                <textarea className={styles.input} style={{ minHeight: '100px' }} value={planForm.description} placeholder="Features included in this plan..." onChange={e => setPlanForm({...planForm, description: e.target.value})} />
-              </div>
-              <div className={styles.modalActions}>
-                <button type="button" className={styles.secondaryButton} onClick={() => setActiveModal(null)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton} disabled={isSubmittingPlan}>{isSubmittingPlan ? "Saving..." : "Save Plan"}</button>
+              <FormField label="Max Hardware Boards"><Input type="number" value={planForm.max_boards} onChange={e => setPlanForm({...planForm, max_boards: parseInt(e.target.value)})} required /></FormField>
+              <FormField label="Public Description"><Textarea style={{ minHeight: '100px' }} value={planForm.description} placeholder="Features included in this plan..." onChange={e => setPlanForm({...planForm, description: e.target.value})} /></FormField>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+                <Button type="button" onClick={() => setActiveModal(null)}>Cancel</Button>
+                <Button type="submit" variant="primary" loading={isSubmittingPlan} loadingLabel="Saving...">Save Plan</Button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {/* SUBSCRIPTION MODAL */}
       {activeModal === 'SUBSCRIPTION' && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div style={{ marginBottom: '1rem' }}>
-              <h2 className={styles.modalTitle} style={{ marginBottom: '0.5rem' }}>{editingItem ? "Update Subscription" : "Assign Plan to Client"}</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                {editingItem ? "Modify an existing client's access level and payment status." : "Grant a specific client access to a subscription plan."}
-              </p>
-            </div>
-            
+        <Modal open title={editingItem ? "Update Subscription" : "Assign Plan to Client"} description={editingItem ? "Modify an existing client's access level and payment status." : "Grant a specific client access to a subscription plan."} onClose={() => setActiveModal(null)}>
             <form onSubmit={handleSubSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className={styles.formGroup}>
-                  <label>Select Client</label>
-                  <select className={styles.input} value={subForm.client} onChange={e => setSubForm({...subForm, client: e.target.value})} required>
+                <FormField label="Select Client">
+                  <Select value={subForm.client} onChange={e => setSubForm({...subForm, client: e.target.value})} required>
                     <option value="">Choose...</option>
                     {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Target Plan</label>
-                  <select className={styles.input} value={subForm.subscription_plan} onChange={e => setSubForm({...subForm, subscription_plan: e.target.value})} required>
+                  </Select>
+                </FormField>
+                <FormField label="Target Plan">
+                  <Select value={subForm.subscription_plan} onChange={e => setSubForm({...subForm, subscription_plan: e.target.value})} required>
                     <option value="">Choose...</option>
                     {planCatalog.map(p => <option key={p.id} value={p.id}>{p.name} (${p.price})</option>)}
-                  </select>
-                </div>
+                  </Select>
+                </FormField>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className={styles.formGroup}>
-                  <label>System Status</label>
-                  <select className={styles.input} value={subForm.is_active ? "true" : "false"} onChange={e => setSubForm({...subForm, is_active: e.target.value === "true"})}>
+                <FormField label="System Status">
+                  <Select value={subForm.is_active ? "true" : "false"} onChange={e => setSubForm({...subForm, is_active: e.target.value === "true"})}>
                     <option value="true">ACTIVE</option>
                     <option value="false">INACTIVE / EXPIRED</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Payment Status</label>
-                  <select className={styles.input} value={subForm.payment_status} onChange={e => setSubForm({...subForm, payment_status: e.target.value})}>
+                  </Select>
+                </FormField>
+                <FormField label="Payment Status">
+                  <Select value={subForm.payment_status} onChange={e => setSubForm({...subForm, payment_status: e.target.value})}>
                     <option value="PAID">PAID</option>
                     <option value="PENDING">PENDING</option>
                     <option value="FREE">FREE / GIFTED</option>
-                  </select>
-                </div>
+                  </Select>
+                </FormField>
               </div>
-              <div className={styles.modalActions}>
-                <button type="button" className={styles.secondaryButton} onClick={() => setActiveModal(null)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton} disabled={isSubmittingSubscription}>{isSubmittingSubscription ? "Saving..." : "Save Subscription"}</button>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+                <Button type="button" onClick={() => setActiveModal(null)}>Cancel</Button>
+                <Button type="submit" variant="primary" loading={isSubmittingSubscription} loadingLabel="Saving...">Save Subscription</Button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
