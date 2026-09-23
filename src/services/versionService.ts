@@ -10,10 +10,8 @@ export interface ADBVersion {
 
 export const versionService = {
   async getVersions(): Promise<ADBVersion[]> {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/adb-versions/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/adb-versions/`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
       },
     });
 
