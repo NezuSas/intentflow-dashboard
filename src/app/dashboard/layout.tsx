@@ -5,7 +5,7 @@ import styles from "./dashboard.module.css";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeProvider";
-import { authService } from "@/services/authService";
+import { authService } from "@/features/auth";
 
 function DashboardLayoutContent({
   children,

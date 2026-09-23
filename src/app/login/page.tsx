@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/authService";
+import { authService } from "@/features/auth";
 import { getErrorMessage } from "@/utils/errors";
 
 export default function LoginPage() {

@@ -6,7 +6,7 @@ import styles from "../users/users.module.css";
 import {
   Client,
   clientService,
-} from "@/services/clientService";
+} from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 
 interface ClientFormData {

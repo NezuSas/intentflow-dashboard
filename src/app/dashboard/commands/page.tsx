@@ -5,7 +5,7 @@ import styles from "../users/users.module.css";
 import {
   ADBCommand,
   commandService,
-} from "@/services/commandService";
+} from "@/features/commands";
 import { getErrorMessage } from "@/utils/errors";
 
 export default function CommandsPage() {

@@ -1,5 +1,5 @@
 import { API_URL } from "@/config/api";
-import { authService } from "@/services/authService";
+import { authService } from "@/features/auth";
 import { ApiError } from "@/core/errors/ApiError";
 
 type AuthenticatedFetcher = (
