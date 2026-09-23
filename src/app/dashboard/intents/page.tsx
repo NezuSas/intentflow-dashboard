@@ -13,9 +13,10 @@ import React, {
   useState,
 } from "react";
 import styles from "../dashboard.module.css";
-import type {
-  Intent,
-  IntentListQuery,
+import {
+  IntentErrorDetails,
+  type Intent,
+  type IntentListQuery,
 } from "@/features/intents";
 import type {
   Board,
@@ -355,46 +356,7 @@ export default function IntentsPage() {
       {/* Error Details Modal */}
       {errorModalOpen && selectedIntent && (
         <Modal open title="Error Details" description={`Intent #${selectedIntent.id} - ${selectedIntent.command_key}`} onClose={handleCloseErrorModal} footer={<Button variant="primary" onClick={handleCloseErrorModal}>Close</Button>}>
-
-            {/* Modal Body */}
-            <div>
-              <div>
-                <h3>
-                  Board
-                </h3>
-                <p>
-                  {selectedIntent.board?.name} ({selectedIntent.board?.adb_identifier})
-                </p>
-              </div>
-
-              <div>
-                <h3>
-                  Command
-                </h3>
-                <code>
-                  {selectedIntent.resolved_command}
-                </code>
-              </div>
-
-              <div>
-                <h3>
-                  Error Output
-                </h3>
-                <pre>
-                  {selectedIntent.output || "No error output available"}
-                </pre>
-              </div>
-
-              <div>
-                <h3>
-                  Executed At
-                </h3>
-                <p>
-                  {new Date(selectedIntent.executed_at).toLocaleString()}
-                </p>
-              </div>
-            </div>
-
+          <IntentErrorDetails intent={selectedIntent} />
         </Modal>
       )}
 

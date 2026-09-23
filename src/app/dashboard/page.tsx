@@ -6,8 +6,9 @@ import {
 
 import React, { useEffect, useState, useRef } from "react";
 import styles from "./dashboard.module.css";
-import type {
-  Intent,
+import {
+  IntentErrorDetails,
+  type Intent,
 } from "@/features/intents";
 
 import type {
@@ -189,16 +190,7 @@ export default function DashboardHomePage() {
       )}
       {errorModalOpen && selectedIntent && (
         <Modal open title="Error Details" description={`Intent #${selectedIntent.id} - ${selectedIntent.command_key}`} onClose={handleCloseErrorModal} footer={<Button variant="primary" onClick={handleCloseErrorModal}>Close</Button>}>
-          <div>
-            <h3>Board</h3>
-            <p>{selectedIntent.board?.name} ({selectedIntent.board?.adb_identifier})</p>
-            <h3>Command</h3>
-            <code>{selectedIntent.resolved_command}</code>
-            <h3>Error Output</h3>
-            <pre>{selectedIntent.output || "No error output available"}</pre>
-            <h3>Executed At</h3>
-            <p>{new Date(selectedIntent.executed_at).toLocaleString()}</p>
-          </div>
+          <IntentErrorDetails intent={selectedIntent} />
         </Modal>
       )}
     </div>

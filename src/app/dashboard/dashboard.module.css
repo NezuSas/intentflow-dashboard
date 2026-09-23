@@ -1,3 +1,8 @@
+.dashboardShell { height: 100vh; height: 100dvh; overflow: hidden; }
+.dashboardSidebar { height: 100%; overflow: hidden; }
+.dashboardSidebar :global(.ant-layout-sider-children) { display: flex; flex-direction: column; min-height: 0; }
+.dashboardContent { min-width: 0; min-height: 0; overflow-y: auto; }
+
 .filtersToolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-bottom: 20px; }
 .filterGroupWide { min-width: 250px; }
 .filterControl { min-width: 200px; }
