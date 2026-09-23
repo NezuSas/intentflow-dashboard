@@ -89,6 +89,7 @@
   --success: 142 71% 45%;
   --warning: 38 92% 50%;
   --error: 0 84% 60%;
+  --error-foreground: 0 0% 100%;
   --info: 221 83% 53%;
 
   --button-primary-hover: hsl(var(--primary-hover));
@@ -203,153 +204,119 @@ a {
 }
 
 /* ============================================
-   FUTURISTIC GLASSMORPHISM
+   NEZU SURFACES
    ============================================ */
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), var(--glass-glow);
-  border-radius: var(--radius);
+  background: var(--surface-raised);
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-panel);
   position: relative;
   overflow: hidden;
 }
 
-.glass-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
-.glass-panel:hover::before {
-  left: 100%;
-}
-
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--surface);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease;
   position: relative;
 }
 
-.glass-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary) / 0.3),
-    hsl(var(--secondary) / 0.3),
-    hsl(var(--accent) / 0.3)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
 .glass-card:hover {
-  background: hsl(var(--card-hover));
+  background: var(--surface-raised);
   border-color: hsl(var(--border-bright));
-  transform: translateY(-2px);
-  box-shadow: var(--glass-shadow), var(--glass-glow),
-              0 0 30px hsl(var(--primary-glow) / 0.2);
-}
-
-.glass-card:hover::after {
-  opacity: 1;
+  box-shadow: var(--shadow-md);
 }
 
 /* ============================================
-   FUTURISTIC BUTTONS
+   NEZU BUTTONS
    ============================================ */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.625rem 1.25rem;
-  font-weight: 500;
-  border-radius: var(--radius);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-control);
+  transition: background-color var(--transition-speed) ease,
+              border-color var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease,
+              color var(--transition-speed) ease;
   cursor: pointer;
-  border: none;
+  border: 1px solid transparent;
   font-family: inherit;
   font-size: 0.875rem;
-  outline: none;
-  position: relative;
-  overflow: hidden;
 }
 
-.btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 70%
-  );
-  transform: translateX(-100%);
-  transition: transform 0.6s;
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
 }
 
-.btn:hover::before {
-  transform: translateX(100%);
+.btn:focus-visible {
+  outline: 2px solid hsl(var(--focus-ring) / 0.5);
+  outline-offset: 2px;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  box-shadow: 0 4px 15px hsl(var(--primary-glow) / 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px hsl(var(--primary-glow) / 0.5),
-              0 0 30px hsl(var(--primary-glow) / 0.3);
+.btn-primary:hover:not(:disabled) {
+  background: hsl(var(--primary-hover));
+  box-shadow: var(--shadow-md);
 }
 
-.btn-ghost {
-  background: transparent;
-  color: hsl(var(--foreground));
-  border: 1px solid var(--glass-border);
+.btn-secondary {
+  background: var(--surface-raised);
+  border-color: hsl(var(--border));
+  color: var(--text-primary);
 }
 
-.btn-ghost:hover {
+.btn-secondary:hover:not(:disabled) {
   background: hsl(var(--muted));
   border-color: hsl(var(--border-bright));
 }
 
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: hsl(var(--muted));
+  border-color: hsl(var(--border));
+}
+
+.btn-danger {
+  background: hsl(var(--error));
+  color: hsl(var(--error-foreground));
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: hsl(var(--error) / 0.88);
+  box-shadow: var(--shadow-sm);
+}
+
 /* Forms */
 .input-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .input-label {
   display: block;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 0.5rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--text-secondary);
 }
 
 .input-field {
@@ -357,17 +324,46 @@ a {
   background: var(--surface-input);
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius-control);
-  padding: 0.75rem 1rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
   color: var(--text-primary);
   font-family: inherit;
   font-size: 0.875rem;
-  transition: all 0.2s;
+  transition: border-color var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease,
+              background-color var(--transition-speed) ease;
 }
 
-.input-field:focus {
+.input-field::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.input-field:focus,
+.input-field:focus-visible {
   outline: none;
   border-color: hsl(var(--primary));
   box-shadow: 0 0 0 3px hsl(var(--focus-ring) / 0.25);
+}
+
+.input-field:disabled {
+  background: hsl(var(--muted));
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.input-field[aria-invalid="true"],
+.input-field.input-error {
+  border-color: hsl(var(--error));
+  background: hsl(var(--error) / 0.05);
+}
+
+.input-field[aria-invalid="true"]:focus,
+.input-field[aria-invalid="true"]:focus-visible,
+.input-field.input-error:focus,
+.input-field.input-error:focus-visible {
+  box-shadow: 0 0 0 3px hsl(var(--error) / 0.2);
 }
 
 /* Utilities */
@@ -378,14 +374,7 @@ a {
 }
 
 .gradient-text {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary)),
-    hsl(var(--accent))
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: hsl(var(--primary));
   font-weight: 800;
 }
 
