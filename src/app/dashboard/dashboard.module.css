@@ -186,6 +186,60 @@
   gap: 1rem;
 }
 
+.filtersToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+.filterGroup {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+.filterGroupWide {
+  min-width: 250px;
+}
+
+.filterLabel {
+  margin-bottom: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.filterControl {
+  cursor: pointer;
+}
+
+[data-theme="light"] .filterControl {
+  color-scheme: light;
+}
+
+[data-theme="dark"] .filterControl {
+  color-scheme: dark;
+}
+
+.clearFiltersButton {
+  flex: 0 0 auto;
+  border-color: hsl(var(--error) / 0.5);
+  color: hsl(var(--error));
+  white-space: nowrap;
+}
+
+.clearFiltersButton:hover:not(:disabled) {
+  background: hsl(var(--error) / 0.1);
+  border-color: hsl(var(--error));
+  color: hsl(var(--error));
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
