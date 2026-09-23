@@ -39,23 +39,14 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
-      <div className={`${styles.loginCard} glass-panel`}>
+      <div className={styles.loginCard}>
         <div className={styles.header}>
-          <h1 className={`${styles.logo} gradient-text`}>IntentFlow</h1>
+          <h1 className={styles.logo}>IntentFlow</h1>
           <p className={styles.subtitle}>Admin Dashboard Access</p>
         </div>
 
         {error && (
-          <div style={{ 
-            padding: '0.75rem', 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            border: '1px solid rgba(239, 68, 68, 0.2)', 
-            borderRadius: 'var(--radius)',
-            color: '#f87171',
-            fontSize: '0.8125rem',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
+          <div className={styles.errorMessage}>
             {error}
           </div>
         )}
@@ -93,9 +84,8 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="btn btn-primary"
+            className={`btn btn-primary ${styles.submitButton}`}
             disabled={loading}
-            style={{ width: "100%", marginTop: "1rem" }}
           >
             {loading ? "Authenticating..." : "Sign In"}
           </button>
