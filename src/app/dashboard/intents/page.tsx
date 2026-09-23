@@ -39,6 +39,7 @@ import {
   StatusBadge,
   Table,
   TableEmpty,
+  TablePanel,
 } from "@/shared/components";
 
 const PAGE_SIZE = 20;
@@ -279,7 +280,7 @@ export default function IntentsPage() {
         )}
       </Card>
 
-      <Card>
+      <TablePanel title="Intents" pagination={meta && <Pagination page={meta.page} totalPages={totalPages} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setCurrentPage((page) => page - 1)} onNext={() => setCurrentPage((page) => page + 1)} />}>
         {loading ? (
           <LoadingState label="Loading intents..." />
         ) : error ? (
@@ -349,11 +350,7 @@ export default function IntentsPage() {
               </tbody>
           </Table>
         )}
-      </Card>
-
-      {meta && (
-        <Pagination page={meta.page} totalPages={totalPages} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setCurrentPage((page) => page - 1)} onNext={() => setCurrentPage((page) => page + 1)} />
-      )}
+      </TablePanel>
 
       {/* Error Details Modal */}
       {errorModalOpen && selectedIntent && (

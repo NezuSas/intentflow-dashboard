@@ -9,7 +9,7 @@ import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -139,12 +139,9 @@ export default function UsersPage() {
     <Page>
       <PageHeader title="User Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New User</Button>} />
 
-      {meta && (
-        <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />
-      )}
-
       {error && <ErrorState message={error} />}
 
+      <TablePanel title="Users" pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
       <Table label="User management">
           <thead>
             <tr>
@@ -191,6 +188,7 @@ export default function UsersPage() {
             )}
           </tbody>
       </Table>
+      </TablePanel>
 
       <Modal open={isModalOpen} title={editingUser ? "Edit User Profile" : "Create New User"} description={editingUser ? "Update profile information and system permissions for this user." : "User creation is not available through this screen."} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
