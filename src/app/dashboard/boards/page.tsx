@@ -19,7 +19,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Modal, Pagination, Table } from "@/shared/components";
+import { Button, FormField, Input, Modal, Pagination, Select, Table } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -411,11 +411,8 @@ export default function BoardsPage() {
 
       <Modal open={isModalOpen} title={editingBoard ? "Edit Board" : "Register New Board"} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
-                <label>Display Name</label>
-
-                <input
-                  className={styles.input}
+              <FormField label="Display Name" required>
+                <Input
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({
@@ -425,15 +422,10 @@ export default function BoardsPage() {
                   }
                   required
                 />
-              </div>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>
-                  ADB Identifier (IP:Port)
-                </label>
-
-                <input
-                  className={styles.input}
+              <FormField label="ADB Identifier (IP:Port)" required>
+                <Input
                   value={
                     formData.adb_identifier
                   }
@@ -447,13 +439,10 @@ export default function BoardsPage() {
                   }
                   required
                 />
-              </div>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>Assign to Client</label>
-
-                <select
-                  className={styles.input}
+              <FormField label="Assign to Client" required>
+                <Select
                   value={formData.client}
                   onChange={(e) =>
                     setFormData({
@@ -477,16 +466,11 @@ export default function BoardsPage() {
                       {client.name}
                     </option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>
-                  Firmware / ADB Version
-                </label>
-
-                <select
-                  className={styles.input}
+              <FormField label="Firmware / ADB Version" required>
+                <Select
                   value={formData.version}
                   onChange={(e) =>
                     setFormData({
@@ -510,14 +494,11 @@ export default function BoardsPage() {
                       {version.code}
                     </option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div className={styles.formGroup}>
-                <label>Stored Status</label>
-
-                <select
-                  className={styles.input}
+              <FormField label="Stored Status">
+                <Select
                   value={formData.status}
                   onChange={(e) =>
                     setFormData({
@@ -537,33 +518,25 @@ export default function BoardsPage() {
                   <option value="OFFLINE">
                     Offline
                   </option>
-                </select>
-              </div>
+                </Select>
+              </FormField>
 
-              <div
-                className={styles.modalActions}
-              >
-                <button
+              <div>
+                <Button
                   type="button"
-                  className={
-                    styles.secondaryButton
-                  }
                   onClick={() =>
                     setIsModalOpen(false)
                   }
                 >
                   Cancel
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="submit"
-                  className={
-                    styles.primaryButton
-                  }
+                  variant="primary"
+                  loading={submitting}
                   disabled={submitting}
-                >
-                  {submitting ? "Saving..." : "Save Board"}
-                </button>
+                >Save Board</Button>
               </div>
             </form>
       </Modal>
