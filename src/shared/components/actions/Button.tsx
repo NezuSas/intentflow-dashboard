@@ -1,4 +1,8 @@
+import { Button as AntButton } from "antd";
+import type { ButtonProps } from "antd";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import styles from "../shared.module.css";
-export type ButtonVariant="primary"|"secondary"|"ghost"|"danger";
-export function Button({variant="secondary",loading=false,loadingLabel="Loading…",children,className="",disabled,...props}:ButtonHTMLAttributes<HTMLButtonElement>&{variant?:ButtonVariant;loading?:boolean;loadingLabel?:ReactNode;children:ReactNode}){return <button {...props} disabled={disabled||loading} className={`${styles.button} ${styles[variant]} ${className}`}>{loading?loadingLabel:children}</button>}
+
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "text" | "link";
+type Props = Omit<ButtonProps, "type" | "danger" | "htmlType" | "loading" | "children" | "variant"> & Pick<ButtonHTMLAttributes<HTMLButtonElement>, "type" | "disabled"> & { variant?: ButtonVariant; loading?: boolean; loadingLabel?: ReactNode; children: ReactNode };
+const variantProps: Record<ButtonVariant, Pick<ButtonProps, "type" | "danger">> = { primary: { type: "primary" }, secondary: { type: "default" }, ghost: { type: "text" }, danger: { type: "primary", danger: true }, text: { type: "text" }, link: { type: "link" } };
+export function Button({ variant = "secondary", loading = false, loadingLabel, children, type, disabled, ...props }: Props) { return <AntButton {...variantProps[variant]} {...props} htmlType={type} disabled={disabled || loading} loading={loading}>{loading && loadingLabel ? loadingLabel : children}</AntButton>; }
