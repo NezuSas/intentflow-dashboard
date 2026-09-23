@@ -19,6 +19,9 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
+import type { PageMeta } from "@/core/Pagination";
+
+const PAGE_SIZE = 20;
 
 interface BoardFormData {
   name: string;
@@ -67,6 +70,9 @@ export default function BoardsPage() {
     useState<ADBVersion[]>([]);
 
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] =
     useState<string | null>(null);
 
@@ -89,13 +95,14 @@ export default function BoardsPage() {
           clientData,
           versionData,
         ] = await Promise.all([
-          boardService.getBoards(),
-          clientService.getClients(),
+          boardService.listBoards({ page, pageSize: PAGE_SIZE }),
+          clientService.getClientCatalog(),
           versionService.getVersions(),
         ]);
 
-        setBoards(boardData);
-        setClients(clientData);
+        setBoards(boardData.data);
+        setMeta(boardData.meta);
+        setClients(clientData as Client[]);
         setVersions(versionData);
         setError(null);
       } catch (err: unknown) {
@@ -106,12 +113,13 @@ export default function BoardsPage() {
     };
 
     void fetchInitialData();
-  }, []);
+  }, [page]);
 
   const fetchBoards = async () => {
     try {
-      const data = await boardService.getBoards();
-      setBoards(data);
+      const response = await boardService.listBoards({ page, pageSize: PAGE_SIZE });
+      setBoards(response.data);
+      setMeta(response.meta);
     } catch (err: unknown) {
       console.error(
         "Error refreshing boards:",
@@ -161,6 +169,8 @@ export default function BoardsPage() {
     e: React.FormEvent
   ) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
 
     try {
       if (
@@ -208,6 +218,8 @@ export default function BoardsPage() {
           err
         )}`
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -244,6 +256,7 @@ export default function BoardsPage() {
       <div className={styles.container}>
         Loading boards...
       </div>
+
     );
   }
 
@@ -394,6 +407,8 @@ export default function BoardsPage() {
           </tbody>
         </table>
       </div>
+
+      {meta && <div className="table-pagination"><span>{meta.count} total · Page {meta.page} of {Math.max(1, Math.ceil(meta.count / meta.pageSize))}</span><div><button className={styles.secondaryButton} disabled={!meta.previous} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button><button className={styles.secondaryButton} disabled={!meta.next} onClick={() => setPage((current) => current + 1)}>Next</button></div></div>}
 
       {isModalOpen && (
         <div className={styles.modalOverlay}>
@@ -560,8 +575,9 @@ export default function BoardsPage() {
                   className={
                     styles.primaryButton
                   }
+                  disabled={submitting}
                 >
-                  Save Board
+                  {submitting ? "Saving..." : "Save Board"}
                 </button>
               </div>
             </form>
