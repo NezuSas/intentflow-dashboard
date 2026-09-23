@@ -11,11 +11,6 @@ import type {
 import { buildListPath, mapPaginatedResponse } from "@/core/Pagination";
 import type { ListQuery, PaginatedResponse, ApiPaginatedEnvelope } from "@/core/Pagination";
 
-interface ApiEnvelope<T> {
-  data?: T;
-  detail?: string;
-}
-
 export class UserApiRepository
   implements UserRepository
 {

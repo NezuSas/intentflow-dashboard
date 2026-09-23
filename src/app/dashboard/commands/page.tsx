@@ -18,12 +18,18 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
+import type { PageMeta } from "@/core/Pagination";
+
+const PAGE_SIZE = 20;
 
 export default function CommandsPage() {
   const [commands, setCommands] = useState<ADBCommand[]>([]);
   const [versions, setVersions] = useState<ADBVersion[]>([]);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Modal state
@@ -40,20 +46,21 @@ export default function CommandsPage() {
 
   useEffect(() => {
     void fetchData();
-  }, []);
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [commandsData, versionsData, plansData] =
         await Promise.all([
-          commandService.getCommands(),
+          commandService.listCommands({ page, pageSize: PAGE_SIZE }),
           versionService.getVersions(),
-          subscriptionService.getPlans(),
+          subscriptionService.getPlanCatalog(),
         ]);
-      setCommands(commandsData);
+      setCommands(commandsData.data);
+      setMeta(commandsData.meta);
       setVersions(versionsData);
-      setPlans(plansData);
+      setPlans(plansData as SubscriptionPlan[]);
       setError(null);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
@@ -65,8 +72,9 @@ export default function CommandsPage() {
   const fetchCommands = async () => {
     try {
       setLoading(true);
-      const data = await commandService.getCommands();
-      setCommands(data);
+      const response = await commandService.listCommands({ page, pageSize: PAGE_SIZE });
+      setCommands(response.data);
+      setMeta(response.meta);
       setError(null);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
@@ -102,6 +110,7 @@ export default function CommandsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
 
     if (formData.versions.length === 0) {
       alert(
@@ -119,6 +128,7 @@ export default function CommandsPage() {
       return;
     }
 
+    setSubmitting(true);
     try {
       if (editingCommand) {
         await commandService.updateCommand(editingCommand.id, formData);
@@ -126,11 +136,13 @@ export default function CommandsPage() {
         await commandService.createCommand(formData);
       }
       setIsModalOpen(false);
-      fetchCommands();
+      await fetchCommands();
     } catch (err: unknown) {
       alert(
         `Error saving command: ${getErrorMessage(err)}`
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -217,6 +229,8 @@ export default function CommandsPage() {
           </tbody>
         </table>
       </div>
+
+      {meta && <div className="table-pagination"><span>{meta.count} total · Page {meta.page} of {Math.max(1, Math.ceil(meta.count / meta.pageSize))}</span><div><button className={styles.secondaryButton} disabled={!meta.previous} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button><button className={styles.secondaryButton} disabled={!meta.next} onClick={() => setPage((current) => current + 1)}>Next</button></div></div>}
 
       {isModalOpen && (
         <div className={styles.modalOverlay}>
@@ -337,7 +351,7 @@ export default function CommandsPage() {
               </div>
               <div className={styles.modalActions}>
                 <button type="button" className={styles.secondaryButton} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton}>Save Command</button>
+                <button type="submit" className={styles.primaryButton} disabled={submitting}>{submitting ? "Saving..." : "Save Command"}</button>
               </div>
             </form>
           </div>

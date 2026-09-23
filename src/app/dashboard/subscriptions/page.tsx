@@ -15,12 +15,20 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
+import type { PageMeta } from "@/core/Pagination";
+
+const PAGE_SIZE = 20;
 
 export default function SubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [planCatalog, setPlanCatalog] = useState<SubscriptionPlan[]>([]);
   const [clientSubs, setClientSubs] = useState<ClientSubscription[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [plansPage, setPlansPage] = useState(1);
+  const [subscriptionsPage, setSubscriptionsPage] = useState(1);
+  const [plansMeta, setPlansMeta] = useState<PageMeta | null>(null);
+  const [subscriptionsMeta, setSubscriptionsMeta] = useState<PageMeta | null>(null);
   const [isSubmittingPlan, setIsSubmittingPlan] = useState(false);
   const [isSubmittingSubscription, setIsSubmittingSubscription] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,20 +55,24 @@ export default function SubscriptionsPage() {
   });
 
   useEffect(() => {
-    void void fetchData();
-  }, []);
+    void fetchData();
+  }, [plansPage, subscriptionsPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [plansData, subsData, clientsData] = await Promise.all([
-        subscriptionService.getPlans(),
-        subscriptionService.getClientSubscriptions(),
-        clientService.getClientCatalog()
+      const [plansData, subsData, clientsData, planCatalogData] = await Promise.all([
+        subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE }),
+        subscriptionService.listClientSubscriptions({ page: subscriptionsPage, pageSize: PAGE_SIZE }),
+        clientService.getClientCatalog(),
+        subscriptionService.getPlanCatalog(),
       ]);
-      setPlans(plansData);
-      setClientSubs(subsData);
+      setPlans(plansData.data);
+      setPlansMeta(plansData.meta);
+      setClientSubs(subsData.data);
+      setSubscriptionsMeta(subsData.meta);
       setClients(clientsData as Client[]);
+      setPlanCatalog(planCatalogData as SubscriptionPlan[]);
       setError(null);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
@@ -70,13 +82,15 @@ export default function SubscriptionsPage() {
   };
 
   const refreshPlans = async () => {
-    const plansData = await subscriptionService.getPlans();
-    setPlans(plansData);
+    const plansData = await subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE });
+    setPlans(plansData.data);
+    setPlansMeta(plansData.meta);
   };
 
   const refreshClientSubscriptions = async () => {
-    const subscriptionsData = await subscriptionService.getClientSubscriptions();
-    setClientSubs(subscriptionsData);
+    const subscriptionsData = await subscriptionService.listClientSubscriptions({ page: subscriptionsPage, pageSize: PAGE_SIZE });
+    setClientSubs(subscriptionsData.data);
+    setSubscriptionsMeta(subscriptionsData.meta);
   };
 
   const handleOpenPlanModal = (plan: SubscriptionPlan | null = null) => {
@@ -258,6 +272,7 @@ export default function SubscriptionsPage() {
             </tbody>
           </table>
         </div>
+        {plansMeta && <div className="table-pagination"><span>{plansMeta.count} total · Page {plansMeta.page} of {Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))}</span><div><button className={styles.secondaryButton} disabled={!plansMeta.previous} onClick={() => setPlansPage((page) => Math.max(1, page - 1))}>Previous</button><button className={styles.secondaryButton} disabled={!plansMeta.next} onClick={() => setPlansPage((page) => page + 1)}>Next</button></div></div>}
       </section>
 
       <section>
@@ -301,6 +316,7 @@ export default function SubscriptionsPage() {
             </tbody>
           </table>
         </div>
+        {subscriptionsMeta && <div className="table-pagination"><span>{subscriptionsMeta.count} total · Page {subscriptionsMeta.page} of {Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))}</span><div><button className={styles.secondaryButton} disabled={!subscriptionsMeta.previous} onClick={() => setSubscriptionsPage((page) => Math.max(1, page - 1))}>Previous</button><button className={styles.secondaryButton} disabled={!subscriptionsMeta.next} onClick={() => setSubscriptionsPage((page) => page + 1)}>Next</button></div></div>}
       </section>
 
       {/* PLAN MODAL */}
@@ -375,7 +391,7 @@ export default function SubscriptionsPage() {
                   <label>Target Plan</label>
                   <select className={styles.input} value={subForm.subscription_plan} onChange={e => setSubForm({...subForm, subscription_plan: e.target.value})} required>
                     <option value="">Choose...</option>
-                    {plans.map(p => <option key={p.id} value={p.id}>{p.name} (${p.price})</option>)}
+                    {planCatalog.map(p => <option key={p.id} value={p.id}>{p.name} (${p.price})</option>)}
                   </select>
                 </div>
               </div>

@@ -72,7 +72,7 @@ export default function ClientsPage() {
 
   useEffect(() => {
     void fetchClients();
-  }, [page]);
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOpenModal = (
     client: Client | null = null
