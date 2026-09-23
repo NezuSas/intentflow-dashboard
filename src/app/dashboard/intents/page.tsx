@@ -122,31 +122,19 @@ export default function IntentsPage() {
       </div>
 
       {/* FILTERS TOOLBAR */}
-      <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+      <div className={`glass-panel ${styles.filtersToolbar}`}>
 
         {/* Client Filter */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '200px' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Filter by Client</label>
+        <div className={`input-group ${styles.filterGroup}`}>
+            <label className={`input-label ${styles.filterLabel}`}>Filter by Client</label>
             <select
                 value={selectedClientId}
                 onChange={(e) => setSelectedClientId(e.target.value)}
-                style={{
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    background: 'rgba(15, 23, 42, 0.6)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    transition: 'all 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)'}
-                onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+                className={`input-field ${styles.filterControl}`}
             >
-                <option value="" style={{ background: '#0f172a', color: 'white' }}>All Clients</option>
+                <option value="">All Clients</option>
                 {clients.map(c => (
-                    <option key={c.id} value={c.id} style={{ background: '#0f172a', color: 'white', padding: '0.5rem' }}>
+                    <option key={c.id} value={c.id}>
                         {c.name}
                     </option>
                 ))}
@@ -154,34 +142,21 @@ export default function IntentsPage() {
         </div>
 
         {/* Board Filter (filtered by selected client) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>
+        <div className={`input-group ${styles.filterGroup} ${styles.filterGroupWide}`}>
+            <label className={`input-label ${styles.filterLabel}`}>
                 Filter by Board {selectedClientId && `(${clients.find(c => c.id === parseInt(selectedClientId))?.name || 'Client'})`}
             </label>
             <select
                 value={selectedBoardId}
                 onChange={(e) => setSelectedBoardId(e.target.value)}
                 disabled={!selectedClientId && availableBoards.length === 0}
-                style={{
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    background: 'rgba(15, 23, 42, 0.6)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    cursor: selectedClientId || availableBoards.length > 0 ? 'pointer' : 'not-allowed',
-                    outline: 'none',
-                    transition: 'all 0.2s',
-                    opacity: (!selectedClientId && availableBoards.length === 0) ? 0.5 : 1
-                }}
-                onFocus={(e) => e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)'}
-                onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+                className={`input-field ${styles.filterControl}`}
             >
-                <option value="" style={{ background: '#0f172a', color: 'white' }}>
+                <option value="">
                     {selectedClientId ? 'All Boards' : 'Select a client first'}
                 </option>
                 {availableBoards.map(b => (
-                    <option key={b.id} value={b.id} style={{ background: '#0f172a', color: 'white', padding: '0.5rem' }}>
+                    <option key={b.id} value={b.id}>
                         {b.name} ({b.adb_identifier})
                     </option>
                 ))}
@@ -189,26 +164,13 @@ export default function IntentsPage() {
         </div>
 
         {/* Date Filter */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '200px' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Filter by Date</label>
+        <div className={`input-group ${styles.filterGroup}`}>
+            <label className={`input-label ${styles.filterLabel}`}>Filter by Date</label>
             <input
                 type="date"
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
-                style={{
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    background: 'rgba(15, 23, 42, 0.6)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    colorScheme: 'dark',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    transition: 'all 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)'}
-                onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+                className={`input-field ${styles.filterControl}`}
             />
         </div>
 
@@ -216,26 +178,7 @@ export default function IntentsPage() {
         {(selectedClientId || selectedBoardId || filterDate) && (
             <button
                 onClick={() => { setSelectedClientId(""); setSelectedBoardId(""); setFilterDate(""); }}
-                style={{
-                    background: 'transparent',
-                    border: '1px solid hsl(var(--error) / 0.5)',
-                    color: 'hsl(var(--error))',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    whiteSpace: 'nowrap'
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'hsl(var(--error) / 0.1)';
-                    e.currentTarget.style.borderColor = 'hsl(var(--error))';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.borderColor = 'hsl(var(--error) / 0.5)';
-                }}
+                className={`btn btn-ghost ${styles.clearFiltersButton}`}
             >
                 ✕ Clear Filters
             </button>
