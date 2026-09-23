@@ -128,12 +128,8 @@ export default function IntentsPage() {
   useEffect(() => {
     const fetchCatalogs = async () => {
       try {
-        const [boardsData, clientsData] = await Promise.all([
-          boardService.getBoards(),
-          clientService.getClients(),
-        ]);
-        setBoards(boardsData);
-        setClients(clientsData);
+        const clientsData = await clientService.getClientCatalog();
+        setClients(clientsData as Client[]);
       } catch (err: unknown) {
         setError(getErrorMessage(err));
       }
@@ -141,6 +137,17 @@ export default function IntentsPage() {
 
     void fetchCatalogs();
   }, []);
+
+  useEffect(() => {
+    if (!selectedClientId) {
+      setBoards([]);
+      return;
+    }
+
+    void boardService.getBoardCatalog(Number(selectedClientId))
+      .then((data) => setBoards(data as Board[]))
+      .catch((err: unknown) => setError(getErrorMessage(err)));
+  }, [selectedClientId]);
 
   useEffect(() => {
     void loadIntents();
@@ -151,9 +158,7 @@ export default function IntentsPage() {
   }, [loadIntents]);
 
   // Get boards filtered by selected client
-  const availableBoards = selectedClientId
-    ? boards.filter(b => b.client === parseInt(selectedClientId))
-    : boards;
+  const availableBoards = boards;
 
   const totalPages = meta
     ? Math.max(1, Math.ceil(meta.count / meta.pageSize))

@@ -23,7 +23,7 @@ export class VersionApiRepository
     const response =
       await this.http.get<
         ApiEnvelope<ADBVersion[]>
-      >("/adb-versions/");
+      >("/adb-versions/catalog/");
 
     return response.data ?? [];
   }
