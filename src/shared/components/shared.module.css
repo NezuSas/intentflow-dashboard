@@ -17,6 +17,7 @@
 .label { font-size: .8125rem; font-weight: 700; color: var(--text-secondary); }
 .error { color: hsl(var(--error)); font-size: .8125rem; }
 .card { background: var(--surface); border: 1px solid hsl(var(--border)); border-radius: var(--radius-card); box-shadow: var(--shadow-sm); padding: 1rem; }
+.page { max-width: 1200px; margin: 0 auto; padding: 2rem; }.actionGroup { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; }
 .modalOverlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 1rem; background: rgb(0 0 0 / .6); backdrop-filter: blur(6px); }
 .modal { width: min(100%, 600px); max-height: 90vh; overflow: auto; background: var(--surface-raised); border: 1px solid hsl(var(--border)); border-radius: var(--radius-modal); box-shadow: var(--shadow-modal); padding: 1.5rem; }
 .modalHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid hsl(var(--border)); }

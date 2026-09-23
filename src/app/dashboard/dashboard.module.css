@@ -240,35 +240,6 @@
   color: hsl(var(--error));
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: 0.875rem 1rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-control);
-  background: var(--surface-raised);
-}
-
-.paginationControls {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.paginationTotal,
-.paginationIndicator {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-}
-
-.paginationIndicator {
-  min-width: 7.5rem;
-  text-align: center;
-}
-
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -278,13 +249,6 @@
 
 .statCard {
   padding: 1.5rem;
-  background: var(--surface-raised);
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
-  transition: background-color var(--transition-speed) ease,
-    border-color var(--transition-speed) ease,
-    box-shadow var(--transition-speed) ease;
 }
 
 .statCard:hover {
@@ -447,15 +411,6 @@
   .statsGrid {
     grid-template-columns: 1fr;
     gap: 1rem;
-  }
-
-  .pagination {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .paginationControls {
-    justify-content: space-between;
   }
 
   .header {

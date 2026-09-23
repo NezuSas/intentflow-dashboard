@@ -5,13 +5,12 @@ import {
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
-import styles from "@/shared/components/page.module.css";
 
 import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -163,15 +162,15 @@ export default function ClientsPage() {
 
   if (loading && clients.length === 0) {
     return (
-      <div className={styles.container}>
+      <Page>
         <LoadingState label="Loading clients..." />
-      </div>
+      </Page>
 
     );
   }
 
   return (
-    <div className={styles.container}>
+    <Page>
       <PageHeader title="Client Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New Client</Button>} />
 
       {error && <ErrorState message={error} />}
@@ -347,7 +346,7 @@ export default function ClientsPage() {
                 />
               </FormField>
 
-              <div>
+              <ActionGroup>
                 <Button
                   type="button"
                   onClick={() =>
@@ -362,9 +361,9 @@ export default function ClientsPage() {
                   variant="primary"
                   loading={submitting}
                 >Save Client</Button>
-              </div>
+              </ActionGroup>
             </form>
       </Modal>
-    </div>
+    </Page>
   );
 }

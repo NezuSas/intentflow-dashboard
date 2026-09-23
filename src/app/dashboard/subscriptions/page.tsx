@@ -6,7 +6,6 @@ import {
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
-import styles from "@/shared/components/page.module.css";
 import type {
   SubscriptionPlan,
   ClientSubscription,
@@ -16,7 +15,7 @@ import type {
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 import type { PageMeta } from "@/core/Pagination";
-import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
 
 const PAGE_SIZE = 20;
 
@@ -221,7 +220,7 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <Page>
       <PageHeader title="Subscription Management" actions={<div style={{ display: "flex", gap: "1rem" }}>
           <Button onClick={() => handleOpenPlanModal()}>+ New Plan</Button>
           <Button variant="primary" onClick={() => handleOpenSubModal()}>+ New Subscription</Button>
@@ -332,10 +331,10 @@ export default function SubscriptionsPage() {
               </div>
               <FormField label="Max Hardware Boards"><Input type="number" value={planForm.max_boards} onChange={e => setPlanForm({...planForm, max_boards: parseInt(e.target.value)})} required /></FormField>
               <FormField label="Public Description"><Textarea style={{ minHeight: '100px' }} value={planForm.description} placeholder="Features included in this plan..." onChange={e => setPlanForm({...planForm, description: e.target.value})} /></FormField>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+              <ActionGroup>
                 <Button type="button" onClick={() => setActiveModal(null)}>Cancel</Button>
                 <Button type="submit" variant="primary" loading={isSubmittingPlan} loadingLabel="Saving...">Save Plan</Button>
-              </div>
+              </ActionGroup>
             </form>
         </Modal>
       )}
@@ -373,13 +372,13 @@ export default function SubscriptionsPage() {
                   </Select>
                 </FormField>
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+              <ActionGroup>
                 <Button type="button" onClick={() => setActiveModal(null)}>Cancel</Button>
                 <Button type="submit" variant="primary" loading={isSubmittingSubscription} loadingLabel="Saving...">Save Subscription</Button>
-              </div>
+              </ActionGroup>
             </form>
         </Modal>
       )}
-    </div>
+    </Page>
   );
 }
