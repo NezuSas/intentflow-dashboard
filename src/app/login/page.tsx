@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
+import { getErrorMessage } from "@/utils/errors";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,8 +21,13 @@ export default function LoginPage() {
     try {
       await authService.login(email, password);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials. Please try again.");
+    } catch (err: unknown) {
+      setError(
+        getErrorMessage(
+          err,
+          "Invalid credentials. Please try again."
+        )
+      );
     } finally {
       setLoading(false);
     }

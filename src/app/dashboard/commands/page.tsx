@@ -2,16 +2,20 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "../users/users.module.css";
-import { commandService } from "@/services/commandService";
+import {
+  ADBCommand,
+  commandService,
+} from "@/services/commandService";
+import { getErrorMessage } from "@/utils/errors";
 
 export default function CommandsPage() {
-  const [commands, setCommands] = useState<any[]>([]);
+  const [commands, setCommands] = useState<ADBCommand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCommand, setEditingCommand] = useState<any>(null);
+  const [editingCommand, setEditingCommand] = useState<ADBCommand | null>(null);
   const [formData, setFormData] = useState({
     key: "",
     command: "",
@@ -29,14 +33,14 @@ export default function CommandsPage() {
       const data = await commandService.getCommands();
       setCommands(data);
       setError(null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOpenModal = (command: any = null) => {
+  const handleOpenModal = (command: ADBCommand | null = null) => {
     if (command) {
       setEditingCommand(command);
       setFormData({
@@ -67,8 +71,10 @@ export default function CommandsPage() {
       }
       setIsModalOpen(false);
       fetchCommands();
-    } catch (err: any) {
-      alert(`Error saving command: ${err.message}`);
+    } catch (err: unknown) {
+      alert(
+        `Error saving command: ${getErrorMessage(err)}`
+      );
     }
   };
 
@@ -77,8 +83,10 @@ export default function CommandsPage() {
     try {
       await commandService.deleteCommand(commandId);
       setCommands(commands.filter(c => c.id !== commandId));
-    } catch (err: any) {
-      alert(`Error deleting command: ${err.message}`);
+    } catch (err: unknown) {
+      alert(
+        `Error deleting command: ${getErrorMessage(err)}`
+      );
     }
   };
 
@@ -123,7 +131,7 @@ export default function CommandsPage() {
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {command.subscription_plans_detail && command.subscription_plans_detail.length > 0 ? (
-                        command.subscription_plans_detail.map((plan: any) => (
+                        command.subscription_plans_detail.map((plan) => (
                           <span 
                             key={plan.id}
                             style={{
