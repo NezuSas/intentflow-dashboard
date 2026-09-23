@@ -1,4 +1,4 @@
-import { Empty, Table as AntTable, Tag } from "antd";
+import { Empty, Skeleton, Table as AntTable, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { isValidElement, type ReactElement, type ReactNode, type TdHTMLAttributes } from "react";
 import { Card } from "../layout/Primitives";
@@ -61,9 +61,12 @@ export const Table = ({ children, label }: { children: ReactNode; label: string 
   return <AntTable<Row> aria-label={label} columns={columns} dataSource={rows} pagination={false} size="middle" scroll={{ x: "max-content" }} locale={{ emptyText: <Empty description={emptyMessage} image={Empty.PRESENTED_IMAGE_SIMPLE} /> }} />;
 };
 
-export const TablePanel = ({ title, children, pagination }: { title: string; children: ReactNode; pagination?: ReactNode }) => (
+export const TablePanel = ({ title, children, pagination, refreshing = false }: { title: string; children: ReactNode; pagination?: ReactNode; refreshing?: boolean }) => (
   <Card className={styles.tablePanel}>
-    <h2 className={styles.tablePanelTitle}>{title}</h2>
+    <div className={styles.tablePanelHeading}>
+      <h2 className={styles.tablePanelTitle}>{title}</h2>
+      {refreshing && <div className={styles.tablePanelRefresh} role="status"><Skeleton.Input active size="small" style={{ width: 64 }} /><span>Updating...</span></div>}
+    </div>
     {children}
     {pagination && <div className={styles.tablePanelPagination}>{pagination}</div>}
   </Card>

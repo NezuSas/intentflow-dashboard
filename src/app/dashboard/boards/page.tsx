@@ -19,7 +19,7 @@ import type {
 } from "@/features/versions";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -260,10 +260,7 @@ export default function BoardsPage() {
   };
 
   if (loading && boards.length === 0) {
-    return (
-      <LoadingState label="Loading boards..." />
-
-    );
+    return <TablePageSkeleton title="Board Management" tableTitle="Boards" columns={7} />;
   }
 
   return (
@@ -281,7 +278,7 @@ export default function BoardsPage() {
         <ErrorState message={error} />
       )}
 
-      <TablePanel title="Boards" pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
+      <TablePanel title="Boards" refreshing={loading && boards.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
       <Table label="Board management">
           <thead>
             <tr>
@@ -377,7 +374,7 @@ export default function BoardsPage() {
 
       <Modal open={isModalOpen} title={editingBoard ? "Edit Board" : "Register New Board"} onClose={() => setIsModalOpen(false)}>
           {!catalog.data ? (
-            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <LoadingState label="Loading form options..." />
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <FormSkeleton fields={5} />
           ) : (
             <form onSubmit={handleSubmit}>
               <FormField label="Display Name" required>

@@ -32,7 +32,6 @@ import {
   ErrorState,
   FormField,
   Input,
-  LoadingState,
   Modal,
   PageHeader,
   Pagination,
@@ -41,6 +40,7 @@ import {
   Table,
   TableEmpty,
   TablePanel,
+  TableSkeleton,
 } from "@/shared/components";
 
 const PAGE_SIZE = 20;
@@ -281,9 +281,9 @@ export default function IntentsPage() {
         )}
       </Card>
 
-      <TablePanel title="Intents" pagination={meta && <Pagination page={meta.page} totalPages={totalPages} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setCurrentPage((page) => page - 1)} onNext={() => setCurrentPage((page) => page + 1)} />}>
-        {loading ? (
-          <LoadingState label="Loading intents..." />
+      <TablePanel title="Intents" refreshing={loading && intents.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={totalPages} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setCurrentPage((page) => page - 1)} onNext={() => setCurrentPage((page) => page + 1)} />}>
+        {loading && intents.length === 0 ? (
+          <TableSkeleton columns={6} label="Loading intents..." />
         ) : error ? (
           <ErrorState message={`Error: ${error}`} />
         ) : (

@@ -18,7 +18,7 @@ import type {
 } from "@/features/versions";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, StatusBadge, Table, TableEmpty, TablePanel, Textarea } from "@/shared/components";
+import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel, Textarea } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -163,7 +163,7 @@ export default function CommandsPage() {
   };
 
   if (loading && commands.length === 0) {
-    return <LoadingState label="Loading commands..." />;
+    return <TablePageSkeleton title="ADB Command Management" tableTitle="ADB Commands" columns={7} />;
   }
 
   return (
@@ -172,7 +172,7 @@ export default function CommandsPage() {
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="ADB Commands" pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
+      <TablePanel title="ADB Commands" refreshing={loading && commands.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
       <Table label="ADB command management">
           <thead>
             <tr>
@@ -230,7 +230,7 @@ export default function CommandsPage() {
 
       <Modal open={isModalOpen} title={editingCommand ? "Edit Command" : "New ADB Command"} description={editingCommand ? "Modify this command's execution string and accessibility." : "Define a new command to be executed on the boards."} onClose={() => setIsModalOpen(false)}>
           {!catalog.data ? (
-            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <LoadingState label="Loading form options..." />
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <FormSkeleton fields={5} />
           ) : (
             <form onSubmit={handleSubmit}>
               <FormField label="Command Key (Identifier)" required>
