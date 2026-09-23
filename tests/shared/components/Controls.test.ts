@@ -45,4 +45,12 @@ describe("Select adapter", () => {
     expect(element.props.disabled).toBe(true);
     expect(element.props.options).toEqual([{ value: "archived", label: "Archived", disabled: true }]);
   });
+
+  it("matches native string form values to numeric option values", () => {
+    const element = Select({ children: [option("", "Choose..."), option(1, "North Client")], value: "1", defaultValue: "1" });
+
+    expect(element.props.value).toBe(1);
+    expect(element.props.defaultValue).toBe(1);
+    expect(element.props.options[1].label).toBe("North Client");
+  });
 });
