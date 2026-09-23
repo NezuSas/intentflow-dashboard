@@ -1,9 +1,13 @@
 "use client";
 
+import {
+  authService,
+} from "@/composition";
+
 import React, { useState } from "react";
 import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
-import { authService } from "@/features/auth";
+
 import { getErrorMessage } from "@/utils/errors";
 
 export default function LoginPage() {

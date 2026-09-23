@@ -1,8 +1,12 @@
 "use client";
 
+import {
+  authService,
+} from "@/composition";
+
 import React from "react";
 import styles from "../dashboard.module.css";
-import { authService } from "@/features/auth";
+
 
 export default function SettingsPage() {
   return (

@@ -1,13 +1,3 @@
-import { httpClient } from "@/composition/http";
-import { CommandService } from "./application/CommandService";
-import { CommandApiRepository } from "./infrastructure/CommandApiRepository";
-
-const commandRepository =
-  new CommandApiRepository(httpClient);
-
-export const commandService =
-  new CommandService(commandRepository);
-
 export type {
   ADBCommand,
   CommandPayload,
@@ -18,7 +8,5 @@ export type {
   CommandRepository,
 } from "./domain/CommandRepository";
 
-export {
-  CommandService,
-  CommandApiRepository,
-};
+export { CommandService } from "./application/CommandService";
+export { CommandApiRepository } from "./infrastructure/CommandApiRepository";

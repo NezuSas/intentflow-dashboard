@@ -1,11 +1,14 @@
 "use client";
 
+import {
+  clientService,
+} from "@/composition";
+
 import React, { useEffect, useState } from "react";
 import styles from "../users/users.module.css";
 
-import {
+import type {
   Client,
-  clientService,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 

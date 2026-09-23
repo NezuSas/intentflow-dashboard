@@ -1,19 +1,22 @@
 "use client";
 
+import {
+  boardService,
+  clientService,
+  versionService,
+} from "@/composition";
+
 import React, { useEffect, useState } from "react";
 import styles from "../users/users.module.css";
 
-import {
+import type {
   Board,
-  boardService,
 } from "@/features/boards";
-import {
+import type {
   Client,
-  clientService,
 } from "@/features/clients";
-import {
+import type {
   ADBVersion,
-  versionService,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
 

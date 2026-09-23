@@ -1,27 +1,3 @@
-import { httpClient } from "@/composition/http";
-
-import { SubscriptionService } from "./application/SubscriptionService";
-
-import { SubscriptionPlanApiRepository } from "./infrastructure/SubscriptionPlanApiRepository";
-
-import { ClientSubscriptionApiRepository } from "./infrastructure/ClientSubscriptionApiRepository";
-
-const planRepository =
-  new SubscriptionPlanApiRepository(
-    httpClient
-  );
-
-const clientSubscriptionRepository =
-  new ClientSubscriptionApiRepository(
-    httpClient
-  );
-
-export const subscriptionService =
-  new SubscriptionService(
-    planRepository,
-    clientSubscriptionRepository
-  );
-
 export type {
   SubscriptionPlan,
   ClientSubscription,
@@ -37,8 +13,6 @@ export type {
   ClientSubscriptionRepository,
 } from "./domain/ClientSubscriptionRepository";
 
-export {
-  SubscriptionService,
-  SubscriptionPlanApiRepository,
-  ClientSubscriptionApiRepository,
-};
+export { SubscriptionService } from "./application/SubscriptionService";
+export { SubscriptionPlanApiRepository } from "./infrastructure/SubscriptionPlanApiRepository";
+export { ClientSubscriptionApiRepository } from "./infrastructure/ClientSubscriptionApiRepository";

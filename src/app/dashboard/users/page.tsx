@@ -1,8 +1,14 @@
 "use client";
 
+import {
+  userService,
+} from "@/composition";
+
 import React, { useEffect, useState } from "react";
 import styles from "./users.module.css";
-import { userService, User } from "@/features/users";
+import type {
+  User,
+} from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
 
 export default function UsersPage() {
