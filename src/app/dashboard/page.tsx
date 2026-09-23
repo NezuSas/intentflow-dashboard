@@ -2,18 +2,14 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import styles from "./dashboard.module.css";
-import { authService } from "@/services/authService";
-import { API_URL } from "@/config/api";
-import { Intent } from "@/services/intentService";
+import type { Intent } from "@/features/intents";
+import {
+  dashboardService,
+} from "@/features/dashboard";
+import type {
+  DashboardStats,
+} from "@/features/dashboard";
 import { getErrorMessage } from "@/utils/errors";
-
-interface DashboardStats {
-  total_intents_30d: number;
-  total_users: number;
-  total_clients: number;
-  active_boards: number;
-  recent_intents: Intent[];
-}
 
 export default function DashboardHomePage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -43,14 +39,10 @@ export default function DashboardHomePage() {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await authService.fetchWithAuth(`${API_URL}/intents/stats/`);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch stats (${response.status})`);
-        }
-        
-        const json = await response.json();
-        setStats(json.data || json);
+        const data =
+          await dashboardService.getStats();
+
+        setStats(data);
       } catch (err: unknown) {
         setError(
           getErrorMessage(
