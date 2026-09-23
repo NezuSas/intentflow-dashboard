@@ -79,8 +79,8 @@ function DashboardLayoutContent({
     { name: "Settings", href: "/dashboard/settings", icon: "⚙️" },
   ];
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
   };
 
   const closeMobileMenu = () => {
@@ -161,7 +161,10 @@ function DashboardLayoutContent({
           <div className={styles.divider}></div>
           <button 
             className={styles.logoutButton} 
-            onClick={() => { handleLogout(); closeMobileMenu(); }}
+            onClick={() => {
+              closeMobileMenu();
+              void handleLogout();
+            }}
           >
             <span>🚪</span>
             <span>Logout</span>

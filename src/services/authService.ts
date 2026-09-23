@@ -68,13 +68,43 @@ export const authService = {
     clearTokens();
   },
 
-  logout() {
-    clearTokens();
+  async logout() {
+    const refreshToken = this.getRefreshToken();
+    let accessToken = this.getAccessToken();
 
-    if (isBrowser()) {
-      window.dispatchEvent(
-        new Event("intentflow:logout")
-      );
+    try {
+      if (refreshToken) {
+        const refreshedToken =
+          await this.refreshAccessToken();
+
+        if (refreshedToken) {
+          accessToken = refreshedToken;
+        }
+      }
+
+      if (refreshToken && accessToken) {
+        await fetch(`${API_URL}/auth/logout/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            refresh: refreshToken,
+          }),
+        });
+      }
+    } catch {
+      // El cierre local debe completarse aunque
+      // el backend no esté disponible.
+    } finally {
+      clearTokens();
+
+      if (isBrowser()) {
+        window.dispatchEvent(
+          new Event("intentflow:logout")
+        );
+      }
     }
   },
 
