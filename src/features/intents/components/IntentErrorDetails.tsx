@@ -1,10 +1,15 @@
 import type { Intent } from "../domain/Intent";
 import styles from "./IntentErrorDetails.module.css";
 import { formatGuayaquilDateTime } from "@/shared/format/date";
+import { IntentSourceBadge } from "./IntentSourceBadge";
 
 export function IntentErrorDetails({ intent }: { intent: Intent }) {
   return (
     <div className={styles.details}>
+      <section className={styles.field}>
+        <h3 className={styles.label}>Source</h3>
+        <IntentSourceBadge source={intent.source} />
+      </section>
       <section className={styles.field}>
         <h3 className={styles.label}>Board</h3>
         <p className={styles.value}>

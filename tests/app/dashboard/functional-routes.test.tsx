@@ -60,8 +60,8 @@ const commands = [
   { id: 32, key: "power_off", display_name: "Power Off", description: "Stop device", command: "input keyevent 26", versions: [2], subscription_plans: [22], subscription_plans_detail: [{ id: 22, name: "Premium Plan" }], is_active: false },
 ];
 const intents = [
-  { id: 41, board: { id: 11, name: "Office Board", adb_identifier: "192.0.2.1:5555", client: 1, client_detail: { id: 1, name: "North Client" } }, user: null, command_key: "power_on", resolved_command: "input keyevent 26", version_used: "v1", status: "OK", output: null, executed_at: "2026-09-23T13:00:00Z" },
-  { id: 42, board: { id: 12, name: "Lab Board", adb_identifier: "192.0.2.2:5555", client: 2, client_detail: { id: 2, name: "South Client" } }, user: null, command_key: "power_off", resolved_command: "input keyevent 26", version_used: "v2", status: "ERROR", output: "ADB disconnected", executed_at: "2026-09-23T14:00:00Z" },
+  { id: 41, board: { id: 11, name: "Office Board", adb_identifier: "192.0.2.1:5555", client: 1, client_detail: { id: 1, name: "North Client" } }, user: null, command_key: "power_on", resolved_command: "input keyevent 26", version_used: "v1", status: "OK", source: "google_home", output: null, executed_at: "2026-09-23T13:00:00Z" },
+  { id: 42, board: { id: 12, name: "Lab Board", adb_identifier: "192.0.2.2:5555", client: 2, client_detail: { id: 2, name: "South Client" } }, user: null, command_key: "power_off", resolved_command: "input keyevent 26", version_used: "v2", status: "ERROR", source: "home_assistant", output: "ADB disconnected", executed_at: "2026-09-23T14:00:00Z" },
 ];
 const subscriptions = [
   { id: 51, client_detail: { id: 1, name: "North Client" }, subscription_plan_detail: { id: 21, name: "Starter Plan" }, start_date: "2026-01-01", end_date: null, is_active: true, payment_status: "PAID" },
@@ -190,8 +190,19 @@ describe("dashboard routes with mocked services", () => {
     await render(DashboardPage);
     expect(container.querySelectorAll(".ant-table-tbody tr.ant-table-row")).toHaveLength(2);
     expect(container.textContent).toContain("OK");
+    expect(container.textContent).toContain("Google Home");
+    expect(container.textContent).toContain("Home Assistant");
     await click(container.querySelector('button[aria-label="View error details for intent 42"]'));
     expect(document.body.textContent).toContain("ADB disconnected");
+  });
+
+  it("shows an unknown source for legacy intents without origin data", async () => {
+    mocks.dashboardService.getStats.mockResolvedValue({
+      total_intents_30d: 1, total_users: 1, total_clients: 1, active_boards: 1,
+      recent_intents: [{ ...intents[0], source: undefined }],
+    });
+    await render(DashboardPage);
+    expect(container.textContent).toContain("Unknown");
   });
 
   it("routes every sidebar item through router.push", async () => {
@@ -273,6 +284,8 @@ describe("dashboard routes with mocked services", () => {
   it("filters Intents, opens ERROR details and paginates", async () => {
     mocks.intentService.list.mockResolvedValue({ data: intents, meta: meta(40) });
     await render(IntentsPage);
+    expect(container.textContent).toContain("Google Home");
+    expect(container.textContent).toContain("Home Assistant");
     const filters = container.querySelectorAll(".ant-select");
     expect(filters).toHaveLength(2);
     await openSelect(filters[0]);
