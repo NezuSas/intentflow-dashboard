@@ -5,12 +5,13 @@ import {
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
-import styles from "../users/users.module.css";
+import styles from "@/shared/components/page.module.css";
 
 import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
+import { Button, Pagination } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -186,14 +187,14 @@ export default function ClientsPage() {
           Client Management
         </h1>
 
-        <button
-          className={styles.primaryButton}
+        <Button
+          variant="primary"
           onClick={() =>
             handleOpenModal(null)
           }
         >
           + New Client
-        </button>
+        </Button>
       </div>
 
       {error && (
@@ -310,13 +311,7 @@ export default function ClientsPage() {
       </div>
 
       {meta && (
-        <div className="table-pagination">
-          <span>{meta.count} total · Page {meta.page} of {Math.max(1, Math.ceil(meta.count / meta.pageSize))}</span>
-          <div>
-            <button className={styles.secondaryButton} disabled={!meta.previous} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button>
-            <button className={styles.secondaryButton} disabled={!meta.next} onClick={() => setPage((current) => current + 1)}>Next</button>
-          </div>
-        </div>
+        <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />
       )}
 
       {isModalOpen && (
