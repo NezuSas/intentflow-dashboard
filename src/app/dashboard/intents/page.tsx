@@ -24,7 +24,7 @@ export default function IntentsPage() {
   const [filteredIntents, setFilteredIntents] = useState<Intent[]>([]);
   const [boards, setBoards] = useState<Board[]>([]); // For filter dropdown
   const [clients, setClients] = useState<Client[]>([]); // For client filter
-  
+
   // Filters
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [selectedBoardId, setSelectedBoardId] = useState<string>("");
@@ -97,7 +97,7 @@ export default function IntentsPage() {
   }, [selectedClientId]);
 
   // Get boards filtered by selected client
-  const availableBoards = selectedClientId 
+  const availableBoards = selectedClientId
     ? boards.filter(b => b.client === parseInt(selectedClientId))
     : boards;
 
@@ -123,17 +123,17 @@ export default function IntentsPage() {
 
       {/* FILTERS TOOLBAR */}
       <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-        
+
         {/* Client Filter */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '200px' }}>
             <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Filter by Client</label>
-            <select 
-                value={selectedClientId} 
+            <select
+                value={selectedClientId}
                 onChange={(e) => setSelectedClientId(e.target.value)}
-                style={{ 
-                    padding: '0.75rem 1rem', 
-                    borderRadius: '8px', 
-                    background: 'rgba(15, 23, 42, 0.6)', 
+                style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    background: 'rgba(15, 23, 42, 0.6)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     color: 'white',
                     fontSize: '0.875rem',
@@ -158,14 +158,14 @@ export default function IntentsPage() {
             <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>
                 Filter by Board {selectedClientId && `(${clients.find(c => c.id === parseInt(selectedClientId))?.name || 'Client'})`}
             </label>
-            <select 
-                value={selectedBoardId} 
+            <select
+                value={selectedBoardId}
                 onChange={(e) => setSelectedBoardId(e.target.value)}
                 disabled={!selectedClientId && availableBoards.length === 0}
-                style={{ 
-                    padding: '0.75rem 1rem', 
-                    borderRadius: '8px', 
-                    background: 'rgba(15, 23, 42, 0.6)', 
+                style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    background: 'rgba(15, 23, 42, 0.6)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     color: 'white',
                     fontSize: '0.875rem',
@@ -191,16 +191,16 @@ export default function IntentsPage() {
         {/* Date Filter */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '200px' }}>
             <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Filter by Date</label>
-            <input 
-                type="date" 
+            <input
+                type="date"
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
-                style={{ 
-                    padding: '0.75rem 1rem', 
-                    borderRadius: '8px', 
-                    background: 'rgba(15, 23, 42, 0.6)', 
+                style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    background: 'rgba(15, 23, 42, 0.6)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'white', 
+                    color: 'white',
                     fontSize: '0.875rem',
                     colorScheme: 'dark',
                     cursor: 'pointer',
@@ -211,17 +211,17 @@ export default function IntentsPage() {
                 onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
             />
         </div>
-        
+
         {/* Clear Filters Button */}
         {(selectedClientId || selectedBoardId || filterDate) && (
-            <button 
+            <button
                 onClick={() => { setSelectedClientId(""); setSelectedBoardId(""); setFilterDate(""); }}
-                style={{ 
-                    background: 'transparent', 
-                    border: '1px solid hsl(var(--error) / 0.5)', 
-                    color: 'hsl(var(--error))', 
-                    padding: '0.75rem 1.5rem', 
-                    borderRadius: '8px', 
+                style={{
+                    background: 'transparent',
+                    border: '1px solid hsl(var(--error) / 0.5)',
+                    color: 'hsl(var(--error))',
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '8px',
                     fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -276,7 +276,7 @@ export default function IntentsPage() {
                     <tr key={intent.id} className="nezu-table__row">
                       <td className="nezu-table__cell">#{intent.id}</td>
                       <td className="nezu-table__cell nezu-table__emphasis">{intent.command_key}</td>
-                      
+
                       {/* Board column with name and ADB identifier */}
                       <td className="nezu-table__cell">
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -284,7 +284,7 @@ export default function IntentsPage() {
                               <span className="nezu-table__meta">{intent.board?.adb_identifier}</span>
                           </div>
                       </td>
-                      
+
                       {/* Client column - showing which client owns the board */}
                       <td className="nezu-table__cell">
                           <span className="nezu-table__emphasis">
@@ -292,9 +292,9 @@ export default function IntentsPage() {
                           </span>
                       </td>
 
-                      <td 
+                      <td
                         className="nezu-table__cell"
-                        style={{ 
+                        style={{
                           cursor: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? "pointer" : "default",
                           userSelect: "none"
                         }}
@@ -325,7 +325,7 @@ export default function IntentsPage() {
 
       {/* Error Details Modal */}
       {errorModalOpen && selectedIntent && (
-        <div 
+        <div
           style={{
             position: "fixed",
             top: 0,
@@ -342,7 +342,7 @@ export default function IntentsPage() {
           }}
           onClick={handleCloseErrorModal}
         >
-          <div 
+          <div
             style={{
               background: "hsl(var(--background-elevated))",
               borderRadius: "12px",
@@ -411,7 +411,7 @@ export default function IntentsPage() {
                 <h3 style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: "0.5rem" }}>
                   Command
                 </h3>
-                <code style={{ 
+                <code style={{
                   display: "block",
                   padding: "0.75rem",
                   background: "rgba(0, 0, 0, 0.3)",
@@ -428,7 +428,7 @@ export default function IntentsPage() {
                 <h3 style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: "0.5rem" }}>
                   Error Output
                 </h3>
-                <pre style={{ 
+                <pre style={{
                   margin: 0,
                   padding: "1rem",
                   background: "rgba(220, 38, 38, 0.1)",
