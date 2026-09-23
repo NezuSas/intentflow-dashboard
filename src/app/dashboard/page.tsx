@@ -93,13 +93,13 @@ export default function DashboardHomePage() {
     },
   ] : [];
 
-  const getStatusColor = (status: string) => {
+  const getStatusClass = (status: string) => {
     switch (status.toLowerCase()) {
       case 'ok':
-      case 'success': return 'rgb(34, 197, 94)';
+      case 'success': return 'status-chip--success';
       case 'error':
-      case 'failed': return 'rgb(239, 68, 68)';
-      default: return 'hsl(var(--muted-foreground))';
+      case 'failed': return 'status-chip--error';
+      default: return 'status-chip--neutral';
     }
   };
 
@@ -152,35 +152,35 @@ export default function DashboardHomePage() {
             </h2>
             
             {stats && stats.recent_intents.length > 0 ? (
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-                  <thead>
-                    <tr style={{ background: "rgba(255, 255, 255, 0.03)", borderBottom: "1px solid var(--glass-border)" }}>
-                      <th style={{ padding: "0.75rem", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>Command</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>Board</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>Client</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>Status</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>Time</th>
+              <div className="nezu-table-container">
+                <table className="nezu-table">
+                  <thead className="nezu-table__header">
+                    <tr>
+                      <th>Command</th>
+                      <th>Board</th>
+                      <th>Client</th>
+                      <th>Status</th>
+                      <th>Time</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.recent_intents.map((intent) => (
-                      <tr key={intent.id} style={{ borderBottom: "1px solid var(--glass-border)" }}>
-                        <td style={{ padding: "0.75rem", fontSize: "0.875rem", fontWeight: 500 }}>{intent.command_key}</td>
-                        <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
+                      <tr key={intent.id} className="nezu-table__row">
+                        <td className="nezu-table__cell nezu-table__emphasis">{intent.command_key}</td>
+                        <td className="nezu-table__cell">
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span>{intent.board?.name || "Unknown"}</span>
-                            <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>{intent.board?.adb_identifier}</span>
+                            <span className="nezu-table__meta">{intent.board?.adb_identifier}</span>
                           </div>
                         </td>
-                        <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
-                          <span style={{ color: 'rgb(59, 130, 246)', fontWeight: 500 }}>
+                        <td className="nezu-table__cell">
+                          <span className="nezu-table__emphasis">
                             {intent.board?.client_detail?.name || "Unknown"}
                           </span>
                         </td>
                         <td 
+                        className="nezu-table__cell"
                         style={{ 
-                          padding: "0.75rem",
                           cursor: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? "pointer" : "default",
                           userSelect: "none"
                         }}
@@ -192,20 +192,11 @@ export default function DashboardHomePage() {
                           }
                         }}
                       >
-                        <span style={{ 
-                          fontSize: "0.75rem", 
-                          fontWeight: 600, 
-                          color: getStatusColor(intent.status),
-                          background: `${getStatusColor(intent.status)}20`,
-                          padding: "0.25rem 0.5rem",
-                          borderRadius: "4px",
-                          textTransform: "uppercase",
-                          border: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? `1px solid ${getStatusColor(intent.status)}40` : 'none'
-                        }}>
+                        <span className={`status-chip ${getStatusClass(intent.status)}`}>
                           {intent.status} {intent.status?.toString().toUpperCase().trim() === 'ERROR' && '🔍'}
                         </span>
                       </td>
-                        <td style={{ padding: "0.75rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>
+                        <td className="nezu-table__cell nezu-table__cell--muted">
                           {new Date(intent.executed_at).toLocaleString()}
                         </td>
                       </tr>

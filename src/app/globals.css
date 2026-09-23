@@ -378,6 +378,112 @@ a {
   font-weight: 800;
 }
 
+/* ============================================
+   NEZU TABLES AND STATUS CHIPS
+   ============================================ */
+.nezu-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nezu-table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.nezu-table__header {
+  background: hsl(var(--muted));
+}
+
+.nezu-table th,
+.nezu-table__cell {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.nezu-table th {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nezu-table__row {
+  transition: background-color var(--transition-speed) ease;
+}
+
+.nezu-table__row:hover {
+  background: hsl(var(--muted) / 0.7);
+}
+
+.nezu-table__emphasis {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.nezu-table__meta {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.nezu-table__cell--muted {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.status-chip--success {
+  background: hsl(var(--success) / 0.1);
+  border-color: hsl(var(--success) / 0.25);
+  color: hsl(var(--success));
+}
+
+.status-chip--warning {
+  background: hsl(var(--warning) / 0.1);
+  border-color: hsl(var(--warning) / 0.25);
+  color: hsl(var(--warning));
+}
+
+.status-chip--error {
+  background: hsl(var(--error) / 0.1);
+  border-color: hsl(var(--error) / 0.25);
+  color: hsl(var(--error));
+}
+
+.status-chip--info {
+  background: hsl(var(--info) / 0.1);
+  border-color: hsl(var(--info) / 0.25);
+  color: hsl(var(--info));
+}
+
+.status-chip--active {
+  background: hsl(var(--primary) / 0.1);
+  border-color: hsl(var(--primary) / 0.25);
+  color: hsl(var(--primary));
+}
+
+.status-chip--neutral,
+.status-chip--inactive {
+  background: hsl(var(--muted));
+  border-color: hsl(var(--border));
+  color: var(--text-secondary);
+}
+
 /* Responsive Tables */
 .table-container {
   overflow-x: auto;

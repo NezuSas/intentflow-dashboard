@@ -101,14 +101,14 @@ export default function IntentsPage() {
     ? boards.filter(b => b.client === parseInt(selectedClientId))
     : boards;
 
-  const getStatusColor = (status: string) => {
+  const getStatusClass = (status: string) => {
     switch (status.toLowerCase()) {
       case 'ok':
-      case 'success': return 'rgb(34, 197, 94)';
+      case 'success': return 'status-chip--success';
       case 'error':
-      case 'failed': return 'rgb(239, 68, 68)';
-      case 'pending': return 'rgb(234, 179, 8)';
-      default: return 'hsl(var(--muted-foreground))';
+      case 'failed': return 'status-chip--error';
+      case 'pending': return 'status-chip--warning';
+      default: return 'status-chip--neutral';
     }
   };
 
@@ -218,8 +218,8 @@ export default function IntentsPage() {
                 onClick={() => { setSelectedClientId(""); setSelectedBoardId(""); setFilterDate(""); }}
                 style={{ 
                     background: 'transparent', 
-                    border: '1px solid rgba(239, 68, 68, 0.5)', 
-                    color: 'rgb(239, 68, 68)', 
+                    border: '1px solid hsl(var(--error) / 0.5)', 
+                    color: 'hsl(var(--error))', 
                     padding: '0.75rem 1.5rem', 
                     borderRadius: '8px', 
                     fontSize: '0.875rem',
@@ -229,12 +229,12 @@ export default function IntentsPage() {
                     whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                    e.currentTarget.style.borderColor = 'rgb(239, 68, 68)';
+                    e.currentTarget.style.background = 'hsl(var(--error) / 0.1)';
+                    e.currentTarget.style.borderColor = 'hsl(var(--error))';
                 }}
                 onMouseLeave={(e) => {
                     e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                    e.currentTarget.style.borderColor = 'hsl(var(--error) / 0.5)';
                 }}
             >
                 ✕ Clear Filters
@@ -252,16 +252,16 @@ export default function IntentsPage() {
             Error: {error}
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-              <thead>
-                <tr style={{ background: "rgba(255, 255, 255, 0.03)", borderBottom: "1px solid var(--glass-border)" }}>
-                  <th style={{ padding: "1rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>ID</th>
-                  <th style={{ padding: "1rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>COMMAND</th>
-                  <th style={{ padding: "1rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>BOARD</th>
-                  <th style={{ padding: "1rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>CLIENT</th>
-                  <th style={{ padding: "1rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>STATUS</th>
-                  <th style={{ padding: "1rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>EXECUTED AT</th>
+          <div className="nezu-table-container">
+            <table className="nezu-table">
+              <thead className="nezu-table__header">
+                <tr>
+                  <th>ID</th>
+                  <th>Command</th>
+                  <th>Board</th>
+                  <th>Client</th>
+                  <th>Status</th>
+                  <th>Executed at</th>
                 </tr>
               </thead>
               <tbody>
@@ -273,35 +273,28 @@ export default function IntentsPage() {
                   </tr>
                 ) : (
                   filteredIntents.map((intent) => (
-                    <tr 
-                      key={intent.id} 
-                      style={{ 
-                        borderBottom: "1px solid var(--glass-border)", 
-                        transition: "background 0.2s"
-                      }} 
-                      className="hover-row"
-                    >
-                      <td style={{ padding: "1rem", fontSize: "0.875rem" }}>#{intent.id}</td>
-                      <td style={{ padding: "1rem", fontSize: "0.875rem", fontWeight: 500 }}>{intent.command_key}</td>
+                    <tr key={intent.id} className="nezu-table__row">
+                      <td className="nezu-table__cell">#{intent.id}</td>
+                      <td className="nezu-table__cell nezu-table__emphasis">{intent.command_key}</td>
                       
                       {/* Board column with name and ADB identifier */}
-                      <td style={{ padding: "1rem", fontSize: "0.875rem" }}>
+                      <td className="nezu-table__cell">
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                               <span style={{ fontWeight: 500 }}>{intent.board?.name || "Unknown"}</span>
-                              <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>{intent.board?.adb_identifier}</span>
+                              <span className="nezu-table__meta">{intent.board?.adb_identifier}</span>
                           </div>
                       </td>
                       
                       {/* Client column - showing which client owns the board */}
-                      <td style={{ padding: "1rem", fontSize: "0.875rem" }}>
-                          <span style={{ fontWeight: 500, color: 'rgb(59, 130, 246)' }}>
+                      <td className="nezu-table__cell">
+                          <span className="nezu-table__emphasis">
                               {intent.board?.client_detail?.name || "Unknown"}
                           </span>
                       </td>
 
                       <td 
+                        className="nezu-table__cell"
                         style={{ 
-                          padding: "1rem",
                           cursor: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? "pointer" : "default",
                           userSelect: "none"
                         }}
@@ -313,23 +306,12 @@ export default function IntentsPage() {
                           }
                         }}
                       >
-                        <span style={{ 
-                          fontSize: "0.75rem", 
-                          fontWeight: 600, 
-                          color: getStatusColor(intent.status),
-                          background: `${getStatusColor(intent.status)}20`,
-                          padding: "0.25rem 0.5rem",
-                          borderRadius: "4px",
-                          textTransform: "uppercase",
-                          border: intent.status === 'ERROR' ? `1px solid ${getStatusColor(intent.status)}40` : 'none',
-                          display: 'inline-block',
-                          transition: 'all 0.2s'
-                        }}>
+                        <span className={`status-chip ${getStatusClass(intent.status)}`}>
                           {intent.status} {intent.status === 'ERROR' && '🔍'}
                         </span>
                       </td>
 
-                      <td style={{ padding: "1rem", fontSize: "0.8125rem", color: "hsl(var(--muted-foreground))" }}>
+                      <td className="nezu-table__cell nezu-table__cell--muted">
                         {new Date(intent.executed_at).toLocaleString()}
                       </td>
                     </tr>
@@ -510,11 +492,6 @@ export default function IntentsPage() {
         </div>
       )}
 
-      <style jsx>{`
-        .hover-row:hover {
-          background: rgba(255, 255, 255, 0.02);
-        }
-      `}</style>
     </div>
   );
 }
