@@ -32,6 +32,8 @@ export default function UsersPage() {
     role: "USER"
   });
 
+  // The request intentionally follows only the selected page.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { void fetchUsers(); }, [page]);
 
   const fetchUsers = async () => {
