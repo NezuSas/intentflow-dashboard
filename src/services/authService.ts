@@ -1,145 +1,223 @@
 import { API_URL } from "@/config/api";
 
-let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
+let refreshPromise: Promise<string | null> | null = null;
 
-function subscribeTokenRefresh(callback: (token: string) => void) {
-  refreshSubscribers.push(callback);
-}
+const isBrowser = () => typeof window !== "undefined";
 
-function onTokenRefreshed(token: string) {
-  refreshSubscribers.forEach(callback => callback(token));
-  refreshSubscribers = [];
+function clearTokens() {
+  if (!isBrowser()) return;
+
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
 }
 
 export const authService = {
   async login(email: string, password: string) {
-    console.log('Attempting login at:', `${API_URL}/auth/login/`);
     const response = await fetch(`${API_URL}/auth/login/`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
-      console.error('Login failed with status:', response.status);
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || errorData.message || 'Login failed');
+      throw new Error(
+        errorData.detail ||
+        errorData.message ||
+        "Login failed"
+      );
     }
 
     const data = await response.json();
-    
-    // Store tokens in localStorage
-    if (data.access) {
-      localStorage.setItem('access_token', data.access);
+
+    if (isBrowser()) {
+      if (data.access) {
+        localStorage.setItem("access_token", data.access);
+      }
+
+      if (data.refresh) {
+        localStorage.setItem("refresh_token", data.refresh);
+      }
     }
-    if (data.refresh) {
-      localStorage.setItem('refresh_token', data.refresh);
-    }
-    
+
     return data;
+  },
+
+  getAccessToken(): string | null {
+    return isBrowser()
+      ? localStorage.getItem("access_token")
+      : null;
+  },
+
+  getRefreshToken(): string | null {
+    return isBrowser()
+      ? localStorage.getItem("refresh_token")
+      : null;
+  },
+
+  hasSession(): boolean {
+    return Boolean(
+      this.getAccessToken() ||
+      this.getRefreshToken()
+    );
+  },
+
+  clearSession() {
+    clearTokens();
+  },
+
+  async logout() {
+    const refreshToken = this.getRefreshToken();
+    let accessToken = this.getAccessToken();
+
+    try {
+      if (refreshToken) {
+        const refreshedToken =
+          await this.refreshAccessToken();
+
+        if (refreshedToken) {
+          accessToken = refreshedToken;
+        }
+      }
+
+      if (refreshToken && accessToken) {
+        await fetch(`${API_URL}/auth/logout/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            refresh: refreshToken,
+          }),
+        });
+      }
+    } catch {
+      // El cierre local debe completarse aunque
+      // el backend no esté disponible.
+    } finally {
+      clearTokens();
+
+      if (isBrowser()) {
+        window.dispatchEvent(
+          new Event("intentflow:logout")
+        );
+      }
+    }
   },
 
   async refreshAccessToken(): Promise<string | null> {
     const refreshToken = this.getRefreshToken();
-    
+
     if (!refreshToken) {
-      console.warn('[AuthService] No refresh token available');
       return null;
     }
 
-    if (isRefreshing) {
-      // If already refreshing, wait for the new token
-      return new Promise((resolve) => {
-        subscribeTokenRefresh((token: string) => {
-          resolve(token);
-        });
-      });
+    // Si varias peticiones reciben 401 al mismo tiempo,
+    // todas esperan la misma renovación.
+    if (refreshPromise) {
+      return refreshPromise;
     }
 
-    isRefreshing = true;
+    refreshPromise = (async () => {
+      try {
+        const response = await fetch(`${API_URL}/auth/refresh/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            refresh: refreshToken,
+          }),
+        });
 
-    try {
-      console.log('[AuthService] Refreshing access token...');
-      const response = await fetch(`${API_URL}/auth/refresh/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refresh: refreshToken }),
-      });
+        if (!response.ok) {
+          clearTokens();
+          return null;
+        }
 
-      if (!response.ok) {
-        console.error('[AuthService] Token refresh failed:', response.status);
-        // Refresh token is invalid or expired, logout
-        this.logout();
+        const data = await response.json();
+
+        if (!data.access) {
+          clearTokens();
+          return null;
+        }
+
+        if (isBrowser()) {
+          localStorage.setItem(
+            "access_token",
+            data.access
+          );
+        }
+
+        return data.access as string;
+      } catch {
+        clearTokens();
         return null;
       }
+    })();
 
-      const data = await response.json();
-      
-      if (data.access) {
-        localStorage.setItem('access_token', data.access);
-        console.log('[AuthService] Access token refreshed successfully');
-        onTokenRefreshed(data.access);
-        return data.access;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('[AuthService] Token refresh error:', error);
-      this.logout();
-      return null;
+    try {
+      return await refreshPromise;
     } finally {
-      isRefreshing = false;
+      refreshPromise = null;
     }
   },
 
-  logout() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    window.location.href = '/login';
-  },
+  async fetchWithAuth(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    let token = this.getAccessToken();
 
-  getAccessToken() {
-    return typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  },
+    // Si no existe access token pero sí refresh,
+    // intentar recuperar la sesión antes de consultar la API.
+    if (!token && this.getRefreshToken()) {
+      token = await this.refreshAccessToken();
+    }
 
-  getRefreshToken() {
-    return typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
-  },
+    const createHeaders = (
+      accessToken: string | null
+    ) => {
+      const headers = new Headers(
+        options.headers || {}
+      );
 
-  /**
-   * Wrapper for fetch that automatically handles token refresh on 401 errors
-   */
-  async fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-    const token = this.getAccessToken();
-    
-    // Add Authorization header
-    const headers = {
-      ...options.headers,
-      'Authorization': `Bearer ${token}`,
+      if (accessToken) {
+        headers.set(
+          "Authorization",
+          `Bearer ${accessToken}`
+        );
+      }
+
+      return headers;
     };
 
-    let response = await fetch(url, { ...options, headers });
+    let response = await fetch(url, {
+      ...options,
+      headers: createHeaders(token),
+    });
 
-    // If 401, try to refresh token and retry
-    if (response.status === 401) {
-      console.log('[AuthService] 401 detected, attempting token refresh...');
-      const newToken = await this.refreshAccessToken();
-      
+    // Access token vencido.
+    if (
+      response.status === 401 &&
+      this.getRefreshToken()
+    ) {
+      const newToken =
+        await this.refreshAccessToken();
+
       if (newToken) {
-        // Retry with new token
-        const retryHeaders = {
-          ...options.headers,
-          'Authorization': `Bearer ${newToken}`,
-        };
-        response = await fetch(url, { ...options, headers: retryHeaders });
+        response = await fetch(url, {
+          ...options,
+          headers: createHeaders(newToken),
+        });
+      } else {
+        this.logout();
       }
     }
 
     return response;
-  }
+  },
 };

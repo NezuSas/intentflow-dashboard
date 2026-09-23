@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import styles from "./dashboard.module.css";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeProvider";
+import { authService } from "@/services/authService";
 
 function DashboardLayoutContent({
   children,
@@ -12,13 +13,60 @@ function DashboardLayoutContent({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
-  // Only access theme after component mounts
+  const [authChecked, setAuthChecked] = useState(false);
+
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    let cancelled = false;
+
+    const redirectToLogin = () => {
+      router.replace("/login");
+    };
+
+    window.addEventListener(
+      "intentflow:logout",
+      redirectToLogin
+    );
+
+    const validateSession = async () => {
+      if (!authService.hasSession()) {
+        router.replace("/login");
+        return;
+      }
+
+      // Una sesión puede conservar únicamente el refresh token.
+      if (
+        !authService.getAccessToken() &&
+        authService.getRefreshToken()
+      ) {
+        const token =
+          await authService.refreshAccessToken();
+
+        if (!token) {
+          router.replace("/login");
+          return;
+        }
+      }
+
+      if (!cancelled) {
+        setMounted(true);
+        setAuthChecked(true);
+      }
+    };
+
+    validateSession();
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener(
+        "intentflow:logout",
+        redirectToLogin
+      );
+    };
+  }, [router]);
 
   const navItems = [
     { name: "Overview", href: "/dashboard", icon: "📊" },
@@ -31,15 +79,28 @@ function DashboardLayoutContent({
     { name: "Settings", href: "/dashboard/settings", icon: "⚙️" },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    await authService.logout();
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+
+  if (!authChecked) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        Validating session...
+      </div>
+    );
+  }
 
   return (
     <div className={styles.layout}>
@@ -100,7 +161,10 @@ function DashboardLayoutContent({
           <div className={styles.divider}></div>
           <button 
             className={styles.logoutButton} 
-            onClick={() => { handleLogout(); closeMobileMenu(); }}
+            onClick={() => {
+              closeMobileMenu();
+              void handleLogout();
+            }}
           >
             <span>🚪</span>
             <span>Logout</span>

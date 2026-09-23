@@ -14,10 +14,8 @@ export interface User {
 
 export const userService = {
   async getUsers(): Promise<User[]> {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/auth/users/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/auth/users/`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
       },
     });
 
@@ -30,11 +28,9 @@ export const userService = {
   },
 
   async toggleActive(userId: number) {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/auth/users/${userId}/toggle-active/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/auth/users/${userId}/toggle-active/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
       },
     });
 
@@ -47,11 +43,9 @@ export const userService = {
   },
 
   async changeRole(userId: number, role: string) {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/auth/users/${userId}/change-role/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/auth/users/${userId}/change-role/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ role }),
@@ -66,11 +60,9 @@ export const userService = {
   },
 
   async updateUser(userId: number, data: Partial<User>) {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/auth/users/${userId}/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/auth/users/${userId}/`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
@@ -85,11 +77,9 @@ export const userService = {
   },
 
   async deleteUser(userId: number) {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/auth/users/${userId}/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/auth/users/${userId}/`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
       },
     });
 

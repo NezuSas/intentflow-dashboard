@@ -13,10 +13,8 @@ export interface ADBCommand {
 
 export const commandService = {
   async getCommands(): Promise<ADBCommand[]> {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/adb-commands/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/adb-commands/`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
       },
     });
 
@@ -28,12 +26,10 @@ export const commandService = {
     return json.data || [];
   },
 
-  async createCommand(data: any) {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/adb-commands/`, {
+  async createCommand(data: Record<string, unknown>) {
+    const response = await authService.fetchWithAuth(`${API_URL}/adb-commands/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
@@ -47,12 +43,10 @@ export const commandService = {
     return await response.json();
   },
 
-  async updateCommand(commandId: number, data: any) {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/adb-commands/${commandId}/`, {
+  async updateCommand(commandId: number, data: Record<string, unknown>) {
+    const response = await authService.fetchWithAuth(`${API_URL}/adb-commands/${commandId}/`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
@@ -67,11 +61,9 @@ export const commandService = {
   },
 
   async deleteCommand(commandId: number) {
-    const token = authService.getAccessToken();
-    const response = await fetch(`${API_URL}/adb-commands/${commandId}/`, {
+    const response = await authService.fetchWithAuth(`${API_URL}/adb-commands/${commandId}/`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
       },
     });
 
