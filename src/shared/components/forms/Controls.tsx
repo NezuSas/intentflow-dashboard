@@ -23,8 +23,11 @@ export const normalizeSelectOptions = (children: ReactNode) =>
     return [{ value: child.props.value, label: child.props.children, disabled: child.props.disabled }];
   });
 
-export const Select = ({ children, onChange, ...props }: SelectHTMLAttributes<HTMLSelectElement>) => {
+export const Select = ({ children, onChange, value, defaultValue, ...props }: SelectHTMLAttributes<HTMLSelectElement>) => {
   const options = normalizeSelectOptions(children);
-  return <AntSelect {...(props as unknown as SelectProps)} options={options} onChange={(value) => onChange?.({ target: { value: String(value) } } as ChangeEvent<HTMLSelectElement>)} />;
+  const matchOptionValue = (selected: typeof value) => selected === undefined
+    ? undefined
+    : options.find((option) => String(option.value) === String(selected))?.value ?? selected;
+  return <AntSelect {...(props as unknown as SelectProps)} value={matchOptionValue(value)} defaultValue={matchOptionValue(defaultValue)} options={options} onChange={(selected) => onChange?.({ target: { value: String(selected) } } as ChangeEvent<HTMLSelectElement>)} />;
 };
 export function FormField({ label, error, required, children, className = "" }: { label: string; error?: string; required?: boolean; children: ReactNode; className?: string }) { return <Form.Item className={className} label={label} required={required} validateStatus={error ? "error" : undefined} help={error}>{children}</Form.Item>; }
