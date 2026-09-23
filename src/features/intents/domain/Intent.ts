@@ -19,6 +19,8 @@ export interface IntentUser {
   [key: string]: unknown;
 }
 
+export type IntentSource = "unknown" | "google_home" | "home_assistant" | "api";
+
 export interface Intent {
   id: number;
   board: IntentBoard;
@@ -27,6 +29,7 @@ export interface Intent {
   resolved_command: string;
   version_used: string;
   status: string;
+  source?: IntentSource | null;
   output: string | null;
   executed_at: string;
 }

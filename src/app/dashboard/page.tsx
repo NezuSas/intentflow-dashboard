@@ -9,6 +9,7 @@ import styles from "./dashboard.module.css";
 import {
   IntentErrorDetails,
   IntentStatusBadge,
+  IntentSourceBadge,
   type Intent,
 } from "@/features/intents";
 
@@ -106,7 +107,7 @@ export default function DashboardHomePage() {
         <>
           <CardGridSkeleton count={4} />
           <TablePanel title="Recent Activity">
-            <TableSkeleton columns={5} label="Loading recent activity..." />
+            <TableSkeleton columns={6} label="Loading recent activity..." />
           </TablePanel>
         </>
       ) : error ? (
@@ -136,6 +137,7 @@ export default function DashboardHomePage() {
                       <th>Command</th>
                       <th>Board</th>
                       <th>Client</th>
+                      <th>Source</th>
                       <th>Status</th>
                       <th>Time</th>
                     </tr>
@@ -155,6 +157,7 @@ export default function DashboardHomePage() {
                             {intent.board?.client_detail?.name || "Unknown"}
                           </strong>
                         </td>
+                        <td><IntentSourceBadge source={intent.source} /></td>
                         <td><IntentStatusBadge intent={intent} onShowError={handleShowError} /></td>
                         <td>
                           {formatGuayaquilDateTime(intent.executed_at)}

@@ -16,6 +16,7 @@ import styles from "../dashboard.module.css";
 import {
   IntentErrorDetails,
   IntentStatusBadge,
+  IntentSourceBadge,
   type Intent,
   type IntentListQuery,
 } from "@/features/intents";
@@ -281,7 +282,7 @@ export default function IntentsPage() {
 
       <TablePanel title="Intents" refreshing={loading && intents.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setCurrentPage} />}>
         {loading && intents.length === 0 ? (
-          <TableSkeleton columns={6} label="Loading intents..." />
+          <TableSkeleton columns={7} label="Loading intents..." />
         ) : error ? (
           <ErrorState message={`Error: ${error}`} />
         ) : (
@@ -292,6 +293,7 @@ export default function IntentsPage() {
                   <th>Command</th>
                   <th>Board</th>
                   <th>Client</th>
+                  <th>Source</th>
                   <th>Status</th>
                   <th>Executed at</th>
                 </tr>
@@ -299,7 +301,7 @@ export default function IntentsPage() {
               <tbody>
                 {intents.length === 0 ? (
                   <tr>
-                    <TableEmpty colSpan={6} label="No intents found matching criteria." />
+                    <TableEmpty colSpan={7} label="No intents found matching criteria." />
                   </tr>
                 ) : (
                   intents.map((intent) => (
@@ -322,6 +324,7 @@ export default function IntentsPage() {
                           </strong>
                       </td>
 
+                      <td><IntentSourceBadge source={intent.source} /></td>
                       <td><IntentStatusBadge intent={intent} onShowError={handleShowError} /></td>
 
                       <td>
