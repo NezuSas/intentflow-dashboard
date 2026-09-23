@@ -15,7 +15,7 @@ import type {
   DashboardStats,
 } from "@/features/dashboard";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Card, ErrorState, LoadingState, Modal, PageHeader, StatusBadge, Table, TablePanel } from "@/shared/components";
+import { Button, Card, CardGridSkeleton, ErrorState, Modal, PageHeader, StatusBadge, Table, TablePanel, TableSkeleton } from "@/shared/components";
 import { CloudServerOutlined, FileTextOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 
 export default function DashboardHomePage() {
@@ -111,7 +111,12 @@ export default function DashboardHomePage() {
       <PageHeader title="Dashboard Overview" description="Monitor your system’s performance and activity." />
 
       {loading ? (
-        <LoadingState label="Loading dashboard..." />
+        <>
+          <CardGridSkeleton count={4} />
+          <TablePanel title="Recent Activity">
+            <TableSkeleton columns={5} label="Loading recent activity..." />
+          </TablePanel>
+        </>
       ) : error ? (
         <ErrorState message={`Error: ${error}`} />
       ) : (

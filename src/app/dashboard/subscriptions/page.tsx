@@ -16,7 +16,7 @@ import type {
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
 import type { PageMeta } from "@/core/Pagination";
-import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel, Textarea } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel, TableSkeleton, Textarea } from "@/shared/components";
 
 const PAGE_SIZE = 20;
 
@@ -253,8 +253,8 @@ export default function SubscriptionsPage() {
       {subscriptionsError && <ErrorState message={subscriptionsError} />}
 
       <section style={{ marginBottom: '3rem' }}>
-        <TablePanel title="Available Plans" pagination={plansMeta && <Pagination page={plansMeta.page} totalPages={Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))} totalCount={plansMeta.count} hasPrevious={Boolean(plansMeta.previous)} hasNext={Boolean(plansMeta.next)} onPrevious={() => setPlansPage((page) => Math.max(1, page - 1))} onNext={() => setPlansPage((page) => page + 1)} />}>
-        {plansLoading && plans.length === 0 ? <LoadingState label="Loading plans..." /> : (
+        <TablePanel title="Available Plans" refreshing={plansLoading && plans.length > 0} pagination={plansMeta && <Pagination page={plansMeta.page} totalPages={Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))} totalCount={plansMeta.count} hasPrevious={Boolean(plansMeta.previous)} hasNext={Boolean(plansMeta.next)} onPrevious={() => setPlansPage((page) => Math.max(1, page - 1))} onNext={() => setPlansPage((page) => page + 1)} />}>
+        {plansLoading && plans.length === 0 ? <TableSkeleton columns={6} label="Loading plans..." /> : (
         <Table label="Available plans">
             <thead>
               <tr>
@@ -297,8 +297,8 @@ export default function SubscriptionsPage() {
       </section>
 
       <section>
-        <TablePanel title="Client Subscriptions" pagination={subscriptionsMeta && <Pagination page={subscriptionsMeta.page} totalPages={Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))} totalCount={subscriptionsMeta.count} hasPrevious={Boolean(subscriptionsMeta.previous)} hasNext={Boolean(subscriptionsMeta.next)} onPrevious={() => setSubscriptionsPage((page) => Math.max(1, page - 1))} onNext={() => setSubscriptionsPage((page) => page + 1)} />}>
-        {subscriptionsLoading && clientSubs.length === 0 ? <LoadingState label="Loading client subscriptions..." /> : (
+        <TablePanel title="Client Subscriptions" refreshing={subscriptionsLoading && clientSubs.length > 0} pagination={subscriptionsMeta && <Pagination page={subscriptionsMeta.page} totalPages={Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))} totalCount={subscriptionsMeta.count} hasPrevious={Boolean(subscriptionsMeta.previous)} hasNext={Boolean(subscriptionsMeta.next)} onPrevious={() => setSubscriptionsPage((page) => Math.max(1, page - 1))} onNext={() => setSubscriptionsPage((page) => page + 1)} />}>
+        {subscriptionsLoading && clientSubs.length === 0 ? <TableSkeleton columns={6} label="Loading client subscriptions..." /> : (
         <Table label="Client subscriptions">
             <thead>
               <tr>
@@ -370,7 +370,7 @@ export default function SubscriptionsPage() {
       {activeModal === 'SUBSCRIPTION' && (
         <Modal open title={editingItem ? "Update Subscription" : "Assign Plan to Client"} description={editingItem ? "Modify an existing client's access level and payment status." : "Grant a specific client access to a subscription plan."} onClose={() => setActiveModal(null)}>
           {!catalog.data ? (
-            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <LoadingState label="Loading form options..." />
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <FormSkeleton fields={4} />
           ) : (
             <form onSubmit={handleSubSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>

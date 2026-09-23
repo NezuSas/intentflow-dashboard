@@ -9,7 +9,7 @@ import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -132,7 +132,7 @@ export default function UsersPage() {
   };
 
   if (loading && users.length === 0) {
-    return <Page><LoadingState label="Loading users..." /></Page>;
+    return <TablePageSkeleton title="User Management" tableTitle="Users" columns={7} />;
   }
 
   return (
@@ -141,7 +141,7 @@ export default function UsersPage() {
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="Users" pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
+      <TablePanel title="Users" refreshing={loading && users.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
       <Table label="User management">
           <thead>
             <tr>

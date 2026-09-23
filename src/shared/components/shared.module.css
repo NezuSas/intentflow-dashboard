@@ -3,5 +3,15 @@
 .pageHeader { margin-bottom: 20px; }
 .state { min-height: 160px; justify-content: center; }
 .tablePanel { width: 100%; }
-.tablePanelTitle { margin: 0 0 24px; font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+.tablePanelHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; margin-bottom: 24px; }
+.tablePanelTitle { margin: 0; font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+.tablePanelRefresh { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 12px; }
 .tablePanelPagination { display: flex; justify-content: flex-end; margin-top: 20px; }
+.skeletonTable { width: 100%; overflow-x: auto; }
+.skeletonRow { display: grid; gap: 12px; align-items: center; min-height: 52px; padding: 10px 12px; border-bottom: 1px solid hsl(var(--border) / .45); }
+.skeletonHeader { min-height: 40px; background: hsl(var(--muted) / .7); border-radius: 10px 10px 0 0; }
+.skeletonRow :global(.ant-skeleton-input) { max-width: 100%; }
+.skeletonCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.skeletonCard { min-height: 148px; }
+.skeletonForm { display: grid; gap: 20px; }
+.skeletonField { display: grid; gap: 8px; }
