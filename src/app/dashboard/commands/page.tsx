@@ -2,6 +2,8 @@
 
 import {
   commandService,
+  subscriptionService,
+  versionService,
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
@@ -9,10 +11,18 @@ import styles from "../users/users.module.css";
 import type {
   ADBCommand,
 } from "@/features/commands";
+import type {
+  SubscriptionPlan,
+} from "@/features/subscriptions";
+import type {
+  ADBVersion,
+} from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
 
 export default function CommandsPage() {
   const [commands, setCommands] = useState<ADBCommand[]>([]);
+  const [versions, setVersions] = useState<ADBVersion[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,12 +33,34 @@ export default function CommandsPage() {
     key: "",
     command: "",
     description: "",
+    versions: [] as number[],
+    subscription_plans: [] as number[],
     is_active: true
   });
 
   useEffect(() => {
-    fetchCommands();
+    void fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [commandsData, versionsData, plansData] =
+        await Promise.all([
+          commandService.getCommands(),
+          versionService.getVersions(),
+          subscriptionService.getPlans(),
+        ]);
+      setCommands(commandsData);
+      setVersions(versionsData);
+      setPlans(plansData);
+      setError(null);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchCommands = async () => {
     try {
@@ -50,6 +82,8 @@ export default function CommandsPage() {
         key: command.key,
         command: command.command,
         description: command.description || "",
+        versions: command.versions ?? [],
+        subscription_plans: command.subscription_plans ?? [],
         is_active: command.is_active
       });
     } else {
@@ -58,6 +92,8 @@ export default function CommandsPage() {
         key: "",
         command: "",
         description: "",
+        versions: [],
+        subscription_plans: [],
         is_active: true
       });
     }
@@ -66,6 +102,23 @@ export default function CommandsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.versions.length === 0) {
+      alert(
+        "Select at least one ADB version."
+      );
+      return;
+    }
+
+    if (
+      formData.subscription_plans.length === 0
+    ) {
+      alert(
+        "Select at least one subscription plan."
+      );
+      return;
+    }
+
     try {
       if (editingCommand) {
         await commandService.updateCommand(editingCommand.id, formData);
@@ -214,6 +267,82 @@ export default function CommandsPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Available Versions</label>
+                <div style={{ display: "grid", gap: "0.5rem" }}>
+                  {versions.length === 0 ? (
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+                      No versions available.
+                    </span>
+                  ) : (
+                    versions.map((version) => (
+                      <label
+                        key={version.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          color: "var(--text)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.versions.includes(version.id)}
+                          onChange={(event) => {
+                            const isChecked = event.target.checked;
+                            setFormData((current) => ({
+                              ...current,
+                              versions: isChecked
+                                ? [...current.versions, version.id]
+                                : current.versions.filter((id) => id !== version.id),
+                            }));
+                          }}
+                        />
+                        {version.code}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Subscription Plans</label>
+                <div style={{ display: "grid", gap: "0.5rem" }}>
+                  {plans.length === 0 ? (
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+                      No subscription plans available.
+                    </span>
+                  ) : (
+                    plans.map((plan) => (
+                      <label
+                        key={plan.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          color: "var(--text)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.subscription_plans.includes(plan.id)}
+                          onChange={(event) => {
+                            const isChecked = event.target.checked;
+                            setFormData((current) => ({
+                              ...current,
+                              subscription_plans: isChecked
+                                ? [...current.subscription_plans, plan.id]
+                                : current.subscription_plans.filter((id) => id !== plan.id),
+                            }));
+                          }}
+                        />
+                        {plan.name}
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
               <div className={styles.modalActions}>
                 <button type="button" className={styles.secondaryButton} onClick={() => setIsModalOpen(false)}>Cancel</button>
