@@ -10,6 +10,7 @@ import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
+import { Button, Pagination } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -139,17 +140,11 @@ export default function UsersPage() {
     <div className={styles.container}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 className={styles.title} style={{ marginBottom: 0 }}>User Management</h1>
-        <button className={styles.primaryButton} onClick={() => handleOpenModal(null)}>+ New User</button>
+        <Button variant="primary" onClick={() => handleOpenModal(null)}>+ New User</Button>
       </div>
 
       {meta && (
-        <div className="table-pagination">
-          <span>{meta.count} total · Page {meta.page} of {Math.max(1, Math.ceil(meta.count / meta.pageSize))}</span>
-          <div>
-            <button className={styles.secondaryButton} disabled={!meta.previous} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button>
-            <button className={styles.secondaryButton} disabled={!meta.next} onClick={() => setPage((current) => current + 1)}>Next</button>
-          </div>
-        </div>
+        <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />
       )}
 
       {error && <div className="error-card" style={{ marginBottom: '1rem' }}>{error}</div>}
