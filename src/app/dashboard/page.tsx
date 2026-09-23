@@ -15,6 +15,7 @@ import type {
 } from "@/features/dashboard";
 import { getErrorMessage } from "@/utils/errors";
 import { Button, Card, ErrorState, LoadingState, Modal, PageHeader, StatusBadge, Table } from "@/shared/components";
+import { CloudServerOutlined, FileTextOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 
 export default function DashboardHomePage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -68,28 +69,28 @@ export default function DashboardHomePage() {
       label: "Intents (30d)", 
       value: stats.total_intents_30d.toLocaleString(), 
       change: "Last 30 days", 
-      icon: "⚡",
+      icon: <FileTextOutlined />,
       tone: "primary"
     },
     { 
       label: "Active Clients", 
       value: stats.total_clients.toLocaleString(), 
       change: "Total active", 
-      icon: "🏢",
+      icon: <TeamOutlined />,
       tone: "success"
     },
     { 
       label: "Active Boards", 
       value: stats.active_boards.toLocaleString(), 
       change: "Connected", 
-      icon: "📱",
+      icon: <CloudServerOutlined />,
       tone: "accent"
     },
     { 
       label: "Total Users", 
       value: stats.total_users.toLocaleString(), 
       change: "Active users", 
-      icon: "👥",
+      icon: <UserOutlined />,
       tone: "info"
     },
   ] : [];
@@ -185,9 +186,7 @@ export default function DashboardHomePage() {
                   </tbody>
               </Table>
             ) : (
-              <div style={{ color: "hsl(var(--muted-foreground))", textAlign: "center", marginTop: "4rem" }}>
-                No recent activity to display.
-              </div>
+              <div style={{ textAlign: "center", marginTop: "4rem" }}>No recent activity to display.</div>
             )}
           </Card>
         </>

@@ -1,2 +1,6 @@
-import { Button } from "../actions/Button";import styles from "../shared.module.css";
-export function Pagination({page,totalPages,totalCount,hasNext,hasPrevious,onNext,onPrevious,disabled=false}:{page:number;totalPages:number;totalCount:number;hasNext:boolean;hasPrevious:boolean;onNext:()=>void;onPrevious:()=>void;disabled?:boolean}){return <nav className={styles.pagination} aria-label="Pagination"><span>{totalCount} total · Page {page} of {Math.max(1,totalPages)}</span><div><Button type="button" onClick={onPrevious} disabled={disabled||!hasPrevious}>Previous</Button><Button type="button" onClick={onNext} disabled={disabled||!hasNext}>Next</Button></div></nav>}
+import { Pagination as AntPagination } from "antd";
+
+export function Pagination({ page, totalPages, totalCount, hasNext, hasPrevious, onNext, onPrevious, disabled = false }: { page: number; totalPages: number; totalCount: number; hasNext: boolean; hasPrevious: boolean; onNext: () => void; onPrevious: () => void; disabled?: boolean }) {
+  const safeTotalPages = Math.max(1, totalPages);
+  return <AntPagination current={page} total={totalCount} pageSize={Math.max(1, Math.ceil(totalCount / safeTotalPages))} showSizeChanger={false} disabled={disabled} onChange={(nextPage) => { if (nextPage > page && hasNext) onNext(); if (nextPage < page && hasPrevious) onPrevious(); }} />;
+}

@@ -6,6 +6,8 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { ConfigProvider } from "antd";
+import { getNezuTheme } from "@/shared/design-system/theme";
 
 type Theme = "light" | "dark";
 
@@ -36,10 +38,8 @@ export function ThemeProvider({
     useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.setAttribute(
-      "data-theme",
-      theme
-    );
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.classList.toggle("dark", theme === "dark");
 
     localStorage.setItem("theme", theme);
   }, [theme]);
@@ -51,10 +51,8 @@ export function ThemeProvider({
   };
 
   return (
-    <ThemeContext.Provider
-      value={{ theme, toggleTheme }}
-    >
-      {children}
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <ConfigProvider theme={getNezuTheme(theme === "dark")}>{children}</ConfigProvider>
     </ThemeContext.Provider>
   );
 }

@@ -1,217 +1,69 @@
 "use client";
 
-import {
-  authService,
-  authTokenManager,
-} from "@/composition";
-
-import React, { useState, useEffect } from "react";
-import styles from "./dashboard.module.css";
+import { authService, authTokenManager } from "@/composition";
+import { useTheme } from "@/contexts/ThemeProvider";
+import { AppstoreOutlined, CloudServerOutlined, DashboardOutlined, FileTextOutlined, LogoutOutlined, MacCommandOutlined, MenuFoldOutlined, MenuUnfoldOutlined, MoonOutlined, SettingOutlined, SunOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
+import { Button, Flex, Layout, Menu, Tooltip, Typography, theme } from "antd";
+import type { MenuProps } from "antd";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ThemeProvider, useTheme } from "@/contexts/ThemeProvider";
+import React, { useEffect, useMemo, useState } from "react";
 
+const { Sider, Content } = Layout;
 
-function DashboardLayoutContent({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const { theme: currentTheme, toggleTheme } = useTheme();
+  const { token } = theme.useToken();
+  const [collapsed, setCollapsed] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-
-    const redirectToLogin = () => {
-      router.replace("/login");
-    };
-
-    window.addEventListener(
-      "intentflow:logout",
-      redirectToLogin
-    );
-
+    const redirectToLogin = () => router.replace("/login");
+    window.addEventListener("intentflow:logout", redirectToLogin);
     const validateSession = async () => {
-      if (!authTokenManager.hasSession()) {
-        router.replace("/login");
-        return;
+      if (!authTokenManager.hasSession()) return redirectToLogin();
+      if (!authTokenManager.getAccessToken() && authTokenManager.getRefreshToken()) {
+        const token = await authTokenManager.refreshAccessToken();
+        if (!token) return redirectToLogin();
       }
-
-      // Una sesión puede conservar únicamente el refresh token.
-      if (
-        !authTokenManager.getAccessToken() &&
-        authTokenManager.getRefreshToken()
-      ) {
-        const token =
-          await authTokenManager.refreshAccessToken();
-
-        if (!token) {
-          router.replace("/login");
-          return;
-        }
-      }
-
-      if (!cancelled) {
-        setMounted(true);
-        setAuthChecked(true);
-      }
+      if (!cancelled) setAuthChecked(true);
     };
-
-    validateSession();
-
-    return () => {
-      cancelled = true;
-      window.removeEventListener(
-        "intentflow:logout",
-        redirectToLogin
-      );
-    };
+    void validateSession();
+    return () => { cancelled = true; window.removeEventListener("intentflow:logout", redirectToLogin); };
   }, [router]);
 
-  const navItems = [
-    { name: "Overview", href: "/dashboard", icon: "📊" },
-    { name: "Intents", href: "/dashboard/intents", icon: "🧠" },
-    { name: "Users", href: "/dashboard/users", icon: "👥" },
-    { name: "Clients", href: "/dashboard/clients", icon: "🏢" },
-    { name: "Boards", href: "/dashboard/boards", icon: "📟" },
-    { name: "Commands", href: "/dashboard/commands", icon: "⌨️" },
-    { name: "Subscriptions", href: "/dashboard/subscriptions", icon: "💳" },
-    { name: "Settings", href: "/dashboard/settings", icon: "⚙️" },
-  ];
+  const items = useMemo<MenuProps["items"]>(() => [
+    { key: "/dashboard", icon: <DashboardOutlined />, label: <Link href="/dashboard">Overview</Link> },
+    { key: "/dashboard/intents", icon: <FileTextOutlined />, label: <Link href="/dashboard/intents">Intents</Link> },
+    { key: "/dashboard/users", icon: <UserOutlined />, label: <Link href="/dashboard/users">Users</Link> },
+    { key: "/dashboard/clients", icon: <TeamOutlined />, label: <Link href="/dashboard/clients">Clients</Link> },
+    { key: "/dashboard/boards", icon: <CloudServerOutlined />, label: <Link href="/dashboard/boards">Boards</Link> },
+    { key: "/dashboard/commands", icon: <MacCommandOutlined />, label: <Link href="/dashboard/commands">Commands</Link> },
+    { key: "/dashboard/subscriptions", icon: <AppstoreOutlined />, label: <Link href="/dashboard/subscriptions">Subscriptions</Link> },
+    { key: "/dashboard/settings", icon: <SettingOutlined />, label: <Link href="/dashboard/settings">Settings</Link> },
+  ], []);
 
-  const handleLogout = async () => {
-    await authService.logout();
-  };
+  if (!authChecked) return <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>Validating session...</Flex>;
 
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
-  if (!authChecked) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        Validating session...
+  return <Layout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
+    <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} breakpoint="md" collapsedWidth={64} width={248} trigger={null} theme={currentTheme === "dark" ? "dark" : "light"} style={{ background: token.colorBgContainer, borderInlineEnd: `1px solid ${token.colorBorderSecondary}` }}>
+      <Flex align="center" justify="space-between" style={{ height: 64, padding: "0 12px", borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
+        <Typography.Text strong style={{ color: token.colorText, whiteSpace: "nowrap", fontSize: 16, overflow: "hidden" }}>{collapsed ? "N" : "NEZU · IntentFlow"}</Typography.Text>
+        <Flex gap={0}>
+          {!collapsed && <Tooltip title={currentTheme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}><Button type="text" shape="circle" aria-label="Toggle theme" icon={currentTheme === "dark" ? <SunOutlined /> : <MoonOutlined />} onClick={toggleTheme} /></Tooltip>}
+          <Tooltip title={collapsed ? "Expandir navegación" : "Contraer navegación"}><Button type="text" shape="circle" aria-label="Toggle navigation" icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} onClick={() => setCollapsed((value) => !value)} /></Tooltip>
+        </Flex>
+      </Flex>
+      <Menu theme={currentTheme === "dark" ? "dark" : "light"} mode="inline" selectedKeys={[pathname]} items={items} style={{ background: "transparent", borderInlineEnd: 0, padding: 8 }} />
+      <div style={{ position: "absolute", insetInline: 0, bottom: 0, padding: 8, borderTop: `1px solid ${token.colorBorderSecondary}` }}>
+        <Button danger type="text" icon={<LogoutOutlined />} block onClick={() => void authService.logout()}> {!collapsed && "Logout"}</Button>
       </div>
-    );
-  }
-
-  return (
-    <div className={styles.layout}>
-      {/* Mobile Menu Toggle */}
-      <button 
-        className={`${styles.mobileMenuToggle} ${isMobileMenuOpen ? styles.hidden : ''}`}
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label="Toggle menu"
-      >
-        <span className={styles.hamburger}></span>
-        <span className={styles.hamburger}></span>
-        <span className={styles.hamburger}></span>
-      </button>
-
-      {/* Overlay for mobile */}
-      {isMobileMenuOpen && (
-        <div 
-          className={styles.overlay} 
-          onClick={closeMobileMenu}
-        />
-      )}
-
-      <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
-        <div className={styles.sidebarHeader}>
-          <div className={styles.brand}>
-            IntentFlow
-          </div>
-          {/* Close button for mobile */}
-          <button 
-            className={styles.closeButton}
-            onClick={closeMobileMenu}
-            aria-label="Close menu"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <nav className={styles.nav}>
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${styles.navItem} ${
-                pathname === item.href ? styles.navItemActive : ""
-              }`}
-              onClick={closeMobileMenu}
-            >
-              <span>{item.icon}</span>
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-        
-        <div className={styles.logoutContainer}>
-          {/* Theme Toggle - only render after mount */}
-          {mounted && <ThemeToggleButton />}
-          
-          <div className={styles.divider}></div>
-          <button 
-            className={styles.logoutButton} 
-            onClick={() => {
-              closeMobileMenu();
-              void handleLogout();
-            }}
-          >
-            <span>🚪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
-      
-      <main className={styles.main}>
-        {children}
-      </main>
-    </div>
-  );
+    </Sider>
+    <Content style={{ minWidth: 0, overflowY: "auto", padding: 20, background: token.colorBgLayout }}><main>{children}</main></Content>
+  </Layout>;
 }
 
-// Separate component for theme toggle to isolate useTheme
-function ThemeToggleButton() {
-  const { theme, toggleTheme } = useTheme();
-  
-  return (
-    <button 
-      className={styles.themeToggle}
-      onClick={toggleTheme}
-      aria-label="Toggle theme"
-    >
-      <span className={styles.themeIcon}>
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </span>
-      <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-    </button>
-  );
-}
-
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <ThemeProvider>
-      <DashboardLayoutContent>
-        {children}
-      </DashboardLayoutContent>
-    </ThemeProvider>
-  );
-}
+export default function DashboardLayout({ children }: { children: React.ReactNode }) { return <DashboardLayoutContent>{children}</DashboardLayoutContent>; }
