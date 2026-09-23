@@ -10,7 +10,7 @@ import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Pagination } from "@/shared/components";
+import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -133,24 +133,20 @@ export default function UsersPage() {
   };
 
   if (loading && users.length === 0) {
-    return <div className={styles.container}>Loading users...</div>;
+    return <div className={styles.container}><LoadingState label="Loading users..." /></div>;
   }
 
   return (
     <div className={styles.container}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 className={styles.title} style={{ marginBottom: 0 }}>User Management</h1>
-        <Button variant="primary" onClick={() => handleOpenModal(null)}>+ New User</Button>
-      </div>
+      <PageHeader title="User Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New User</Button>} />
 
       {meta && (
         <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />
       )}
 
-      {error && <div className="error-card" style={{ marginBottom: '1rem' }}>{error}</div>}
+      {error && <ErrorState message={error} />}
 
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
+      <Table label="User management">
           <thead>
             <tr>
               <th>ID</th>
@@ -164,7 +160,7 @@ export default function UsersPage() {
           </thead>
           <tbody>
             {users.length === 0 ? (
-              <tr><td colSpan={7} style={{ textAlign: "center", padding: "2rem" }}>No users found.</td></tr>
+              <TableEmpty colSpan={7} label="No users found." />
             ) : (
               users.map((user) => (
                 <tr key={user.id}>
@@ -172,104 +168,77 @@ export default function UsersPage() {
                   <td>{user.email}</td>
                   <td>{`${user.first_name || ""} ${user.last_name || ""}`}</td>
                   <td>
-                    <select 
-                      className={styles.roleSelect}
+                    <Select
                       value={user.role}
                       onChange={(e) => handleChangeRole(user.id, e.target.value)}
                     >
                       <option value="USER">User</option>
                       <option value="ADMIN">Admin</option>
                       <option value="SUPERADMIN">Super Admin</option>
-                    </select>
+                    </Select>
                   </td>
                   <td>
-                    <span 
-                      className={`${styles.badge} ${user.is_active ? styles.badgeActive : styles.badgeInactive}`}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleToggleActive(user)}
-                    >
-                      {user.is_active ? "Active" : "Inactive"}
-                    </span>
+                    <button type="button" onClick={() => handleToggleActive(user)} style={{ background: "none", border: 0, cursor: "pointer" }}><StatusBadge variant={user.is_active ? "success" : "neutral"}>{user.is_active ? "Active" : "Inactive"}</StatusBadge></button>
                   </td>
                   <td>{formatDate(user.date_joined)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className={styles.actionButton} onClick={() => handleOpenModal(user)}>✎</button>
-                      <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDelete(user.id)}>🗑</button>
+                      <Button type="button" variant="ghost" onClick={() => handleOpenModal(user)}>✎</Button>
+                      <Button type="button" variant="danger" onClick={() => handleDelete(user.id)}>🗑</Button>
                     </div>
                   </td>
                 </tr>
               ))
             )}
           </tbody>
-        </table>
-      </div>
+      </Table>
 
-      {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div style={{ marginBottom: '1rem' }}>
-              <h2 className={styles.modalTitle} style={{ marginBottom: '0.5rem' }}>{editingUser ? "Edit User Profile" : "Create New User"}</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                {editingUser ? "Update profile information and system permissions for this user." : "Invite a new user to the platform by providing their details."}
-              </p>
-            </div>
-            
+      <Modal open={isModalOpen} title={editingUser ? "Edit User Profile" : "Create New User"} description={editingUser ? "Update profile information and system permissions for this user." : "User creation is not available through this screen."} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className={styles.formGroup}>
-                  <label>First Name</label>
-                  <input 
-                    className={styles.input} 
+                <FormField label="First Name" required>
+                  <Input
                     value={formData.first_name}
                     placeholder="e.g. John"
                     onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                     required
                   />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Last Name</label>
-                  <input 
-                    className={styles.input} 
+                </FormField>
+                <FormField label="Last Name" required>
+                  <Input
                     value={formData.last_name}
                     placeholder="e.g. Doe"
                     onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                     required
                   />
-                </div>
+                </FormField>
               </div>
               
-              <div className={styles.formGroup}>
-                <label>Email Address</label>
-                <input 
-                  className={styles.input} 
+              <FormField label="Email Address" required>
+                <Input
                   type="email"
                   value={formData.email}
                   placeholder="name@example.com"
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
                 />
-              </div>
-              <div className={styles.formGroup}>
-                <label>System Role</label>
-                <select 
-                  className={styles.input}
+              </FormField>
+              <FormField label="System Role">
+                <Select
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
                 >
                   <option value="USER">Standard User</option>
                   <option value="ADMIN">Administrator</option>
                   <option value="SUPERADMIN">Super Admin</option>
-                </select>
-              </div>
+                </Select>
+              </FormField>
               <div className={styles.modalActions}>
-                <button type="button" className={styles.secondaryButton} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton} disabled={submitting || !editingUser}>{submitting ? "Saving..." : "Save User"}</button>
+                <Button type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                <Button type="submit" variant="primary" loading={submitting} disabled={!editingUser}>Save User</Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

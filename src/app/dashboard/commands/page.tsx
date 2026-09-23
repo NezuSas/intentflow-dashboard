@@ -18,7 +18,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Pagination } from "@/shared/components";
+import { Button, Pagination, Table } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -172,8 +172,7 @@ export default function CommandsPage() {
 
       {error && <div className="error-card" style={{ marginBottom: '1rem' }}>{error}</div>}
 
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
+      <Table label="ADB command management">
           <thead>
             <tr>
               <th>ID</th>
@@ -228,8 +227,7 @@ export default function CommandsPage() {
               ))
             )}
           </tbody>
-        </table>
-      </div>
+      </Table>
 
       {meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}
 
