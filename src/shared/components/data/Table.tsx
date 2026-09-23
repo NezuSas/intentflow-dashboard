@@ -74,4 +74,4 @@ export const TablePanel = ({ title, children, pagination, refreshing = false }: 
 
 export const TableEmpty = ({ colSpan, label }: { colSpan: number; label: string }) => <td colSpan={colSpan}><span data-table-empty={label} /></td>;
 export type BadgeVariant = "success" | "warning" | "error" | "info" | "neutral";
-export const StatusBadge = ({ variant = "neutral", children }: { variant?: BadgeVariant; children: ReactNode }) => <Tag color={variant === "neutral" ? undefined : variant}>{children}</Tag>;
+export const StatusBadge = ({ variant = "neutral", children }: { variant?: BadgeVariant; children: ReactNode }) => <Tag color={variant === "neutral" || variant === "success" ? undefined : variant} className={variant === "success" ? styles.successBadge : undefined}>{children}</Tag>;
