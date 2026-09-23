@@ -6,10 +6,16 @@ import {
   intentService,
 } from "@/composition";
 
-import React, { useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styles from "../dashboard.module.css";
 import type {
   Intent,
+  IntentListQuery,
 } from "@/features/intents";
 import type {
   Board,
@@ -18,12 +24,35 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
+import type { PageMeta } from "@/core/Pagination";
+
+const PAGE_SIZE = 20;
+const GUAYAQUIL_OFFSET = "-05:00";
+
+export const getGuayaquilDayBounds = (date: string) => {
+  const [year, month, day] = date.split("-").map(Number);
+  const nextDay = new Date(
+    Date.UTC(year, month - 1, day + 1)
+  );
+  const nextDate = [
+    nextDay.getUTCFullYear(),
+    String(nextDay.getUTCMonth() + 1).padStart(2, "0"),
+    String(nextDay.getUTCDate()).padStart(2, "0"),
+  ].join("-");
+
+  return {
+    executedAtAfter: `${date}T00:00:00${GUAYAQUIL_OFFSET}`,
+    executedAtBefore: `${nextDate}T00:00:00${GUAYAQUIL_OFFSET}`,
+  };
+};
 
 export default function IntentsPage() {
   const [intents, setIntents] = useState<Intent[]>([]);
-  const [filteredIntents, setFilteredIntents] = useState<Intent[]>([]);
   const [boards, setBoards] = useState<Board[]>([]); // For filter dropdown
   const [clients, setClients] = useState<Client[]>([]); // For client filter
+  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const requestSequence = useRef(0);
 
   // Filters
   const [selectedClientId, setSelectedClientId] = useState<string>("");
@@ -47,59 +76,111 @@ export default function IntentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadIntents = useCallback(async () => {
+    const requestId = ++requestSequence.current;
+    const query: IntentListQuery = {
+      page: currentPage,
+      pageSize: PAGE_SIZE,
+    };
+
+    if (selectedClientId) {
+      query.client = Number(selectedClientId);
+    }
+
+    if (selectedBoardId) {
+      query.board = Number(selectedBoardId);
+    }
+
+    if (filterDate) {
+      Object.assign(query, getGuayaquilDayBounds(filterDate));
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await intentService.list(query);
+
+      if (requestId !== requestSequence.current) {
+        return;
+      }
+
+      setIntents(response.data);
+      setMeta(response.meta);
+    } catch (err: unknown) {
+      if (requestId !== requestSequence.current) {
+        return;
+      }
+
+      setError(getErrorMessage(err));
+    } finally {
+      if (requestId === requestSequence.current) {
+        setLoading(false);
+      }
+    }
+  }, [
+    currentPage,
+    filterDate,
+    selectedBoardId,
+    selectedClientId,
+  ]);
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCatalogs = async () => {
       try {
-        const [intentsData, boardsData, clientsData] = await Promise.all([
-          intentService.getIntents(),
+        const [boardsData, clientsData] = await Promise.all([
           boardService.getBoards(),
-          clientService.getClients()
+          clientService.getClients(),
         ]);
-        setIntents(intentsData);
-        setFilteredIntents(intentsData);
         setBoards(boardsData);
         setClients(clientsData);
       } catch (err: unknown) {
         setError(getErrorMessage(err));
-      } finally {
-        setLoading(false);
       }
     };
 
-    void fetchData();
+    void fetchCatalogs();
   }, []);
 
-  // Filter effect
   useEffect(() => {
-    let result = intents;
+    void loadIntents();
 
-    // Filter by Client (affects which boards are shown)
-    if (selectedClientId) {
-      result = result.filter(i => i.board?.client === parseInt(selectedClientId));
-    }
-
-    // Filter by Board
-    if (selectedBoardId) {
-      result = result.filter(i => i.board?.id === parseInt(selectedBoardId));
-    }
-
-    // Filter by Date (YYYY-MM-DD matches start of executed_at ISO string)
-    if (filterDate) {
-      result = result.filter(i => i.executed_at.startsWith(filterDate));
-    }
-
-    setFilteredIntents(result);
-  }, [selectedClientId, selectedBoardId, filterDate, intents]);
-
-  // Reset board filter when client changes
-  useEffect(() => {
-    setSelectedBoardId("");
-  }, [selectedClientId]);
+    return () => {
+      requestSequence.current += 1;
+    };
+  }, [loadIntents]);
 
   // Get boards filtered by selected client
   const availableBoards = selectedClientId
     ? boards.filter(b => b.client === parseInt(selectedClientId))
     : boards;
+
+  const totalPages = meta
+    ? Math.max(1, Math.ceil(meta.count / meta.pageSize))
+    : 1;
+
+  const handleClientFilterChange = (clientId: string) => {
+    setSelectedClientId(clientId);
+    setSelectedBoardId("");
+    setCurrentPage(1);
+  };
+
+  const handleBoardFilterChange = (boardId: string) => {
+    setSelectedBoardId(boardId);
+    setCurrentPage(1);
+  };
+
+  const handleDateFilterChange = (date: string) => {
+    setFilterDate(date);
+    setCurrentPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedClientId("");
+    setSelectedBoardId("");
+    setFilterDate("");
+    setCurrentPage(1);
+  };
 
   const getStatusClass = (status: string) => {
     switch (status.toLowerCase()) {
@@ -129,7 +210,7 @@ export default function IntentsPage() {
             <label className={`input-label ${styles.filterLabel}`}>Filter by Client</label>
             <select
                 value={selectedClientId}
-                onChange={(e) => setSelectedClientId(e.target.value)}
+                onChange={(e) => handleClientFilterChange(e.target.value)}
                 className={`input-field ${styles.filterControl}`}
             >
                 <option value="">All Clients</option>
@@ -148,7 +229,7 @@ export default function IntentsPage() {
             </label>
             <select
                 value={selectedBoardId}
-                onChange={(e) => setSelectedBoardId(e.target.value)}
+                onChange={(e) => handleBoardFilterChange(e.target.value)}
                 disabled={!selectedClientId && availableBoards.length === 0}
                 className={`input-field ${styles.filterControl}`}
             >
@@ -169,7 +250,7 @@ export default function IntentsPage() {
             <input
                 type="date"
                 value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
+                onChange={(e) => handleDateFilterChange(e.target.value)}
                 className={`input-field ${styles.filterControl}`}
             />
         </div>
@@ -177,7 +258,7 @@ export default function IntentsPage() {
         {/* Clear Filters Button */}
         {(selectedClientId || selectedBoardId || filterDate) && (
             <button
-                onClick={() => { setSelectedClientId(""); setSelectedBoardId(""); setFilterDate(""); }}
+                onClick={handleClearFilters}
                 className={`btn btn-ghost ${styles.clearFiltersButton}`}
             >
                 ✕ Clear Filters
@@ -208,14 +289,14 @@ export default function IntentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredIntents.length === 0 ? (
+                {intents.length === 0 ? (
                   <tr>
                     <td colSpan={6} style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>
                       No intents found matching criteria.
                     </td>
                   </tr>
                 ) : (
-                  filteredIntents.map((intent) => (
+                  intents.map((intent) => (
                     <tr key={intent.id} className="nezu-table__row">
                       <td className="nezu-table__cell">#{intent.id}</td>
                       <td className="nezu-table__cell nezu-table__emphasis">{intent.command_key}</td>
@@ -265,6 +346,35 @@ export default function IntentsPage() {
           </div>
         )}
       </div>
+
+      {meta && (
+        <div className={styles.pagination}>
+          <span className={styles.paginationTotal}>
+            {meta.count} total records
+          </span>
+          <div className={styles.paginationControls}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((page) => page - 1)}
+            >
+              Previous
+            </button>
+            <span className={styles.paginationIndicator}>
+              Page {meta.page} of {totalPages}
+            </span>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={!meta.next}
+              onClick={() => setCurrentPage((page) => page + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error Details Modal */}
       {errorModalOpen && selectedIntent && (
