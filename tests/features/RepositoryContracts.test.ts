@@ -28,6 +28,20 @@ describe("API repository contracts", () => {
     expect(response.meta.pageSize).toBe(25); expect(http.calls).toEqual(expect.arrayContaining([{ method: "GET", path: "/auth/users/?page=2&page_size=25" }, { method: "POST", path: "/auth/users/7/toggle-active/" }, { method: "POST", path: "/auth/users/7/change-role/", body: { role: "ADMIN" } }, { method: "PATCH", path: "/auth/users/7/", body: {} }, { method: "DELETE", path: "/auth/users/7/" }]));
   });
 
+  it("uses the backend user creation and current-profile contracts", async () => {
+    const profile = { id: 7, email: "new@example.test", first_name: "New", last_name: "User", role: "USER", is_active: true, date_joined: "2026-09-23" };
+    const http = new FakeHttpClient({ data: profile });
+    const repository = new UserApiRepository(http);
+    const payload = { email: profile.email, first_name: profile.first_name, last_name: profile.last_name, password: "strong-password" };
+
+    expect(await repository.getCurrent()).toEqual(profile);
+    await repository.create(payload);
+    expect(http.calls).toEqual([
+      { method: "GET", path: "/auth/users/me/" },
+      { method: "POST", path: "/auth/users/", body: payload },
+    ]);
+  });
+
   it("uses the client collection and catalog contracts", async () => {
     const http = new FakeHttpClient(paginated); const repository = new ClientApiRepository(http);
     await repository.list({ page: 1, pageSize: 20 }); await repository.getCatalog(); await repository.create({}); await repository.update(2, {}); await repository.delete(2);

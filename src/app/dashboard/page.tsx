@@ -8,6 +8,7 @@ import React, { useEffect, useState, useRef } from "react";
 import styles from "./dashboard.module.css";
 import {
   IntentErrorDetails,
+  IntentStatusBadge,
   type Intent,
 } from "@/features/intents";
 
@@ -15,7 +16,8 @@ import type {
   DashboardStats,
 } from "@/features/dashboard";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Card, CardGridSkeleton, ErrorState, Modal, PageHeader, StatusBadge, Table, TablePanel, TableSkeleton } from "@/shared/components";
+import { formatGuayaquilDateTime } from "@/shared/format/date";
+import { Button, Card, CardGridSkeleton, ErrorState, Modal, PageHeader, Table, TablePanel, TableSkeleton } from "@/shared/components";
 import { CloudServerOutlined, FileTextOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 
 export default function DashboardHomePage() {
@@ -96,16 +98,6 @@ export default function DashboardHomePage() {
     },
   ] : [];
 
-  const getStatusVariant = (status: string): "success" | "error" | "neutral" => {
-    switch (status.toLowerCase()) {
-      case 'ok':
-      case 'success': return 'success';
-      case 'error':
-      case 'failed': return 'error';
-      default: return 'neutral';
-    }
-  };
-
   return (
     <div>
       <PageHeader title="Dashboard Overview" description="Monitor your system’s performance and activity." />
@@ -163,25 +155,9 @@ export default function DashboardHomePage() {
                             {intent.board?.client_detail?.name || "Unknown"}
                           </strong>
                         </td>
-                        <td 
-                        style={{ 
-                          cursor: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? "pointer" : "default",
-                          userSelect: "none"
-                        }}
-                        onMouseDown={(e) => {
-                          const status = intent.status?.toString().toUpperCase().trim();
-                          if (status === 'ERROR') {
-                            e.preventDefault();
-                            handleShowError(intent);
-                          }
-                        }}
-                      >
-                        <StatusBadge variant={getStatusVariant(intent.status)}>
-                          {intent.status} {intent.status?.toString().toUpperCase().trim() === 'ERROR' && '🔍'}
-                        </StatusBadge>
-                      </td>
+                        <td><IntentStatusBadge intent={intent} onShowError={handleShowError} /></td>
                         <td>
-                          {new Date(intent.executed_at).toLocaleString()}
+                          {formatGuayaquilDateTime(intent.executed_at)}
                         </td>
                       </tr>
                     ))}

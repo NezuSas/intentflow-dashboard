@@ -3,6 +3,7 @@ import type { HttpClient } from "@/core/http/HttpClient";
 import type {
   User,
   UserUpdatePayload,
+  UserCreatePayload,
 } from "../domain/User";
 
 import type {
@@ -23,6 +24,15 @@ export class UserApiRepository
       buildListPath("/auth/users/", query)
     );
     return mapPaginatedResponse(response);
+  }
+
+  async getCurrent(): Promise<User> {
+    const response = await this.http.get<{ data: User }>("/auth/users/me/");
+    return response.data;
+  }
+
+  async create(data: UserCreatePayload): Promise<void> {
+    await this.http.post("/auth/users/", data);
   }
 
   async toggleActive(

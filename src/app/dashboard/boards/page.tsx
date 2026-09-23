@@ -19,8 +19,10 @@ import type {
 } from "@/features/versions";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
+import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
+import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
+import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
 
@@ -73,6 +75,7 @@ function parseAdbIdentifier(identifier: string) {
 }
 
 export default function BoardsPage() {
+  const feedback = useActionFeedback();
   const [boards, setBoards] = useState<Board[]>([]);
   const catalog = useLazyCatalog(loadBoardCatalogs);
   const clients = catalog.data?.clients ?? [];
@@ -221,7 +224,7 @@ export default function BoardsPage() {
       setIsModalOpen(false);
       await fetchBoards();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error saving board: ${getErrorMessage(
           err
         )}`
@@ -234,24 +237,13 @@ export default function BoardsPage() {
   const handleDelete = async (
     boardId: number
   ) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this board?"
-      )
-    ) {
-      return;
-    }
-
     try {
       await boardService.deleteBoard(boardId);
-
-      setBoards((current) =>
-        current.filter(
-          (board) => board.id !== boardId
-        )
-      );
+      const nextPage = meta ? pageAfterDeletion(meta) : page;
+      if (nextPage !== page) setPage(nextPage);
+      else await fetchBoards();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error deleting board: ${getErrorMessage(
           err
         )}`
@@ -278,7 +270,7 @@ export default function BoardsPage() {
         <ErrorState message={error} />
       )}
 
-      <TablePanel title="Boards" refreshing={loading && boards.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
+      <TablePanel title="Boards" refreshing={loading && boards.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
       <Table label="Board management">
           <thead>
             <tr>
@@ -341,29 +333,7 @@ export default function BoardsPage() {
                   </td>
 
                   <td>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <Button
-                        onClick={() =>
-                          handleOpenModal(board)
-                        }
-                      >
-                        ✎
-                      </Button>
-
-                      <Button
-                        variant="danger"
-                        onClick={() =>
-                          handleDelete(board.id)
-                        }
-                      >
-                        🗑
-                      </Button>
-                    </div>
+                    <RowActions itemName={`board ${board.name}`} onEdit={() => handleOpenModal(board)} onDelete={() => handleDelete(board.id)} />
                   </td>
                 </tr>
               ))

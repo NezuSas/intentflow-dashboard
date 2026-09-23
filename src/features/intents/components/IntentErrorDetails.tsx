@@ -1,5 +1,6 @@
 import type { Intent } from "../domain/Intent";
 import styles from "./IntentErrorDetails.module.css";
+import { formatGuayaquilDateTime } from "@/shared/format/date";
 
 export function IntentErrorDetails({ intent }: { intent: Intent }) {
   return (
@@ -26,7 +27,7 @@ export function IntentErrorDetails({ intent }: { intent: Intent }) {
       <section className={styles.field}>
         <h3 className={styles.label}>Executed At</h3>
         <p className={styles.value}>
-          {new Date(intent.executed_at).toLocaleString()}
+          {formatGuayaquilDateTime(intent.executed_at)}
         </p>
       </section>
     </div>

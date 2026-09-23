@@ -36,10 +36,11 @@ describe("application services", () => {
   });
 
   it("delegates every user action", async () => {
-    const list = vi.fn().mockResolvedValue(page); const toggleActive = vi.fn(); const changeRole = vi.fn(); const update = vi.fn(); const remove = vi.fn();
-    const service = new UserService({ list, toggleActive, changeRole, update, delete: remove } as unknown as UserRepository);
-    await service.listUsers({ page: 2 }); await service.toggleActive(1); await service.changeRole(1, "ADMIN"); await service.updateUser(1, {}); await service.deleteUser(1);
-    expect(list).toHaveBeenCalledWith({ page: 2 }); expect(toggleActive).toHaveBeenCalledWith(1); expect(changeRole).toHaveBeenCalledWith(1, "ADMIN"); expect(update).toHaveBeenCalledWith(1, {}); expect(remove).toHaveBeenCalledWith(1);
+    const list = vi.fn().mockResolvedValue(page); const getCurrent = vi.fn(); const create = vi.fn(); const toggleActive = vi.fn(); const changeRole = vi.fn(); const update = vi.fn(); const remove = vi.fn();
+    const service = new UserService({ list, getCurrent, create, toggleActive, changeRole, update, delete: remove } as unknown as UserRepository);
+    const newUser = { email: "new@example.test", first_name: "New", last_name: "User", password: "strong-password" };
+    await service.listUsers({ page: 2 }); await service.getCurrentUser(); await service.createUser(newUser); await service.toggleActive(1); await service.changeRole(1, "ADMIN"); await service.updateUser(1, {}); await service.deleteUser(1);
+    expect(list).toHaveBeenCalledWith({ page: 2 }); expect(getCurrent).toHaveBeenCalledOnce(); expect(create).toHaveBeenCalledWith(newUser); expect(toggleActive).toHaveBeenCalledWith(1); expect(changeRole).toHaveBeenCalledWith(1, "ADMIN"); expect(update).toHaveBeenCalledWith(1, {}); expect(remove).toHaveBeenCalledWith(1);
   });
 
   it("delegates version catalog reads", async () => {

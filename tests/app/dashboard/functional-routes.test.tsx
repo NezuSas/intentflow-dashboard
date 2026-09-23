@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => {
     authTokenManager: service("hasSession", "getAccessToken", "getRefreshToken", "refreshAccessToken"),
     authService: service("login", "logout"),
     dashboardService: service("getStats"),
-    userService: service("listUsers", "updateUser", "deleteUser", "toggleActive", "changeRole"),
+    userService: service("listUsers", "getCurrentUser", "createUser", "updateUser", "deleteUser", "toggleActive", "changeRole"),
     clientService: service("listClients", "getClientCatalog", "createClient", "updateClient", "deleteClient"),
     boardService: service("listBoards", "getBoardCatalog", "createBoard", "updateBoard", "deleteBoard"),
     versionService: service("getVersions"),
@@ -69,13 +69,13 @@ const subscriptions = [
 ];
 
 const routes = [
-  { path: "/dashboard", Page: DashboardPage, text: "Recent Activity", empty: "No recent activity to display.", loading: "Loading dashboard...", fail: mocks.dashboardService.getStats },
-  { path: "/dashboard/users", Page: UsersPage, text: "alice@example.test", empty: "No users found.", loading: "Loading users...", fail: mocks.userService.listUsers },
-  { path: "/dashboard/clients", Page: ClientsPage, text: "North Client", empty: "No clients found.", loading: "Loading clients...", fail: mocks.clientService.listClients },
-  { path: "/dashboard/boards", Page: BoardsPage, text: "Office Board", empty: "No boards found.", loading: "Loading boards...", fail: mocks.boardService.listBoards },
-  { path: "/dashboard/commands", Page: CommandsPage, text: "power_on", empty: "No commands found.", loading: "Loading commands...", fail: mocks.commandService.listCommands },
-  { path: "/dashboard/intents", Page: IntentsPage, text: "power_on", empty: "No intents found matching criteria.", loading: "Loading intents...", fail: mocks.intentService.list },
-  { path: "/dashboard/subscriptions", Page: SubscriptionsPage, text: "Starter Plan", empty: "No plans found.", loading: "Loading subscriptions...", fail: mocks.subscriptionService.listPlans },
+  { path: "/dashboard", Page: DashboardPage, text: "Recent Activity", empty: "No recent activity to display.", fail: mocks.dashboardService.getStats },
+  { path: "/dashboard/users", Page: UsersPage, text: "alice@example.test", empty: "No users found.", fail: mocks.userService.listUsers },
+  { path: "/dashboard/clients", Page: ClientsPage, text: "North Client", empty: "No clients found.", fail: mocks.clientService.listClients },
+  { path: "/dashboard/boards", Page: BoardsPage, text: "Office Board", empty: "No boards found.", fail: mocks.boardService.listBoards },
+  { path: "/dashboard/commands", Page: CommandsPage, text: "power_on", empty: "No commands found.", fail: mocks.commandService.listCommands },
+  { path: "/dashboard/intents", Page: IntentsPage, text: "power_on", empty: "No intents found matching criteria.", fail: mocks.intentService.list },
+  { path: "/dashboard/subscriptions", Page: SubscriptionsPage, text: "Starter Plan", empty: "No plans found.", fail: mocks.subscriptionService.listPlans },
 ] as const;
 
 let container: HTMLDivElement;
@@ -107,6 +107,8 @@ beforeEach(() => {
   mocks.authTokenManager.getRefreshToken.mockReturnValue(null);
   mocks.dashboardService.getStats.mockResolvedValue({ total_intents_30d: 42, total_users: 2, total_clients: 2, active_boards: 1, recent_intents: intents });
   mocks.userService.listUsers.mockResolvedValue({ data: users, meta: meta(2) });
+  mocks.userService.getCurrentUser.mockResolvedValue(users[0]);
+  mocks.userService.createUser.mockResolvedValue(users[0]);
   mocks.clientService.listClients.mockResolvedValue({ data: clients, meta: meta(2) });
   mocks.clientService.getClientCatalog.mockResolvedValue(clients);
   mocks.boardService.listBoards.mockResolvedValue({ data: boards, meta: meta(2) });
@@ -134,11 +136,11 @@ describe("dashboard routes with mocked services", () => {
     expect(container.querySelectorAll(".ant-table-tbody tr.ant-table-row").length).toBeGreaterThanOrEqual(2);
   });
 
-  it.each(routes)("renders $path loading state", async ({ Page, loading, fail }) => {
+  it.each(routes)("renders $path loading state", async ({ Page, fail }) => {
     fail.mockReturnValue(new Promise(() => undefined));
     await render(Page);
-    expect(container.textContent).toContain(loading);
-    expect(container.querySelector(".ant-spin")).not.toBeNull();
+    expect(container.querySelector('[role="status"]')).not.toBeNull();
+    expect(container.querySelector(".ant-skeleton")).not.toBeNull();
   });
 
   it.each(routes)("renders $path empty state", async ({ Page, path, empty, fail }) => {
@@ -161,11 +163,12 @@ describe("dashboard routes with mocked services", () => {
     expect(container.querySelector(".ant-alert-error")).not.toBeNull();
   });
 
-  it("renders login and settings without service requests", async () => {
+  it("renders login and the authenticated user's profile", async () => {
     await render(LoginPage);
     expect(container.textContent).toContain("Sign In");
     await render(SettingsPage);
-    expect(container.textContent).toContain("Profile Settings");
+    expect(container.textContent).toContain("alice@example.test");
+    expect(mocks.userService.getCurrentUser).toHaveBeenCalledOnce();
     expect(mocks.userService.listUsers).not.toHaveBeenCalled();
   });
 
@@ -187,8 +190,7 @@ describe("dashboard routes with mocked services", () => {
     await render(DashboardPage);
     expect(container.querySelectorAll(".ant-table-tbody tr.ant-table-row")).toHaveLength(2);
     expect(container.textContent).toContain("OK");
-    const errorCell = [...container.querySelectorAll(".ant-table-tbody td")].find((cell) => cell.textContent?.includes("ERROR"));
-    await act(async () => { errorCell?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true })); });
+    await click(container.querySelector('button[aria-label="View error details for intent 42"]'));
     expect(document.body.textContent).toContain("ADB disconnected");
   });
 
@@ -206,10 +208,25 @@ describe("dashboard routes with mocked services", () => {
     const row = container.querySelector(".ant-table-tbody tr.ant-table-row");
     await click(button("Active", row ?? undefined));
     expect(mocks.userService.toggleActive).toHaveBeenCalledWith(1);
-    await click(button("✎", row ?? undefined));
+    await click(row?.querySelector('button[aria-label^="Edit user"]') ?? null);
     expect(document.body.textContent).toContain("Edit User Profile");
     await openSelect(document.body.querySelector(".ant-modal .ant-select"));
     expect(document.body.textContent).toContain("Standard User");
+  });
+
+  it("shows the backend-required password only when creating a user", async () => {
+    await render(UsersPage);
+    await click(button("New User", container));
+    expect(document.body.querySelector('.ant-modal input[type="password"]')).not.toBeNull();
+    expect(document.body.textContent).toContain("New users start with the User role");
+    expect(document.body.querySelectorAll(".ant-modal .ant-select")).toHaveLength(0);
+    const inputs = document.body.querySelectorAll(".ant-modal input") as NodeListOf<HTMLInputElement>;
+    await setInput(inputs[0], "New");
+    await setInput(inputs[1], "User");
+    await setInput(inputs[2], "new@example.test");
+    await setInput(inputs[3], "strong-password");
+    await act(async () => { document.body.querySelector(".ant-modal form")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
+    expect(mocks.userService.createUser).toHaveBeenCalledWith({ first_name: "New", last_name: "User", email: "new@example.test", password: "strong-password" });
   });
 
   it("opens Clients create and edit modals with form controls", async () => {
@@ -223,7 +240,7 @@ describe("dashboard routes with mocked services", () => {
     await openSelect(document.body.querySelector(".ant-modal .ant-select"));
     expect(document.body.textContent).toContain("COMPANY");
     await click(button("Cancel"));
-    await click(button("✎", container.querySelector(".ant-table-tbody tr.ant-table-row") ?? undefined));
+    await click(container.querySelector('.ant-table-tbody tr.ant-table-row button[aria-label^="Edit client"]'));
     expect(document.body.textContent).toContain("Edit Client");
   });
 
@@ -267,8 +284,7 @@ describe("dashboard routes with mocked services", () => {
     const date = container.querySelector('input[type="date"]') as HTMLInputElement;
     await setInput(date, "2026-09-23");
     expect(mocks.intentService.list).toHaveBeenLastCalledWith(expect.objectContaining({ executedAtAfter: "2026-09-23T00:00:00-05:00" }));
-    const errorCell = [...container.querySelectorAll(".ant-table-tbody td")].find((cell) => cell.textContent?.includes("ERROR"));
-    await act(async () => { errorCell?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true })); });
+    await click(container.querySelector('button[aria-label="View error details for intent 42"]'));
     expect(document.body.textContent).toContain("ADB disconnected");
     await click(button("Close", document.body.querySelector(".ant-modal") ?? undefined));
     await click(container.querySelector(".ant-pagination-next button"));
@@ -283,6 +299,7 @@ describe("dashboard routes with mocked services", () => {
     await click(button("Cancel"));
     await click(button("New Subscription", container));
     expect(document.body.textContent).toContain("Assign Plan to Client");
+    expect(document.body.querySelector('.ant-modal input[type="date"]')).not.toBeNull();
     expect(document.body.querySelectorAll(".ant-modal .ant-select")).toHaveLength(4);
     expect(container.querySelectorAll(".ant-table-tbody tr.ant-table-row")).toHaveLength(4);
     const selectors = document.body.querySelectorAll(".ant-modal .ant-select");

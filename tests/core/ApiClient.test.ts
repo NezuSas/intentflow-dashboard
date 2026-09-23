@@ -80,5 +80,16 @@ describe(
         });
       }
     );
+
+    it("shows the first backend validation error", async () => {
+      const client = new ApiClient("https://api.example.com", async () =>
+        new Response(JSON.stringify({ errors: { password: ["Password is too short."] } }), { status: 400 })
+      );
+
+      await expect(client.post("/auth/users/", {})).rejects.toMatchObject({
+        name: "ApiError",
+        message: "password: Password is too short.",
+      });
+    });
   }
 );

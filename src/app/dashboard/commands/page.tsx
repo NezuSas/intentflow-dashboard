@@ -18,8 +18,10 @@ import type {
 } from "@/features/versions";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel, Textarea } from "@/shared/components";
+import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
+import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, RowActions, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel, Textarea } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
+import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
 
@@ -32,6 +34,7 @@ const loadCommandCatalogs = async () => {
 };
 
 export default function CommandsPage() {
+  const feedback = useActionFeedback();
   const [commands, setCommands] = useState<ADBCommand[]>([]);
   const catalog = useLazyCatalog(loadCommandCatalogs);
   const versions: ADBVersion[] = catalog.data?.versions ?? [];
@@ -117,7 +120,7 @@ export default function CommandsPage() {
     if (submitting) return;
 
     if (formData.versions.length === 0) {
-      alert(
+      feedback.error(
         "Select at least one ADB version."
       );
       return;
@@ -126,7 +129,7 @@ export default function CommandsPage() {
     if (
       formData.subscription_plans.length === 0
     ) {
-      alert(
+      feedback.error(
         "Select at least one subscription plan."
       );
       return;
@@ -142,7 +145,7 @@ export default function CommandsPage() {
       setIsModalOpen(false);
       await fetchCommands();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error saving command: ${getErrorMessage(err)}`
       );
     } finally {
@@ -151,12 +154,13 @@ export default function CommandsPage() {
   };
 
   const handleDelete = async (commandId: number) => {
-    if (!confirm("Are you sure you want to delete this command?")) return;
     try {
       await commandService.deleteCommand(commandId);
-      setCommands(commands.filter(c => c.id !== commandId));
+      const nextPage = meta ? pageAfterDeletion(meta) : page;
+      if (nextPage !== page) setPage(nextPage);
+      else await fetchCommands();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error deleting command: ${getErrorMessage(err)}`
       );
     }
@@ -172,7 +176,7 @@ export default function CommandsPage() {
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="ADB Commands" refreshing={loading && commands.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
+      <TablePanel title="ADB Commands" refreshing={loading && commands.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
       <Table label="ADB command management">
           <thead>
             <tr>
@@ -216,10 +220,7 @@ export default function CommandsPage() {
                     </StatusBadge>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Button onClick={() => handleOpenModal(command)}>✎</Button>
-                      <Button variant="danger" onClick={() => handleDelete(command.id)}>🗑</Button>
-                    </div>
+                    <RowActions itemName={`command ${command.key}`} onEdit={() => handleOpenModal(command)} onDelete={() => handleDelete(command.id)} />
                   </td>
                 </tr>
               ))
