@@ -15,3 +15,4 @@
 .skeletonCard { min-height: 148px; }
 .skeletonForm { display: grid; gap: 20px; }
 .skeletonField { display: grid; gap: 8px; }
+.successBadge:global(.ant-tag) { color: hsl(var(--success)); background: hsl(var(--success) / .12); border-color: hsl(var(--success) / .35); font-weight: 600; }

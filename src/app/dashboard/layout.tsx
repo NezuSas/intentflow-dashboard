@@ -46,7 +46,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   return <Layout className={styles.dashboardShell} style={{ background: token.colorBgLayout }}>
     <Sider className={styles.dashboardSidebar} collapsible collapsed={collapsed} onCollapse={setCollapsed} breakpoint="md" collapsedWidth={64} width={248} trigger={null} theme={currentTheme === "dark" ? "dark" : "light"} style={{ background: token.colorBgContainer, borderInlineEnd: `1px solid ${token.colorBorderSecondary}` }}>
       <Flex align="center" justify="space-between" style={{ height: 64, flexShrink: 0, padding: "0 12px", borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
-        <Typography.Text strong style={{ color: token.colorText, whiteSpace: "nowrap", fontSize: 16, overflow: "hidden" }}>{collapsed ? "N" : "NEZU · IntentFlow"}</Typography.Text>
+        <Typography.Text strong style={{ color: token.colorText, whiteSpace: "nowrap", fontSize: 16, overflow: "hidden" }}>{collapsed ? "I" : "IntentFlow"}</Typography.Text>
         <Flex gap={0}>
           {!collapsed && <Tooltip title={currentTheme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}><Button type="text" shape="circle" aria-label="Toggle theme" icon={currentTheme === "dark" ? <SunOutlined /> : <MoonOutlined />} onClick={toggleTheme} /></Tooltip>}
           <Tooltip title={collapsed ? "Expandir navegación" : "Contraer navegación"}><Button type="text" shape="circle" aria-label="Toggle navigation" icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} onClick={() => setCollapsed((value) => !value)} /></Tooltip>
