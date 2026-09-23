@@ -195,17 +195,76 @@
 
 .statCard {
   padding: 1.5rem;
+  background: var(--surface-raised);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-speed) ease,
+    border-color var(--transition-speed) ease,
+    box-shadow var(--transition-speed) ease;
+}
+
+.statCard:hover {
+  background: var(--surface);
+  border-color: hsl(var(--border-bright));
+  box-shadow: var(--shadow-md);
+}
+
+.statCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.statIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.statMeta {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.statMetaPrimary {
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.statMetaSuccess {
+  background: hsl(var(--success) / 0.1);
+  color: hsl(var(--success));
+}
+
+.statMetaAccent {
+  background: hsl(var(--accent) / 0.14);
+  border-color: hsl(var(--accent) / 0.45);
+  color: var(--text-primary);
+}
+
+.statMetaInfo {
+  background: hsl(var(--info) / 0.1);
+  color: hsl(var(--info));
 }
 
 .statValue {
-  font-size: 1.5rem;
+  margin-top: 1rem;
+  color: var(--text-primary);
+  font-size: 1.75rem;
   font-weight: 700;
-  margin-top: 0.5rem;
+  line-height: 1.2;
 }
 
 .statLabel {
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
   font-size: 0.8125rem;
-  color: hsl(var(--muted-foreground));
+  font-weight: 500;
 }
 
 /* Mobile Menu Toggle Button */
