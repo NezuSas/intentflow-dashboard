@@ -19,7 +19,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, FormField, Input, Modal, Pagination, Select, Table } from "@/shared/components";
+import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -254,47 +254,24 @@ export default function BoardsPage() {
 
   if (loading && boards.length === 0) {
     return (
-      <div className={styles.container}>
-        Loading boards...
-      </div>
+      <LoadingState label="Loading boards..." />
 
     );
   }
 
   return (
     <div className={styles.container}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "2rem",
-        }}
-      >
-        <h1
-          className={styles.title}
-          style={{ marginBottom: 0 }}
-        >
-          Board Management
-        </h1>
-
-        <Button
+      <PageHeader title="Board Management" actions={<Button
           variant="primary"
           onClick={() =>
             handleOpenModal(null)
           }
         >
           + Register Board
-        </Button>
-      </div>
+        </Button>} />
 
       {error && (
-        <div
-          className="error-card"
-          style={{ marginBottom: "1rem" }}
-        >
-          {error}
-        </div>
+        <ErrorState message={error} />
       )}
 
       <Table label="Board management">
@@ -313,15 +290,7 @@ export default function BoardsPage() {
           <tbody>
             {boards.length === 0 ? (
               <tr>
-                <td
-                  colSpan={7}
-                  style={{
-                    textAlign: "center",
-                    padding: "2rem",
-                  }}
-                >
-                  No boards found.
-                </td>
+                <TableEmpty colSpan={7} label="No boards found." />
               </tr>
             ) : (
               boards.map((board) => (
@@ -358,19 +327,12 @@ export default function BoardsPage() {
                   </td>
 
                   <td>
-                    <span
-                      className={`${styles.badge} ${
-                        board.computed_status ===
-                        "online"
-                          ? styles.badgeActive
-                          : styles.badgeInactive
-                      }`}
-                    >
+                    <StatusBadge variant={board.computed_status === "online" ? "success" : "neutral"}>
                       {board.computed_status ===
                       "online"
                         ? "Online"
                         : "Offline"}
-                    </span>
+                    </StatusBadge>
                   </td>
 
                   <td>
@@ -380,25 +342,22 @@ export default function BoardsPage() {
                         gap: "0.5rem",
                       }}
                     >
-                      <button
-                        className={
-                          styles.actionButton
-                        }
+                      <Button
                         onClick={() =>
                           handleOpenModal(board)
                         }
                       >
                         ✎
-                      </button>
+                      </Button>
 
-                      <button
-                        className={`${styles.actionButton} ${styles.deleteButton}`}
+                      <Button
+                        variant="danger"
                         onClick={() =>
                           handleDelete(board.id)
                         }
                       >
                         🗑
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

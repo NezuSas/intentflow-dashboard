@@ -25,6 +25,21 @@ import type {
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 import type { PageMeta } from "@/core/Pagination";
+import {
+  Button,
+  Card,
+  ErrorState,
+  FormField,
+  Input,
+  LoadingState,
+  Modal,
+  PageHeader,
+  Pagination,
+  Select,
+  StatusBadge,
+  Table,
+  TableEmpty,
+} from "@/shared/components";
 
 const PAGE_SIZE = 20;
 const GUAYAQUIL_OFFSET = "-05:00";
@@ -187,36 +202,32 @@ export default function IntentsPage() {
     setCurrentPage(1);
   };
 
-  const getStatusClass = (status: string) => {
+  const getStatusVariant = (status: string): "success" | "warning" | "error" | "neutral" => {
     switch (status.toLowerCase()) {
       case 'ok':
-      case 'success': return 'status-chip--success';
+      case 'success': return 'success';
       case 'error':
-      case 'failed': return 'status-chip--error';
-      case 'pending': return 'status-chip--warning';
-      default: return 'status-chip--neutral';
+      case 'failed': return 'error';
+      case 'pending': return 'warning';
+      default: return 'neutral';
     }
   };
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 style={{ fontSize: "1.875rem", fontWeight: 700 }}>Intents</h1>
-        <button className="btn btn-primary" onClick={() => window.location.reload()}>
+      <PageHeader title="Intents" actions={<Button variant="primary" onClick={() => window.location.reload()}>
           🔄 Refresh
-        </button>
-      </div>
+        </Button>} />
 
       {/* FILTERS TOOLBAR */}
-      <div className={`glass-panel ${styles.filtersToolbar}`}>
+      <Card className={styles.filtersToolbar}>
 
         {/* Client Filter */}
-        <div className={`input-group ${styles.filterGroup}`}>
-            <label className={`input-label ${styles.filterLabel}`}>Filter by Client</label>
-            <select
+        <FormField label="Filter by Client">
+            <Select
                 value={selectedClientId}
                 onChange={(e) => handleClientFilterChange(e.target.value)}
-                className={`input-field ${styles.filterControl}`}
+                className={styles.filterControl}
             >
                 <option value="">All Clients</option>
                 {clients.map(c => (
@@ -224,19 +235,16 @@ export default function IntentsPage() {
                         {c.name}
                     </option>
                 ))}
-            </select>
-        </div>
+            </Select>
+        </FormField>
 
         {/* Board Filter (filtered by selected client) */}
-        <div className={`input-group ${styles.filterGroup} ${styles.filterGroupWide}`}>
-            <label className={`input-label ${styles.filterLabel}`}>
-                Filter by Board {selectedClientId && `(${clients.find(c => c.id === parseInt(selectedClientId))?.name || 'Client'})`}
-            </label>
-            <select
+        <FormField className={`${styles.filterGroupWide}`} label={`Filter by Board ${selectedClientId ? `(${clients.find(c => c.id === parseInt(selectedClientId))?.name || "Client"})` : ""}`}>
+            <Select
                 value={selectedBoardId}
                 onChange={(e) => handleBoardFilterChange(e.target.value)}
                 disabled={!selectedClientId && availableBoards.length === 0}
-                className={`input-field ${styles.filterControl}`}
+                className={styles.filterControl}
             >
                 <option value="">
                     {selectedClientId ? 'All Boards' : 'Select a client first'}
@@ -246,44 +254,39 @@ export default function IntentsPage() {
                         {b.name} ({b.adb_identifier})
                     </option>
                 ))}
-            </select>
-        </div>
+            </Select>
+        </FormField>
 
         {/* Date Filter */}
-        <div className={`input-group ${styles.filterGroup}`}>
-            <label className={`input-label ${styles.filterLabel}`}>Filter by Date</label>
-            <input
+        <FormField label="Filter by Date">
+            <Input
                 type="date"
                 value={filterDate}
                 onChange={(e) => handleDateFilterChange(e.target.value)}
-                className={`input-field ${styles.filterControl}`}
+                className={styles.filterControl}
             />
-        </div>
+        </FormField>
 
         {/* Clear Filters Button */}
         {(selectedClientId || selectedBoardId || filterDate) && (
-            <button
+            <Button
                 onClick={handleClearFilters}
-                className={`btn btn-ghost ${styles.clearFiltersButton}`}
+                variant="danger"
+                className={styles.clearFiltersButton}
             >
                 ✕ Clear Filters
-            </button>
+            </Button>
         )}
-      </div>
+      </Card>
 
-      <div className="glass-panel" style={{ overflow: "hidden" }}>
+      <Card>
         {loading ? (
-          <div style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>
-            Loading intents...
-          </div>
+          <LoadingState label="Loading intents..." />
         ) : error ? (
-          <div style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--error))" }}>
-            Error: {error}
-          </div>
+          <ErrorState message={`Error: ${error}`} />
         ) : (
-          <div className="nezu-table-container">
-            <table className="nezu-table">
-              <thead className="nezu-table__header">
+          <Table label="Intents">
+              <thead>
                 <tr>
                   <th>ID</th>
                   <th>Command</th>
@@ -296,33 +299,30 @@ export default function IntentsPage() {
               <tbody>
                 {intents.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>
-                      No intents found matching criteria.
-                    </td>
+                    <TableEmpty colSpan={6} label="No intents found matching criteria." />
                   </tr>
                 ) : (
                   intents.map((intent) => (
-                    <tr key={intent.id} className="nezu-table__row">
-                      <td className="nezu-table__cell">#{intent.id}</td>
-                      <td className="nezu-table__cell nezu-table__emphasis">{intent.command_key}</td>
+                    <tr key={intent.id}>
+                      <td>#{intent.id}</td>
+                      <td>{intent.command_key}</td>
 
                       {/* Board column with name and ADB identifier */}
-                      <td className="nezu-table__cell">
+                      <td>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                               <span style={{ fontWeight: 500 }}>{intent.board?.name || "Unknown"}</span>
-                              <span className="nezu-table__meta">{intent.board?.adb_identifier}</span>
+                              <small>{intent.board?.adb_identifier}</small>
                           </div>
                       </td>
 
                       {/* Client column - showing which client owns the board */}
-                      <td className="nezu-table__cell">
-                          <span className="nezu-table__emphasis">
+                      <td>
+                          <strong>
                               {intent.board?.client_detail?.name || "Unknown"}
-                          </span>
+                          </strong>
                       </td>
 
                       <td
-                        className="nezu-table__cell"
                         style={{
                           cursor: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? "pointer" : "default",
                           userSelect: "none"
@@ -335,130 +335,70 @@ export default function IntentsPage() {
                           }
                         }}
                       >
-                        <span className={`status-chip ${getStatusClass(intent.status)}`}>
+                        <StatusBadge variant={getStatusVariant(intent.status)}>
                           {intent.status} {intent.status === 'ERROR' && '🔍'}
-                        </span>
+                        </StatusBadge>
                       </td>
 
-                      <td className="nezu-table__cell nezu-table__cell--muted">
+                      <td>
                         {new Date(intent.executed_at).toLocaleString()}
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
-            </table>
-          </div>
+          </Table>
         )}
-      </div>
+      </Card>
 
       {meta && (
-        <div className={styles.pagination}>
-          <span className={styles.paginationTotal}>
-            {meta.count} total records
-          </span>
-          <div className={styles.paginationControls}>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((page) => page - 1)}
-            >
-              Previous
-            </button>
-            <span className={styles.paginationIndicator}>
-              Page {meta.page} of {totalPages}
-            </span>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={!meta.next}
-              onClick={() => setCurrentPage((page) => page + 1)}
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        <Pagination page={meta.page} totalPages={totalPages} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setCurrentPage((page) => page - 1)} onNext={() => setCurrentPage((page) => page + 1)} />
       )}
 
       {/* Error Details Modal */}
       {errorModalOpen && selectedIntent && (
-        <div
-          className="nezu-modal-overlay"
-          onClick={handleCloseErrorModal}
-        >
-          <div
-            className="nezu-modal nezu-modal--error"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="nezu-modal__header">
-              <div>
-                <h2 className="nezu-modal__title">
-                  Error Details
-                </h2>
-                <p className="nezu-modal__description">
-                  Intent #{selectedIntent.id} - {selectedIntent.command_key}
-                </p>
-              </div>
-              <button
-                onClick={handleCloseErrorModal}
-                className="nezu-modal__close"
-              >
-                ✕
-              </button>
-            </div>
+        <Modal open title="Error Details" description={`Intent #${selectedIntent.id} - ${selectedIntent.command_key}`} onClose={handleCloseErrorModal} footer={<Button variant="primary" onClick={handleCloseErrorModal}>Close</Button>}>
 
             {/* Modal Body */}
-            <div className="nezu-modal__body">
-              <div className="nezu-modal__section">
-                <h3 className="nezu-modal__label">
+            <div>
+              <div>
+                <h3>
                   Board
                 </h3>
-                <p className="nezu-modal__value">
+                <p>
                   {selectedIntent.board?.name} ({selectedIntent.board?.adb_identifier})
                 </p>
               </div>
 
-              <div className="nezu-modal__section">
-                <h3 className="nezu-modal__label">
+              <div>
+                <h3>
                   Command
                 </h3>
-                <code className="nezu-modal__code">
+                <code>
                   {selectedIntent.resolved_command}
                 </code>
               </div>
 
-              <div className="nezu-modal__section">
-                <h3 className="nezu-modal__label">
+              <div>
+                <h3>
                   Error Output
                 </h3>
-                <pre className="nezu-modal__error-output">
+                <pre>
                   {selectedIntent.output || "No error output available"}
                 </pre>
               </div>
 
               <div>
-                <h3 className="nezu-modal__label">
+                <h3>
                   Executed At
                 </h3>
-                <p className="nezu-modal__value">
+                <p>
                   {new Date(selectedIntent.executed_at).toLocaleString()}
                 </p>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="nezu-modal__footer">
-              <button
-                onClick={handleCloseErrorModal}
-                className="btn btn-primary"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
     </div>
