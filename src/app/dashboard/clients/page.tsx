@@ -11,7 +11,7 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Pagination, Table } from "@/shared/components";
+import { Button, ErrorState, LoadingState, Modal, PageHeader, Pagination, StatusBadge, Table, TableEmpty } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -164,7 +164,7 @@ export default function ClientsPage() {
   if (loading && clients.length === 0) {
     return (
       <div className={styles.container}>
-        Loading clients...
+        <LoadingState label="Loading clients..." />
       </div>
 
     );
@@ -172,39 +172,9 @@ export default function ClientsPage() {
 
   return (
     <div className={styles.container}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "2rem",
-        }}
-      >
-        <h1
-          className={styles.title}
-          style={{ marginBottom: 0 }}
-        >
-          Client Management
-        </h1>
+      <PageHeader title="Client Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New Client</Button>} />
 
-        <Button
-          variant="primary"
-          onClick={() =>
-            handleOpenModal(null)
-          }
-        >
-          + New Client
-        </Button>
-      </div>
-
-      {error && (
-        <div
-          className="error-card"
-          style={{ marginBottom: "1rem" }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <ErrorState message={error} />}
 
       <Table label="Client management">
           <thead>
@@ -221,17 +191,7 @@ export default function ClientsPage() {
 
           <tbody>
             {clients.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  style={{
-                    textAlign: "center",
-                    padding: "2rem",
-                  }}
-                >
-                  No clients found.
-                </td>
-              </tr>
+              <TableEmpty colSpan={7} label="No clients found." />
             ) : (
               clients.map((client) => (
                 <tr key={client.id}>
@@ -251,18 +211,7 @@ export default function ClientsPage() {
                   </td>
 
                   <td>
-                    <span
-                      className={`${styles.badge} ${
-                        client.subscription_level ===
-                        "FREE"
-                          ? styles.badgeInactive
-                          : styles.badgeActive
-                      }`}
-                    >
-                      {
-                        client.subscription_level
-                      }
-                    </span>
+                    <StatusBadge variant={client.subscription_level === "FREE" ? "neutral" : "success"}>{client.subscription_level}</StatusBadge>
                   </td>
 
                   <td>
@@ -281,25 +230,21 @@ export default function ClientsPage() {
                         gap: "0.5rem",
                       }}
                     >
-                      <button
-                        className={
-                          styles.actionButton
-                        }
+                      <Button type="button" variant="ghost"
                         onClick={() =>
                           handleOpenModal(client)
                         }
                       >
                         ✎
-                      </button>
+                      </Button>
 
-                      <button
-                        className={`${styles.actionButton} ${styles.deleteButton}`}
+                      <Button type="button" variant="danger"
                         onClick={() =>
                           handleDelete(client.id)
                         }
                       >
                         🗑
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -312,17 +257,7 @@ export default function ClientsPage() {
         <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />
       )}
 
-      {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <h2
-              className={styles.modalTitle}
-            >
-              {editingClient
-                ? "Edit Client"
-                : "Create New Client"}
-            </h2>
-
+      <Modal open={isModalOpen} title={editingClient ? "Edit Client" : "Create New Client"} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
                 <label>Client Name</label>
@@ -452,9 +387,7 @@ export default function ClientsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

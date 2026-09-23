@@ -19,7 +19,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Pagination, Table } from "@/shared/components";
+import { Button, Modal, Pagination, Table } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -409,21 +409,7 @@ export default function BoardsPage() {
 
       {meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}
 
-      {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div
-              style={{ marginBottom: "1rem" }}
-            >
-              <h2
-                className={styles.modalTitle}
-              >
-                {editingBoard
-                  ? "Edit Board"
-                  : "Register New Board"}
-              </h2>
-            </div>
-
+      <Modal open={isModalOpen} title={editingBoard ? "Edit Board" : "Register New Board"} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
                 <label>Display Name</label>
@@ -580,9 +566,7 @@ export default function BoardsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

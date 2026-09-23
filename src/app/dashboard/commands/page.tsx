@@ -18,7 +18,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, Pagination, Table } from "@/shared/components";
+import { Button, Modal, Pagination, Table } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -231,16 +231,7 @@ export default function CommandsPage() {
 
       {meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}
 
-      {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div style={{ marginBottom: '1rem' }}>
-              <h2 className={styles.modalTitle} style={{ marginBottom: '0.5rem' }}>{editingCommand ? "Edit Command" : "New ADB Command"}</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                {editingCommand ? "Modify this command's execution string and accessibility." : "Define a new command to be executed on the boards."}
-              </p>
-            </div>
-            
+      <Modal open={isModalOpen} title={editingCommand ? "Edit Command" : "New ADB Command"} description={editingCommand ? "Modify this command's execution string and accessibility." : "Define a new command to be executed on the boards."} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
                 <label>Command Key (Identifier)</label>
@@ -353,9 +344,7 @@ export default function CommandsPage() {
                 <button type="submit" className={styles.primaryButton} disabled={submitting}>{submitting ? "Saving..." : "Save Command"}</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }
