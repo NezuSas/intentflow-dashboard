@@ -2,10 +2,10 @@
 
 import { authService, authTokenManager } from "@/composition";
 import { useTheme } from "@/contexts/ThemeProvider";
+import { dashboardNavigation } from "@/shared/navigation/dashboardNavigation";
 import { AppstoreOutlined, CloudServerOutlined, DashboardOutlined, FileTextOutlined, LogoutOutlined, MacCommandOutlined, MenuFoldOutlined, MenuUnfoldOutlined, MoonOutlined, SettingOutlined, SunOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout, Menu, Tooltip, Typography, theme } from "antd";
 import type { MenuProps } from "antd";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -35,16 +35,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true; window.removeEventListener("intentflow:logout", redirectToLogin); };
   }, [router]);
 
-  const items = useMemo<MenuProps["items"]>(() => [
-    { key: "/dashboard", icon: <DashboardOutlined />, label: <Link href="/dashboard">Overview</Link> },
-    { key: "/dashboard/intents", icon: <FileTextOutlined />, label: <Link href="/dashboard/intents">Intents</Link> },
-    { key: "/dashboard/users", icon: <UserOutlined />, label: <Link href="/dashboard/users">Users</Link> },
-    { key: "/dashboard/clients", icon: <TeamOutlined />, label: <Link href="/dashboard/clients">Clients</Link> },
-    { key: "/dashboard/boards", icon: <CloudServerOutlined />, label: <Link href="/dashboard/boards">Boards</Link> },
-    { key: "/dashboard/commands", icon: <MacCommandOutlined />, label: <Link href="/dashboard/commands">Commands</Link> },
-    { key: "/dashboard/subscriptions", icon: <AppstoreOutlined />, label: <Link href="/dashboard/subscriptions">Subscriptions</Link> },
-    { key: "/dashboard/settings", icon: <SettingOutlined />, label: <Link href="/dashboard/settings">Settings</Link> },
-  ], []);
+  const items = useMemo<MenuProps["items"]>(() => {
+    const icons = { dashboard: <DashboardOutlined />, intents: <FileTextOutlined />, users: <UserOutlined />, clients: <TeamOutlined />, boards: <CloudServerOutlined />, commands: <MacCommandOutlined />, subscriptions: <AppstoreOutlined />, settings: <SettingOutlined /> };
+    return dashboardNavigation.map((item) => ({ key: item.key, label: item.label, icon: icons[item.icon] }));
+  }, []);
 
   if (!authChecked) return <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>Validating session...</Flex>;
 
@@ -57,7 +51,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <Tooltip title={collapsed ? "Expandir navegación" : "Contraer navegación"}><Button type="text" shape="circle" aria-label="Toggle navigation" icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} onClick={() => setCollapsed((value) => !value)} /></Tooltip>
         </Flex>
       </Flex>
-      <Menu theme={currentTheme === "dark" ? "dark" : "light"} mode="inline" selectedKeys={[pathname]} items={items} style={{ background: "transparent", borderInlineEnd: 0, padding: 8 }} />
+      <Menu theme={currentTheme === "dark" ? "dark" : "light"} mode="inline" selectedKeys={[pathname]} items={items} onClick={({ key }) => router.push(key)} style={{ background: "transparent", borderInlineEnd: 0, padding: 8 }} />
       <div style={{ position: "absolute", insetInline: 0, bottom: 0, padding: 8, borderTop: `1px solid ${token.colorBorderSecondary}` }}>
         <Button danger type="text" icon={<LogoutOutlined />} block onClick={() => void authService.logout()}> {!collapsed && "Logout"}</Button>
       </div>
