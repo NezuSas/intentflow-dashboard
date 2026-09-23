@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "../users/users.module.css";
-import { subscriptionService, SubscriptionPlan, ClientSubscription } from "@/services/subscriptionService";
+import { subscriptionService, SubscriptionPlan, ClientSubscription } from "@/features/subscriptions";
 import {
   Client,
   clientService,
-} from "@/services/clientService";
+} from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 
 export default function SubscriptionsPage() {

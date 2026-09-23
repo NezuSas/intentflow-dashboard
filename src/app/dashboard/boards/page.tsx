@@ -6,15 +6,15 @@ import styles from "../users/users.module.css";
 import {
   Board,
   boardService,
-} from "@/services/boardService";
+} from "@/features/boards";
 import {
   Client,
   clientService,
-} from "@/services/clientService";
+} from "@/features/clients";
 import {
   ADBVersion,
   versionService,
-} from "@/services/versionService";
+} from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
 
 interface BoardFormData {

@@ -2,15 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "../dashboard.module.css";
-import { intentService, Intent } from "@/services/intentService";
+import { intentService, Intent } from "@/features/intents";
 import {
   Board,
   boardService,
-} from "@/services/boardService";
+} from "@/features/boards";
 import {
   Client,
   clientService,
-} from "@/services/clientService";
+} from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 
 export default function IntentsPage() {
