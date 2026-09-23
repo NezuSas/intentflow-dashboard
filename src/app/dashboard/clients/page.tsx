@@ -11,6 +11,9 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
+import type { PageMeta } from "@/core/Pagination";
+
+const PAGE_SIZE = 20;
 
 interface ClientFormData {
   name: string;
@@ -34,6 +37,9 @@ export default function ClientsPage() {
 
   const [loading, setLoading] =
     useState(true);
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [error, setError] =
     useState<string | null>(null);
@@ -53,10 +59,9 @@ export default function ClientsPage() {
     try {
       setLoading(true);
 
-      const data =
-        await clientService.getClients();
-
-      setClients(data);
+      const response = await clientService.listClients({ page, pageSize: PAGE_SIZE });
+      setClients(response.data);
+      setMeta(response.meta);
       setError(null);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
@@ -67,7 +72,7 @@ export default function ClientsPage() {
 
   useEffect(() => {
     void fetchClients();
-  }, []);
+  }, [page]);
 
   const handleOpenModal = (
     client: Client | null = null
@@ -96,6 +101,8 @@ export default function ClientsPage() {
     e: React.FormEvent
   ) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
 
     try {
       if (editingClient) {
@@ -117,6 +124,8 @@ export default function ClientsPage() {
           err
         )}`
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -156,6 +165,7 @@ export default function ClientsPage() {
       <div className={styles.container}>
         Loading clients...
       </div>
+
     );
   }
 
@@ -298,6 +308,16 @@ export default function ClientsPage() {
           </tbody>
         </table>
       </div>
+
+      {meta && (
+        <div className="table-pagination">
+          <span>{meta.count} total · Page {meta.page} of {Math.max(1, Math.ceil(meta.count / meta.pageSize))}</span>
+          <div>
+            <button className={styles.secondaryButton} disabled={!meta.previous} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button>
+            <button className={styles.secondaryButton} disabled={!meta.next} onClick={() => setPage((current) => current + 1)}>Next</button>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className={styles.modalOverlay}>

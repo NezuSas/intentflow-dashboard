@@ -2,9 +2,11 @@ import {
   Board,
   BoardPayload,
 } from "./Board";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export interface BoardRepository {
-  getAll(): Promise<Board[]>;
+  list(query?: ListQuery): Promise<PaginatedResponse<Board>>;
+  getCatalog(client?: number): Promise<Array<Pick<Board, "id" | "name" | "client">>>;
 
   create(
     data: BoardPayload

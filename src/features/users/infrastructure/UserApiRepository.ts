@@ -8,6 +8,8 @@ import type {
 import type {
   UserRepository,
 } from "../domain/UserRepository";
+import { buildListPath, mapPaginatedResponse } from "@/core/Pagination";
+import type { ListQuery, PaginatedResponse, ApiPaginatedEnvelope } from "@/core/Pagination";
 
 interface ApiEnvelope<T> {
   data?: T;
@@ -21,13 +23,11 @@ export class UserApiRepository
     private readonly http: HttpClient
   ) {}
 
-  async getAll(): Promise<User[]> {
-    const response =
-      await this.http.get<
-        ApiEnvelope<User[]>
-      >("/auth/users/");
-
-    return response.data ?? [];
+  async list(query: ListQuery = {}): Promise<PaginatedResponse<User>> {
+    const response = await this.http.get<ApiPaginatedEnvelope<User>>(
+      buildListPath("/auth/users/", query)
+    );
+    return mapPaginatedResponse(response);
   }
 
   async toggleActive(

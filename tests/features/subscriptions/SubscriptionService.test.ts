@@ -29,8 +29,15 @@ class FakePlanRepository
       SubscriptionPlan[]
   ) {}
 
-  async getAll() {
-    return this.plans;
+  async list() {
+    return {
+      data: this.plans,
+      meta: { count: this.plans.length, page: 1, pageSize: 20, next: null, previous: null },
+    };
+  }
+
+  async getCatalog() {
+    return this.plans.map(({ id, name, price, plan_type }) => ({ id, name, price, plan_type }));
   }
 
   async create():
@@ -51,8 +58,11 @@ class FakeClientSubscriptionRepository
       ClientSubscription[]
   ) {}
 
-  async getAll() {
-    return this.subscriptions;
+  async list() {
+    return {
+      data: this.subscriptions,
+      meta: { count: this.subscriptions.length, page: 1, pageSize: 20, next: null, previous: null },
+    };
   }
 
   async create():

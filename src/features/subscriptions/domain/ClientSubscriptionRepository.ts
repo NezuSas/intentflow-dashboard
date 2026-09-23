@@ -2,9 +2,10 @@ import type {
   ClientSubscription,
   ClientSubscriptionPayload,
 } from "./Subscription";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export interface ClientSubscriptionRepository {
-  getAll(): Promise<ClientSubscription[]>;
+  list(query?: ListQuery): Promise<PaginatedResponse<ClientSubscription>>;
 
   create(
     data: ClientSubscriptionPayload

@@ -57,6 +57,9 @@ export class AuthenticatedFetcher {
 
       if (!accessToken) {
         this.events.notifyLogout();
+        throw new Error(
+          "Authentication refresh failed"
+        );
       }
     }
 
@@ -96,6 +99,9 @@ export class AuthenticatedFetcher {
           );
       } else {
         this.events.notifyLogout();
+        throw new Error(
+          "Authentication refresh failed"
+        );
       }
     }
 

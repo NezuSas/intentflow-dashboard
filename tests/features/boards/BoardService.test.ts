@@ -28,9 +28,15 @@ class FakeBoardRepository
       Board[]
   ) {}
 
-  async getAll():
-    Promise<Board[]> {
-    return this.boards;
+  async list() {
+    return {
+      data: this.boards,
+      meta: { count: this.boards.length, page: 1, pageSize: 20, next: null, previous: null },
+    };
+  }
+
+  async getCatalog() {
+    return this.boards.map(({ id, name, client }) => ({ id, name, client }));
   }
 
   async create(

@@ -10,6 +10,8 @@ import type {
 import type {
   ClientSubscriptionRepository,
 } from "../domain/ClientSubscriptionRepository";
+import { buildListPath, mapPaginatedResponse } from "@/core/Pagination";
+import type { ListQuery, PaginatedResponse, ApiPaginatedEnvelope } from "@/core/Pagination";
 
 interface ApiEnvelope<T> {
   data?: T;
@@ -22,14 +24,11 @@ export class ClientSubscriptionApiRepository
     private readonly http: HttpClient
   ) {}
 
-  async getAll():
-    Promise<ClientSubscription[]> {
-    const response =
-      await this.http.get<
-        ApiEnvelope<ClientSubscription[]>
-      >("/client-subscriptions/");
-
-    return response.data ?? [];
+  async list(query: ListQuery = {}): Promise<PaginatedResponse<ClientSubscription>> {
+    const response = await this.http.get<ApiPaginatedEnvelope<ClientSubscription>>(
+      buildListPath("/client-subscriptions/", query)
+    );
+    return mapPaginatedResponse(response);
   }
 
   async create(

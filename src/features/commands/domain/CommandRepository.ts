@@ -2,9 +2,10 @@ import type {
   ADBCommand,
   CommandPayload,
 } from "./Command";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export interface CommandRepository {
-  getAll(): Promise<ADBCommand[]>;
+  list(query?: ListQuery): Promise<PaginatedResponse<ADBCommand>>;
 
   create(
     data: CommandPayload

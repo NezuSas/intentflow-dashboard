@@ -6,6 +6,7 @@ import type {
 import type {
   ClientRepository,
 } from "../domain/ClientRepository";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export class ClientService {
   constructor(
@@ -13,8 +14,16 @@ export class ClientService {
       ClientRepository
   ) {}
 
-  getClients(): Promise<Client[]> {
-    return this.repository.getAll();
+  listClients(query?: ListQuery): Promise<PaginatedResponse<Client>> {
+    return this.repository.list(query);
+  }
+
+  async getClients(): Promise<Client[]> {
+    return (await this.listClients({ page: 1, pageSize: 20 })).data;
+  }
+
+  getClientCatalog(): Promise<Array<Pick<Client, "id" | "name">>> {
+    return this.repository.getCatalog();
   }
 
   createClient(

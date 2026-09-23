@@ -2,9 +2,11 @@ import type {
   SubscriptionPlan,
   SubscriptionPlanPayload,
 } from "./Subscription";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export interface SubscriptionPlanRepository {
-  getAll(): Promise<SubscriptionPlan[]>;
+  list(query?: ListQuery): Promise<PaginatedResponse<SubscriptionPlan>>;
+  getCatalog(): Promise<Array<Pick<SubscriptionPlan, "id" | "name" | "price" | "plan_type">>>;
 
   create(
     data: SubscriptionPlanPayload

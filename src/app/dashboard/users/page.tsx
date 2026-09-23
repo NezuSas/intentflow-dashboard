@@ -10,10 +10,16 @@ import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
+import type { PageMeta } from "@/core/Pagination";
+
+const PAGE_SIZE = 20;
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Modal state
@@ -26,15 +32,14 @@ export default function UsersPage() {
     role: "USER"
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { void fetchUsers(); }, [page]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await userService.getUsers();
-      setUsers(data);
+      const response = await userService.listUsers({ page, pageSize: PAGE_SIZE });
+      setUsers(response.data);
+      setMeta(response.meta);
       setError(null);
     } catch (err: unknown) {
       console.error(
@@ -70,18 +75,22 @@ export default function UsersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    if (!editingUser) {
+      alert("User creation is not available through this screen.");
+      return;
+    }
+    setSubmitting(true);
     try {
       if (editingUser) {
         await userService.updateUser(editingUser.id, formData);
-      } else {
-        // Implement create if needed, but usually we use registration
-        // For now, let's treat it as edit only or implement create
-        alert("Create functionality not fully implemented on server yet. Use registration.");
       }
       setIsModalOpen(false);
-      fetchUsers();
+      await fetchUsers();
     } catch (err: unknown) {
       alert(`Error saving user: ${getErrorMessage(err)}`);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -130,6 +139,16 @@ export default function UsersPage() {
         <h1 className={styles.title} style={{ marginBottom: 0 }}>User Management</h1>
         <button className={styles.primaryButton} onClick={() => handleOpenModal(null)}>+ New User</button>
       </div>
+
+      {meta && (
+        <div className="table-pagination">
+          <span>{meta.count} total · Page {meta.page} of {Math.max(1, Math.ceil(meta.count / meta.pageSize))}</span>
+          <div>
+            <button className={styles.secondaryButton} disabled={!meta.previous} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button>
+            <button className={styles.secondaryButton} disabled={!meta.next} onClick={() => setPage((current) => current + 1)}>Next</button>
+          </div>
+        </div>
+      )}
 
       {error && <div className="error-card" style={{ marginBottom: '1rem' }}>{error}</div>}
 
@@ -248,7 +267,7 @@ export default function UsersPage() {
               </div>
               <div className={styles.modalActions}>
                 <button type="button" className={styles.secondaryButton} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton}>Save User</button>
+                <button type="submit" className={styles.primaryButton} disabled={submitting || !editingUser}>{submitting ? "Saving..." : "Save User"}</button>
               </div>
             </form>
           </div>
