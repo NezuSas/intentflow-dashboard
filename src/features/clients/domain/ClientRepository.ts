@@ -2,9 +2,11 @@ import type {
   Client,
   ClientPayload,
 } from "./Client";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export interface ClientRepository {
-  getAll(): Promise<Client[]>;
+  list(query?: ListQuery): Promise<PaginatedResponse<Client>>;
+  getCatalog(): Promise<Array<Pick<Client, "id" | "name">>>;
 
   create(
     data: ClientPayload

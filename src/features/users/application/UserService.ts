@@ -6,6 +6,7 @@ import type {
 import type {
   UserRepository,
 } from "../domain/UserRepository";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export class UserService {
   constructor(
@@ -13,8 +14,8 @@ export class UserService {
       UserRepository
   ) {}
 
-  getUsers(): Promise<User[]> {
-    return this.repository.getAll();
+  listUsers(query?: ListQuery): Promise<PaginatedResponse<User>> {
+    return this.repository.list(query);
   }
 
   toggleActive(

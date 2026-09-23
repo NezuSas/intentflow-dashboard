@@ -8,6 +8,8 @@ import type {
 import type {
   CommandRepository,
 } from "../domain/CommandRepository";
+import { buildListPath, mapPaginatedResponse } from "@/core/Pagination";
+import type { ListQuery, PaginatedResponse, ApiPaginatedEnvelope } from "@/core/Pagination";
 
 interface ApiEnvelope<T> {
   data?: T;
@@ -21,13 +23,11 @@ export class CommandApiRepository
     private readonly http: HttpClient
   ) {}
 
-  async getAll(): Promise<ADBCommand[]> {
-    const response =
-      await this.http.get<
-        ApiEnvelope<ADBCommand[]>
-      >("/adb-commands/");
-
-    return response.data ?? [];
+  async list(query: ListQuery = {}): Promise<PaginatedResponse<ADBCommand>> {
+    const response = await this.http.get<ApiPaginatedEnvelope<ADBCommand>>(
+      buildListPath("/adb-commands/", query)
+    );
+    return mapPaginatedResponse(response);
   }
 
   async create(

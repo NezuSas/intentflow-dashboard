@@ -8,6 +8,8 @@ import type {
 import type {
   ClientRepository,
 } from "../domain/ClientRepository";
+import { buildListPath, mapPaginatedResponse } from "@/core/Pagination";
+import type { ListQuery, PaginatedResponse, ApiPaginatedEnvelope } from "@/core/Pagination";
 
 interface ApiEnvelope<T> {
   data?: T;
@@ -21,12 +23,15 @@ export class ClientApiRepository
     private readonly http: HttpClient
   ) {}
 
-  async getAll(): Promise<Client[]> {
-    const response =
-      await this.http.get<
-        ApiEnvelope<Client[]>
-      >("/clients/");
+  async list(query: ListQuery = {}): Promise<PaginatedResponse<Client>> {
+    const response = await this.http.get<ApiPaginatedEnvelope<Client>>(
+      buildListPath("/clients/", query)
+    );
+    return mapPaginatedResponse(response);
+  }
 
+  async getCatalog(): Promise<Array<Pick<Client, "id" | "name">>> {
+    const response = await this.http.get<ApiEnvelope<Array<Pick<Client, "id" | "name">>>>("/clients/catalog/");
     return response.data ?? [];
   }
 

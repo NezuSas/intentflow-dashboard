@@ -12,6 +12,7 @@ import type {
 import type {
   ClientSubscriptionRepository,
 } from "../domain/ClientSubscriptionRepository";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export class SubscriptionService {
   constructor(
@@ -21,15 +22,24 @@ export class SubscriptionService {
       ClientSubscriptionRepository
   ) {}
 
-  getPlans():
-    Promise<SubscriptionPlan[]> {
-    return this.planRepository.getAll();
+  listPlans(query?: ListQuery): Promise<PaginatedResponse<SubscriptionPlan>> {
+    return this.planRepository.list(query);
   }
 
-  getClientSubscriptions():
-    Promise<ClientSubscription[]> {
-    return this.clientSubscriptionRepository
-      .getAll();
+  async getPlans(): Promise<SubscriptionPlan[]> {
+    return (await this.listPlans({ page: 1, pageSize: 20 })).data;
+  }
+
+  getPlanCatalog(): Promise<Array<Pick<SubscriptionPlan, "id" | "name" | "price" | "plan_type">>> {
+    return this.planRepository.getCatalog();
+  }
+
+  listClientSubscriptions(query?: ListQuery): Promise<PaginatedResponse<ClientSubscription>> {
+    return this.clientSubscriptionRepository.list(query);
+  }
+
+  async getClientSubscriptions(): Promise<ClientSubscription[]> {
+    return (await this.listClientSubscriptions({ page: 1, pageSize: 20 })).data;
   }
 
   createPlan(

@@ -6,6 +6,7 @@ import type {
 import type {
   CommandRepository,
 } from "../domain/CommandRepository";
+import type { ListQuery, PaginatedResponse } from "@/core/Pagination";
 
 export class CommandService {
   constructor(
@@ -13,8 +14,12 @@ export class CommandService {
       CommandRepository
   ) {}
 
-  getCommands(): Promise<ADBCommand[]> {
-    return this.repository.getAll();
+  listCommands(query?: ListQuery): Promise<PaginatedResponse<ADBCommand>> {
+    return this.repository.list(query);
+  }
+
+  async getCommands(): Promise<ADBCommand[]> {
+    return (await this.listCommands({ page: 1, pageSize: 20 })).data;
   }
 
   createCommand(

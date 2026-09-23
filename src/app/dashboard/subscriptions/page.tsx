@@ -21,6 +21,8 @@ export default function SubscriptionsPage() {
   const [clientSubs, setClientSubs] = useState<ClientSubscription[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmittingPlan, setIsSubmittingPlan] = useState(false);
+  const [isSubmittingSubscription, setIsSubmittingSubscription] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Modal states
@@ -54,17 +56,27 @@ export default function SubscriptionsPage() {
       const [plansData, subsData, clientsData] = await Promise.all([
         subscriptionService.getPlans(),
         subscriptionService.getClientSubscriptions(),
-        clientService.getClients()
+        clientService.getClientCatalog()
       ]);
       setPlans(plansData);
       setClientSubs(subsData);
-      setClients(clientsData);
+      setClients(clientsData as Client[]);
       setError(null);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
+  };
+
+  const refreshPlans = async () => {
+    const plansData = await subscriptionService.getPlans();
+    setPlans(plansData);
+  };
+
+  const refreshClientSubscriptions = async () => {
+    const subscriptionsData = await subscriptionService.getClientSubscriptions();
+    setClientSubs(subscriptionsData);
   };
 
   const handleOpenPlanModal = (plan: SubscriptionPlan | null = null) => {
@@ -123,6 +135,8 @@ export default function SubscriptionsPage() {
 
   const handlePlanSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingPlan) return;
+    setIsSubmittingPlan(true);
     try {
       if (editingItem) {
         await subscriptionService.updatePlan(editingItem.id, planForm);
@@ -130,16 +144,20 @@ export default function SubscriptionsPage() {
         await subscriptionService.createPlan(planForm);
       }
       setActiveModal(null);
-      void fetchData();
+      await refreshPlans();
     } catch (err: unknown) {
       alert(
         `Error saving plan: ${getErrorMessage(err)}`
       );
+    } finally {
+      setIsSubmittingPlan(false);
     }
   };
 
   const handleSubSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingSubscription) return;
+    setIsSubmittingSubscription(true);
     try {
       const payload = {
         ...subForm,
@@ -153,11 +171,13 @@ export default function SubscriptionsPage() {
         await subscriptionService.createClientSubscription(payload);
       }
       setActiveModal(null);
-      void fetchData();
+      await refreshClientSubscriptions();
     } catch (err: unknown) {
       alert(
         `Error saving subscription: ${getErrorMessage(err)}`
       );
+    } finally {
+      setIsSubmittingSubscription(false);
     }
   };
 
@@ -165,7 +185,7 @@ export default function SubscriptionsPage() {
     if (!confirm("Delete this plan?")) return;
     try {
       await subscriptionService.deletePlan(id);
-      void fetchData();
+      await refreshPlans();
     } catch (err: unknown) {
       alert(getErrorMessage(err));
     }
@@ -175,7 +195,7 @@ export default function SubscriptionsPage() {
     if (!confirm("Cancel/Delete this subscription?")) return;
     try {
       await subscriptionService.deleteClientSubscription(id);
-      void fetchData();
+      await refreshClientSubscriptions();
     } catch (err: unknown) {
       alert(getErrorMessage(err));
     }
@@ -324,7 +344,7 @@ export default function SubscriptionsPage() {
               </div>
               <div className={styles.modalActions}>
                 <button type="button" className={styles.secondaryButton} onClick={() => setActiveModal(null)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton}>Save Plan</button>
+                <button type="submit" className={styles.primaryButton} disabled={isSubmittingPlan}>{isSubmittingPlan ? "Saving..." : "Save Plan"}</button>
               </div>
             </form>
           </div>
@@ -378,7 +398,7 @@ export default function SubscriptionsPage() {
               </div>
               <div className={styles.modalActions}>
                 <button type="button" className={styles.secondaryButton} onClick={() => setActiveModal(null)}>Cancel</button>
-                <button type="submit" className={styles.primaryButton}>Save Subscription</button>
+                <button type="submit" className={styles.primaryButton} disabled={isSubmittingSubscription}>{isSubmittingSubscription ? "Saving..." : "Save Subscription"}</button>
               </div>
             </form>
           </div>

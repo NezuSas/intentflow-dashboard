@@ -10,6 +10,8 @@ import type {
 import type {
   SubscriptionPlanRepository,
 } from "../domain/SubscriptionPlanRepository";
+import { buildListPath, mapPaginatedResponse } from "@/core/Pagination";
+import type { ListQuery, PaginatedResponse, ApiPaginatedEnvelope } from "@/core/Pagination";
 
 interface ApiEnvelope<T> {
   data?: T;
@@ -22,13 +24,15 @@ export class SubscriptionPlanApiRepository
     private readonly http: HttpClient
   ) {}
 
-  async getAll():
-    Promise<SubscriptionPlan[]> {
-    const response =
-      await this.http.get<
-        ApiEnvelope<SubscriptionPlan[]>
-      >("/subscription-plans/");
+  async list(query: ListQuery = {}): Promise<PaginatedResponse<SubscriptionPlan>> {
+    const response = await this.http.get<ApiPaginatedEnvelope<SubscriptionPlan>>(
+      buildListPath("/subscription-plans/", query)
+    );
+    return mapPaginatedResponse(response);
+  }
 
+  async getCatalog(): Promise<Array<Pick<SubscriptionPlan, "id" | "name" | "price" | "plan_type">>> {
+    const response = await this.http.get<ApiEnvelope<Array<Pick<SubscriptionPlan, "id" | "name" | "price" | "plan_type">>>>("/subscription-plans/catalog/");
     return response.data ?? [];
   }
 
