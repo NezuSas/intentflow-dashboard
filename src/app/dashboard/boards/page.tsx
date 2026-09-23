@@ -318,7 +318,7 @@ export default function BoardsPage() {
                   <td
                     style={{
                       fontWeight: 600,
-                      color: "var(--primary)",
+                      color: "hsl(var(--primary))",
                     }}
                   >
                     {board.name}

@@ -191,7 +191,7 @@ export default function IntentsPage() {
             Loading intents...
           </div>
         ) : error ? (
-          <div style={{ padding: "4rem", textAlign: "center", color: "#f87171" }}>
+          <div style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--error))" }}>
             Error: {error}
           </div>
         ) : (

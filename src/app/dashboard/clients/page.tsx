@@ -230,7 +230,7 @@ export default function ClientsPage() {
                   <td
                     style={{
                       fontWeight: 600,
-                      color: "var(--primary)",
+                      color: "hsl(var(--primary))",
                     }}
                   >
                     {client.name}
