@@ -188,18 +188,9 @@ export default function CommandsPage() {
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {command.subscription_plans_detail && command.subscription_plans_detail.length > 0 ? (
                         command.subscription_plans_detail.map((plan) => (
-                          <span 
+                          <span
                             key={plan.id}
-                            style={{
-                              padding: '0.25rem 0.75rem',
-                              borderRadius: '1rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                              background: `linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2))`,
-                              border: '1px solid hsl(var(--primary) / 0.3)',
-                              color: 'hsl(var(--primary))',
-                              whiteSpace: 'nowrap'
-                            }}
+                            className="status-chip status-chip--neutral"
                           >
                             {plan.name}
                           </span>

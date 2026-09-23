@@ -12,10 +12,11 @@
 
 .tableContainer {
   background: var(--surface);
-  border-radius: 1rem;
+  border-radius: var(--radius-panel);
   padding: 1rem;
   border: 1px solid hsl(var(--border));
   overflow-x: auto;
+  box-shadow: var(--shadow-sm);
 }
 
 .table {
@@ -26,9 +27,13 @@
 
 .table th {
   padding: 1rem;
-  border-bottom: 2px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
   color: var(--text-secondary);
+  font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .table td {
@@ -36,21 +41,36 @@
   border-bottom: 1px solid hsl(var(--border));
 }
 
+.table tbody tr {
+  transition: background-color var(--transition-speed) ease;
+}
+
+.table tbody tr:hover {
+  background: hsl(var(--muted) / 0.7);
+}
+
 .badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
   padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
   font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .badgeActive {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background: hsl(var(--primary) / 0.1);
+  border-color: hsl(var(--primary) / 0.25);
+  color: hsl(var(--primary));
 }
 
 .badgeInactive {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: hsl(var(--muted));
+  border-color: hsl(var(--border));
+  color: var(--text-secondary);
 }
 
 .roleSelect {
