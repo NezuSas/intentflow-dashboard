@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import type {
   User,
@@ -17,9 +17,13 @@ interface ApiEnvelope<T> {
 export class UserApiRepository
   implements UserRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getAll(): Promise<User[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<User[]>
       >("/auth/users/");
 
@@ -29,7 +33,7 @@ export class UserApiRepository
   async toggleActive(
     id: number
   ): Promise<void> {
-    await apiClient.post(
+    await this.http.post(
       `/auth/users/${id}/toggle-active/`
     );
   }
@@ -38,7 +42,7 @@ export class UserApiRepository
     id: number,
     role: string
   ): Promise<void> {
-    await apiClient.post(
+    await this.http.post(
       `/auth/users/${id}/change-role/`,
       { role }
     );
@@ -48,14 +52,14 @@ export class UserApiRepository
     id: number,
     data: UserUpdatePayload
   ): Promise<void> {
-    await apiClient.patch(
+    await this.http.patch(
       `/auth/users/${id}/`,
       data
     );
   }
 
   async delete(id: number): Promise<void> {
-    await apiClient.delete(
+    await this.http.delete(
       `/auth/users/${id}/`
     );
   }

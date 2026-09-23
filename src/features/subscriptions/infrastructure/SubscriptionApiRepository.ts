@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import type {
   SubscriptionPlan,
@@ -19,10 +19,14 @@ interface ApiEnvelope<T> {
 export class SubscriptionApiRepository
   implements SubscriptionRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getPlans():
     Promise<SubscriptionPlan[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<SubscriptionPlan[]>
       >("/subscription-plans/");
 
@@ -32,7 +36,7 @@ export class SubscriptionApiRepository
   async getClientSubscriptions():
     Promise<ClientSubscription[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<ClientSubscription[]>
       >("/client-subscriptions/");
 
@@ -42,7 +46,7 @@ export class SubscriptionApiRepository
   async createPlan(
     data: SubscriptionPlanPayload
   ): Promise<void> {
-    await apiClient.post(
+    await this.http.post(
       "/subscription-plans/",
       data
     );
@@ -52,7 +56,7 @@ export class SubscriptionApiRepository
     id: number,
     data: SubscriptionPlanPayload
   ): Promise<void> {
-    await apiClient.patch(
+    await this.http.patch(
       `/subscription-plans/${id}/`,
       data
     );
@@ -61,7 +65,7 @@ export class SubscriptionApiRepository
   async deletePlan(
     id: number
   ): Promise<void> {
-    await apiClient.delete(
+    await this.http.delete(
       `/subscription-plans/${id}/`
     );
   }
@@ -69,7 +73,7 @@ export class SubscriptionApiRepository
   async createClientSubscription(
     data: ClientSubscriptionPayload
   ): Promise<void> {
-    await apiClient.post(
+    await this.http.post(
       "/client-subscriptions/",
       data
     );
@@ -79,7 +83,7 @@ export class SubscriptionApiRepository
     id: number,
     data: ClientSubscriptionPayload
   ): Promise<void> {
-    await apiClient.patch(
+    await this.http.patch(
       `/client-subscriptions/${id}/`,
       data
     );
@@ -88,7 +92,7 @@ export class SubscriptionApiRepository
   async deleteClientSubscription(
     id: number
   ): Promise<void> {
-    await apiClient.delete(
+    await this.http.delete(
       `/client-subscriptions/${id}/`
     );
   }

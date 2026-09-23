@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import {
   Board,
@@ -15,9 +15,13 @@ interface ApiEnvelope<T> {
 export class BoardApiRepository
   implements BoardRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getAll(): Promise<Board[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<Board[]>
       >("/boards/");
 
@@ -27,7 +31,7 @@ export class BoardApiRepository
   async create(
     data: BoardPayload
   ): Promise<void> {
-    await apiClient.post(
+    await this.http.post(
       "/boards/",
       data
     );
@@ -37,14 +41,14 @@ export class BoardApiRepository
     id: number,
     data: BoardPayload
   ): Promise<void> {
-    await apiClient.patch(
+    await this.http.patch(
       `/boards/${id}/`,
       data
     );
   }
 
   async delete(id: number): Promise<void> {
-    await apiClient.delete(
+    await this.http.delete(
       `/boards/${id}/`
     );
   }

@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import type {
   Client,
@@ -17,9 +17,13 @@ interface ApiEnvelope<T> {
 export class ClientApiRepository
   implements ClientRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getAll(): Promise<Client[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<Client[]>
       >("/clients/");
 
@@ -29,7 +33,7 @@ export class ClientApiRepository
   async create(
     data: ClientPayload
   ): Promise<void> {
-    await apiClient.post(
+    await this.http.post(
       "/clients/",
       data
     );
@@ -39,14 +43,14 @@ export class ClientApiRepository
     id: number,
     data: ClientPayload
   ): Promise<void> {
-    await apiClient.patch(
+    await this.http.patch(
       `/clients/${id}/`,
       data
     );
   }
 
   async delete(id: number): Promise<void> {
-    await apiClient.delete(
+    await this.http.delete(
       `/clients/${id}/`
     );
   }

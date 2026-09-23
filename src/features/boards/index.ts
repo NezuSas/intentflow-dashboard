@@ -1,8 +1,9 @@
+import { httpClient } from "@/composition/http";
 import { BoardService } from "./application/BoardService";
 import { BoardApiRepository } from "./infrastructure/BoardApiRepository";
 
 const boardRepository =
-  new BoardApiRepository();
+  new BoardApiRepository(httpClient);
 
 export const boardService =
   new BoardService(boardRepository);

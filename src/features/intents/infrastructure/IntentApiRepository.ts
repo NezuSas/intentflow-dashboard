@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import type {
   Intent,
@@ -16,9 +16,13 @@ interface ApiEnvelope<T> {
 export class IntentApiRepository
   implements IntentRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getAll(): Promise<Intent[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<Intent[]>
       >("/intents/");
 

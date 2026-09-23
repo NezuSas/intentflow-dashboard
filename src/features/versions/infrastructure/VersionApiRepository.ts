@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import type {
   ADBVersion,
@@ -15,9 +15,13 @@ interface ApiEnvelope<T> {
 export class VersionApiRepository
   implements VersionRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getAll(): Promise<ADBVersion[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<ADBVersion[]>
       >("/adb-versions/");
 

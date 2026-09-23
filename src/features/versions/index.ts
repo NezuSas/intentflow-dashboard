@@ -1,8 +1,9 @@
+import { httpClient } from "@/composition/http";
 import { VersionService } from "./application/VersionService";
 import { VersionApiRepository } from "./infrastructure/VersionApiRepository";
 
 const versionRepository =
-  new VersionApiRepository();
+  new VersionApiRepository(httpClient);
 
 export const versionService =
   new VersionService(versionRepository);

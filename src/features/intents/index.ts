@@ -1,8 +1,9 @@
+import { httpClient } from "@/composition/http";
 import { IntentService } from "./application/IntentService";
 import { IntentApiRepository } from "./infrastructure/IntentApiRepository";
 
 const intentRepository =
-  new IntentApiRepository();
+  new IntentApiRepository(httpClient);
 
 export const intentService =
   new IntentService(intentRepository);

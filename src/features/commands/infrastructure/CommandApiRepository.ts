@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import type {
   ADBCommand,
@@ -17,9 +17,13 @@ interface ApiEnvelope<T> {
 export class CommandApiRepository
   implements CommandRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getAll(): Promise<ADBCommand[]> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<ADBCommand[]>
       >("/adb-commands/");
 
@@ -29,7 +33,7 @@ export class CommandApiRepository
   async create(
     data: CommandPayload
   ): Promise<void> {
-    await apiClient.post(
+    await this.http.post(
       "/adb-commands/",
       data
     );
@@ -39,14 +43,14 @@ export class CommandApiRepository
     id: number,
     data: CommandPayload
   ): Promise<void> {
-    await apiClient.patch(
+    await this.http.patch(
       `/adb-commands/${id}/`,
       data
     );
   }
 
   async delete(id: number): Promise<void> {
-    await apiClient.delete(
+    await this.http.delete(
       `/adb-commands/${id}/`
     );
   }

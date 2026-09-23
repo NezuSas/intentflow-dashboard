@@ -1,8 +1,9 @@
+import { httpClient } from "@/composition/http";
 import { CommandService } from "./application/CommandService";
 import { CommandApiRepository } from "./infrastructure/CommandApiRepository";
 
 const commandRepository =
-  new CommandApiRepository();
+  new CommandApiRepository(httpClient);
 
 export const commandService =
   new CommandService(commandRepository);

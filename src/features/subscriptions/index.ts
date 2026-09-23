@@ -1,8 +1,9 @@
+import { httpClient } from "@/composition/http";
 import { SubscriptionService } from "./application/SubscriptionService";
 import { SubscriptionApiRepository } from "./infrastructure/SubscriptionApiRepository";
 
 const subscriptionRepository =
-  new SubscriptionApiRepository();
+  new SubscriptionApiRepository(httpClient);
 
 export const subscriptionService =
   new SubscriptionService(

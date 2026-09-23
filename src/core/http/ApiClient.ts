@@ -1,21 +1,26 @@
-import { API_URL } from "@/config/api";
-import { authService } from "@/features/auth";
 import { ApiError } from "@/core/errors/ApiError";
+import type { HttpClient } from "./HttpClient";
 
-type AuthenticatedFetcher = (
+export type HttpFetcher = (
   url: string,
   options?: RequestInit
 ) => Promise<Response>;
 
-export class ApiClient {
+export class ApiClient
+  implements HttpClient
+{
   constructor(
     private readonly baseUrl: string,
-    private readonly fetcher: AuthenticatedFetcher
+    private readonly fetcher: HttpFetcher
   ) {}
 
-  private buildUrl(path: string): string {
+  private buildUrl(
+    path: string
+  ): string {
     const normalizedPath =
-      path.startsWith("/") ? path : `/${path}`;
+      path.startsWith("/")
+        ? path
+        : `/${path}`;
 
     return `${this.baseUrl}${normalizedPath}`;
   }
@@ -23,7 +28,8 @@ export class ApiClient {
   private async parseResponse(
     response: Response
   ): Promise<unknown> {
-    const text = await response.text();
+    const text =
+      await response.text();
 
     if (!text) {
       return null;
@@ -44,16 +50,23 @@ export class ApiClient {
       payload &&
       typeof payload === "object"
     ) {
-      const data = payload as Record<
-        string,
-        unknown
-      >;
+      const data =
+        payload as Record<
+          string,
+          unknown
+        >;
 
-      if (typeof data.detail === "string") {
+      if (
+        typeof data.detail ===
+        "string"
+      ) {
         return data.detail;
       }
 
-      if (typeof data.message === "string") {
+      if (
+        typeof data.message ===
+        "string"
+      ) {
         return data.message;
       }
     }
@@ -65,13 +78,16 @@ export class ApiClient {
     path: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const response = await this.fetcher(
-      this.buildUrl(path),
-      options
-    );
+    const response =
+      await this.fetcher(
+        this.buildUrl(path),
+        options
+      );
 
     const payload =
-      await this.parseResponse(response);
+      await this.parseResponse(
+        response
+      );
 
     if (!response.ok) {
       throw new ApiError(
@@ -87,7 +103,9 @@ export class ApiClient {
     return payload as T;
   }
 
-  get<T>(path: string): Promise<T> {
+  get<T>(
+    path: string
+  ): Promise<T> {
     return this.request<T>(path);
   }
 
@@ -95,43 +113,50 @@ export class ApiClient {
     path: string,
     body?: unknown
   ): Promise<T> {
-    return this.request<T>(path, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body:
-        body === undefined
-          ? undefined
-          : JSON.stringify(body),
-    });
+    return this.request<T>(
+      path,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body:
+          body === undefined
+            ? undefined
+            : JSON.stringify(body),
+      }
+    );
   }
 
   patch<T>(
     path: string,
     body?: unknown
   ): Promise<T> {
-    return this.request<T>(path, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body:
-        body === undefined
-          ? undefined
-          : JSON.stringify(body),
-    });
+    return this.request<T>(
+      path,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body:
+          body === undefined
+            ? undefined
+            : JSON.stringify(body),
+      }
+    );
   }
 
-  delete<T>(path: string): Promise<T> {
-    return this.request<T>(path, {
-      method: "DELETE",
-    });
+  delete<T>(
+    path: string
+  ): Promise<T> {
+    return this.request<T>(
+      path,
+      {
+        method: "DELETE",
+      }
+    );
   }
 }
-
-export const apiClient = new ApiClient(
-  API_URL,
-  (url, options) =>
-    authService.fetchWithAuth(url, options)
-);
