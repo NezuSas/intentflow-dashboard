@@ -14,8 +14,10 @@ describe("shared UI primitives", () => {
   });
 
   it("exposes pagination navigation as a single accessible primitive", () => {
-    const element = Pagination({ page: 2, totalPages: 3, totalCount: 45, hasNext: true, hasPrevious: true, onNext: () => undefined, onPrevious: () => undefined });
+    const element = Pagination({ page: 2, pageSize: 20, totalCount: 45, onPageChange: () => undefined });
 
     expect(element.props.current).toBe(2);
+    expect(element.props.pageSize).toBe(20);
+    expect(element.props.total).toBe(45);
   });
 });
