@@ -114,34 +114,36 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85); /* Darker background overlay */
+  background: rgb(0 0 0 / 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(8px); /* More blur */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .modal {
-  background: #0f172a; /* Solid dark background */
-  padding: 3rem;       /* Increased padding */
-  border-radius: 1.5rem;
+  background: var(--surface-raised);
+  padding: 2rem;
+  border-radius: var(--radius-modal);
   width: 100%;
-  max-width: 600px;    /* Slightly wider */
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  max-width: 600px;
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-modal);
   position: relative;
   max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;         /* Gap between sections */
+  gap: 1.5rem;
 }
 
 .modalTitle {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
+  color: var(--text-primary);
 }
 
 .formGroup {
@@ -162,9 +164,9 @@
 .input {
   width: 100%;
   padding: 1rem; /* More padding in inputs */
-  border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-control);
+  border: 1px solid hsl(var(--border));
+  background: var(--surface-input);
   color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.2s;
@@ -172,23 +174,22 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--primary);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--focus-ring) / 0.25);
 }
 
 .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .primaryButton {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-control);
   border: none;
   font-weight: 600;
   cursor: pointer;
@@ -199,6 +200,6 @@
   border: 1px solid hsl(var(--border));
   color: var(--text-primary);
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-control);
   cursor: pointer;
 }
