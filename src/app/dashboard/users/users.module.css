@@ -14,7 +14,7 @@
   background: var(--surface);
   border-radius: 1rem;
   padding: 1rem;
-  border: 1px solid var(--border);
+  border: 1px solid hsl(var(--border));
   overflow-x: auto;
 }
 
@@ -26,14 +26,14 @@
 
 .table th {
   padding: 1rem;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 2px solid hsl(var(--border));
   color: var(--text-secondary);
   font-weight: 600;
 }
 
 .table td {
   padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 .badge {
@@ -54,9 +54,9 @@
 }
 
 .roleSelect {
-  background: var(--background);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: hsl(var(--background));
+  color: var(--text-primary);
+  border: 1px solid hsl(var(--border));
   border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.9rem;
@@ -64,8 +64,8 @@
 
 .actionButton {
   background: none;
-  border: 1px solid var(--border);
-  color: var(--text);
+  border: 1px solid hsl(var(--border));
+  color: var(--text-primary);
   padding: 0.25rem 0.75rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -74,7 +74,7 @@
 }
 
 .actionButton:hover {
-  background: var(--border);
+  background: hsl(var(--border));
 }
 
 .deleteButton {
@@ -145,7 +145,7 @@
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text);
+  color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.2s;
 }
@@ -165,8 +165,8 @@
 }
 
 .primaryButton {
-  background: var(--primary);
-  color: white;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
@@ -176,8 +176,8 @@
 
 .secondaryButton {
   background: none;
-  border: 1px solid var(--border);
-  color: var(--text);
+  border: 1px solid hsl(var(--border));
+  color: var(--text-primary);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
