@@ -68,28 +68,28 @@ export default function DashboardHomePage() {
       value: stats.total_intents_30d.toLocaleString(), 
       change: "Last 30 days", 
       icon: "⚡",
-      color: "rgb(59, 130, 246)"
+      tone: "primary"
     },
     { 
       label: "Active Clients", 
       value: stats.total_clients.toLocaleString(), 
       change: "Total active", 
       icon: "🏢",
-      color: "rgb(34, 197, 94)"
+      tone: "success"
     },
     { 
       label: "Active Boards", 
       value: stats.active_boards.toLocaleString(), 
       change: "Connected", 
       icon: "📱",
-      color: "rgb(168, 85, 247)"
+      tone: "accent"
     },
     { 
       label: "Total Users", 
       value: stats.total_users.toLocaleString(), 
       change: "Active users", 
       icon: "👥",
-      color: "rgb(251, 146, 60)"
+      tone: "info"
     },
   ] : [];
 
@@ -119,24 +119,17 @@ export default function DashboardHomePage() {
           Loading dashboard...
         </div>
       ) : error ? (
-        <div style={{ padding: "4rem", textAlign: "center", color: "#f87171" }}>
+        <div style={{ padding: "4rem", textAlign: "center", color: "hsl(var(--error))" }}>
           Error: {error}
         </div>
       ) : (
         <>
           <div className={styles.statsGrid}>
             {statCards.map((stat) => (
-              <div key={stat.label} className={`${styles.statCard} glass-card`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                  <span style={{ fontSize: "1.5rem" }}>{stat.icon}</span>
-                  <span style={{ 
-                    color: stat.color, 
-                    fontSize: "0.75rem", 
-                    fontWeight: 600,
-                    background: `${stat.color}20`,
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '4px'
-                  }}>
+              <div key={stat.label} className={styles.statCard}>
+                <div className={styles.statCardHeader}>
+                  <span className={styles.statIcon}>{stat.icon}</span>
+                  <span className={`${styles.statMeta} ${styles[`statMeta${stat.tone}`]}`}>
                     {stat.change}
                   </span>
                 </div>
