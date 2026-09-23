@@ -1,4 +1,4 @@
-import { apiClient } from "@/core/http/ApiClient";
+import type { HttpClient } from "@/core/http/HttpClient";
 
 import type {
   DashboardStats,
@@ -15,10 +15,14 @@ interface ApiEnvelope<T> {
 export class DashboardApiRepository
   implements DashboardRepository
 {
+  constructor(
+    private readonly http: HttpClient
+  ) {}
+
   async getStats():
     Promise<DashboardStats> {
     const response =
-      await apiClient.get<
+      await this.http.get<
         ApiEnvelope<DashboardStats> |
         DashboardStats
       >("/intents/stats/");

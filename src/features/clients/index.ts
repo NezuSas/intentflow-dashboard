@@ -1,8 +1,9 @@
+import { httpClient } from "@/composition/http";
 import { ClientService } from "./application/ClientService";
 import { ClientApiRepository } from "./infrastructure/ClientApiRepository";
 
 const clientRepository =
-  new ClientApiRepository();
+  new ClientApiRepository(httpClient);
 
 export const clientService =
   new ClientService(clientRepository);

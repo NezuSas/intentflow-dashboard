@@ -1,8 +1,9 @@
+import { httpClient } from "@/composition/http";
 import { DashboardService } from "./application/DashboardService";
 import { DashboardApiRepository } from "./infrastructure/DashboardApiRepository";
 
 const dashboardRepository =
-  new DashboardApiRepository();
+  new DashboardApiRepository(httpClient);
 
 export const dashboardService =
   new DashboardService(
