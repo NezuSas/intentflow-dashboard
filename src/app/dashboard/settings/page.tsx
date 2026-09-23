@@ -35,7 +35,7 @@ export default function SettingsPage() {
           <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>Account Actions</h2>
           <button 
             className="btn btn-ghost" 
-            style={{ color: "#f87171", borderColor: "rgba(239, 68, 68, 0.2)" }}
+            style={{ color: "hsl(var(--error))", borderColor: "hsl(var(--error) / 0.2)" }}
             onClick={() => authService.logout()}
           >
             Sign Out

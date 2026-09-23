@@ -179,7 +179,7 @@ export default function CommandsPage() {
               commands.map((command) => (
                 <tr key={command.id}>
                   <td>{command.id}</td>
-                  <td style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--primary)' }}>{command.key}</td>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 600, color: 'hsl(var(--primary))' }}>{command.key}</td>
                   <td>{command.display_name || '---'}</td>
                   <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {command.description || '---'}
