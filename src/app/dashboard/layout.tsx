@@ -5,7 +5,10 @@ import styles from "./dashboard.module.css";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeProvider";
-import { authService } from "@/features/auth";
+import {
+  authService,
+  authTokenManager,
+} from "@/features/auth";
 
 function DashboardLayoutContent({
   children,
@@ -32,18 +35,18 @@ function DashboardLayoutContent({
     );
 
     const validateSession = async () => {
-      if (!authService.hasSession()) {
+      if (!authTokenManager.hasSession()) {
         router.replace("/login");
         return;
       }
 
       // Una sesión puede conservar únicamente el refresh token.
       if (
-        !authService.getAccessToken() &&
-        authService.getRefreshToken()
+        !authTokenManager.getAccessToken() &&
+        authTokenManager.getRefreshToken()
       ) {
         const token =
-          await authService.refreshAccessToken();
+          await authTokenManager.refreshAccessToken();
 
         if (!token) {
           router.replace("/login");
