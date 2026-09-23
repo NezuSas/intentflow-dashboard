@@ -1,6 +1,7 @@
 export type {
   User,
   UserUpdatePayload,
+  UserCreatePayload,
 } from "./domain/User";
 
 export type {

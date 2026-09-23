@@ -9,12 +9,15 @@ import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, ErrorState, FormField, Input, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
+import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
+import { ActionGroup, Button, ErrorState, FormField, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
+import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
 
 export default function UsersPage() {
+  const feedback = useActionFeedback();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -25,6 +28,7 @@ export default function UsersPage() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [password, setPassword] = useState("");
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -55,6 +59,7 @@ export default function UsersPage() {
   };
 
   const handleOpenModal = (user: User | null = null) => {
+    setPassword("");
     if (user) {
       setEditingUser(user);
       setFormData({
@@ -78,31 +83,37 @@ export default function UsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
-    if (!editingUser) {
-      alert("User creation is not available through this screen.");
-      return;
-    }
     setSubmitting(true);
     try {
       if (editingUser) {
         await userService.updateUser(editingUser.id, formData);
+      } else {
+        await userService.createUser({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          password,
+        });
       }
+      setPassword("");
       setIsModalOpen(false);
-      await fetchUsers();
+      if (!editingUser && page !== 1) setPage(1);
+      else await fetchUsers();
     } catch (err: unknown) {
-      alert(`Error saving user: ${getErrorMessage(err)}`);
+      feedback.error(`Error saving user: ${getErrorMessage(err)}`);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (userId: number) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
     try {
       await userService.deleteUser(userId);
-      setUsers(users.filter(u => u.id !== userId));
+      const nextPage = meta ? pageAfterDeletion(meta) : page;
+      if (nextPage !== page) setPage(nextPage);
+      else await fetchUsers();
     } catch (err: unknown) {
-      alert(`Error deleting user: ${getErrorMessage(err)}`);
+      feedback.error(`Error deleting user: ${getErrorMessage(err)}`);
     }
   };
 
@@ -111,7 +122,7 @@ export default function UsersPage() {
       await userService.toggleActive(user.id);
       setUsers(users.map(u => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
     } catch (err: unknown) {
-      alert(`Error toggling status: ${getErrorMessage(err)}`);
+      feedback.error(`Error toggling status: ${getErrorMessage(err)}`);
     }
   };
 
@@ -120,7 +131,7 @@ export default function UsersPage() {
       await userService.changeRole(userId, newRole);
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
     } catch (err: unknown) {
-      alert(`Error changing role: ${getErrorMessage(err)}`);
+      feedback.error(`Error changing role: ${getErrorMessage(err)}`);
     }
   };
 
@@ -141,7 +152,7 @@ export default function UsersPage() {
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="Users" refreshing={loading && users.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
+      <TablePanel title="Users" refreshing={loading && users.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
       <Table label="User management">
           <thead>
             <tr>
@@ -174,14 +185,11 @@ export default function UsersPage() {
                     </Select>
                   </td>
                   <td>
-                    <button type="button" onClick={() => handleToggleActive(user)} style={{ background: "none", border: 0, cursor: "pointer" }}><StatusBadge variant={user.is_active ? "success" : "neutral"}>{user.is_active ? "Active" : "Inactive"}</StatusBadge></button>
+                    <button type="button" aria-label={`${user.is_active ? "Deactivate" : "Activate"} user ${user.email}`} onClick={() => handleToggleActive(user)} style={{ background: "none", border: 0, cursor: "pointer" }}><StatusBadge variant={user.is_active ? "success" : "neutral"}>{user.is_active ? "Active" : "Inactive"}</StatusBadge></button>
                   </td>
                   <td>{formatDate(user.date_joined)}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Button type="button" variant="ghost" onClick={() => handleOpenModal(user)}>✎</Button>
-                      <Button type="button" variant="danger" onClick={() => handleDelete(user.id)}>🗑</Button>
-                    </div>
+                    <RowActions itemName={`user ${user.email}`} onEdit={() => handleOpenModal(user)} onDelete={() => handleDelete(user.id)} />
                   </td>
                 </tr>
               ))
@@ -190,7 +198,7 @@ export default function UsersPage() {
       </Table>
       </TablePanel>
 
-      <Modal open={isModalOpen} title={editingUser ? "Edit User Profile" : "Create New User"} description={editingUser ? "Update profile information and system permissions for this user." : "User creation is not available through this screen."} onClose={() => setIsModalOpen(false)}>
+      <Modal open={isModalOpen} title={editingUser ? "Edit User Profile" : "Create New User"} description={editingUser ? "Update profile information and system permissions for this user." : "New users start with the User role. You can change it after creation."} onClose={() => { setPassword(""); setIsModalOpen(false); }}>
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 <FormField label="First Name" required>
@@ -220,7 +228,7 @@ export default function UsersPage() {
                   required
                 />
               </FormField>
-              <FormField label="System Role">
+              {editingUser ? <FormField label="System Role">
                 <Select
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
@@ -229,10 +237,12 @@ export default function UsersPage() {
                   <option value="ADMIN">Administrator</option>
                   <option value="SUPERADMIN">Super Admin</option>
                 </Select>
-              </FormField>
+              </FormField> : <FormField label="Password" required>
+                <Input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </FormField>}
               <ActionGroup>
-                <Button type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" loading={submitting} disabled={!editingUser}>Save User</Button>
+                <Button type="button" onClick={() => { setPassword(""); setIsModalOpen(false); }}>Cancel</Button>
+                <Button type="submit" variant="primary" loading={submitting}>Save User</Button>
               </ActionGroup>
             </form>
       </Modal>

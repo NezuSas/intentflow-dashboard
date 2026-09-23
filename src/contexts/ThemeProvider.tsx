@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { ConfigProvider } from "antd";
+import { App, ConfigProvider } from "antd";
 import { getNezuTheme } from "@/shared/design-system/theme";
 
 type Theme = "light" | "dark";
@@ -52,7 +52,7 @@ export function ThemeProvider({
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <ConfigProvider theme={getNezuTheme(theme === "dark")}>{children}</ConfigProvider>
+      <ConfigProvider theme={getNezuTheme(theme === "dark")}><App>{children}</App></ConfigProvider>
     </ThemeContext.Provider>
   );
 }

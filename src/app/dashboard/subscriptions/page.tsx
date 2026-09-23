@@ -15,8 +15,11 @@ import type {
 } from "@/features/clients";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
+import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
+import { formatCalendarDate } from "@/shared/format/date";
 import type { PageMeta } from "@/core/Pagination";
-import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel, TableSkeleton, Textarea } from "@/shared/components";
+import { pageAfterDeletion } from "@/core/Pagination";
+import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePanel, TableSkeleton, Textarea } from "@/shared/components";
 
 const PAGE_SIZE = 20;
 
@@ -29,6 +32,7 @@ const loadSubscriptionCatalogs = async () => {
 };
 
 export default function SubscriptionsPage() {
+  const feedback = useActionFeedback();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [clientSubs, setClientSubs] = useState<ClientSubscription[]>([]);
   const catalog = useLazyCatalog(loadSubscriptionCatalogs);
@@ -185,7 +189,7 @@ export default function SubscriptionsPage() {
       catalog.invalidate();
       await refreshPlans();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error saving plan: ${getErrorMessage(err)}`
       );
     } finally {
@@ -212,7 +216,7 @@ export default function SubscriptionsPage() {
       setActiveModal(null);
       await refreshClientSubscriptions();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error saving subscription: ${getErrorMessage(err)}`
       );
     } finally {
@@ -221,23 +225,25 @@ export default function SubscriptionsPage() {
   };
 
   const handleDeletePlan = async (id: number) => {
-    if (!confirm("Delete this plan?")) return;
     try {
       await subscriptionService.deletePlan(id);
       catalog.invalidate();
-      await refreshPlans();
+      const nextPage = plansMeta ? pageAfterDeletion(plansMeta) : plansPage;
+      if (nextPage !== plansPage) setPlansPage(nextPage);
+      else await refreshPlans();
     } catch (err: unknown) {
-      alert(getErrorMessage(err));
+      feedback.error(getErrorMessage(err));
     }
   };
 
   const handleDeleteSub = async (id: number) => {
-    if (!confirm("Cancel/Delete this subscription?")) return;
     try {
       await subscriptionService.deleteClientSubscription(id);
-      await refreshClientSubscriptions();
+      const nextPage = subscriptionsMeta ? pageAfterDeletion(subscriptionsMeta) : subscriptionsPage;
+      if (nextPage !== subscriptionsPage) setSubscriptionsPage(nextPage);
+      else await refreshClientSubscriptions();
     } catch (err: unknown) {
-      alert(getErrorMessage(err));
+      feedback.error(getErrorMessage(err));
     }
   };
 
@@ -253,7 +259,7 @@ export default function SubscriptionsPage() {
       {subscriptionsError && <ErrorState message={subscriptionsError} />}
 
       <section style={{ marginBottom: '3rem' }}>
-        <TablePanel title="Available Plans" refreshing={plansLoading && plans.length > 0} pagination={plansMeta && <Pagination page={plansMeta.page} totalPages={Math.max(1, Math.ceil(plansMeta.count / plansMeta.pageSize))} totalCount={plansMeta.count} hasPrevious={Boolean(plansMeta.previous)} hasNext={Boolean(plansMeta.next)} onPrevious={() => setPlansPage((page) => Math.max(1, page - 1))} onNext={() => setPlansPage((page) => page + 1)} />}>
+        <TablePanel title="Available Plans" refreshing={plansLoading && plans.length > 0} pagination={plansMeta && <Pagination page={plansMeta.page} pageSize={plansMeta.pageSize} totalCount={plansMeta.count} onPageChange={setPlansPage} />}>
         {plansLoading && plans.length === 0 ? <TableSkeleton columns={6} label="Loading plans..." /> : (
         <Table label="Available plans">
             <thead>
@@ -282,10 +288,7 @@ export default function SubscriptionsPage() {
                       </StatusBadge>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <Button onClick={() => handleOpenPlanModal(plan)}>✎</Button>
-                        <Button variant="danger" onClick={() => handleDeletePlan(plan.id)}>🗑</Button>
-                      </div>
+                      <RowActions itemName={`plan ${plan.name}`} onEdit={() => handleOpenPlanModal(plan)} onDelete={() => handleDeletePlan(plan.id)} />
                     </td>
                   </tr>
                 ))
@@ -297,7 +300,7 @@ export default function SubscriptionsPage() {
       </section>
 
       <section>
-        <TablePanel title="Client Subscriptions" refreshing={subscriptionsLoading && clientSubs.length > 0} pagination={subscriptionsMeta && <Pagination page={subscriptionsMeta.page} totalPages={Math.max(1, Math.ceil(subscriptionsMeta.count / subscriptionsMeta.pageSize))} totalCount={subscriptionsMeta.count} hasPrevious={Boolean(subscriptionsMeta.previous)} hasNext={Boolean(subscriptionsMeta.next)} onPrevious={() => setSubscriptionsPage((page) => Math.max(1, page - 1))} onNext={() => setSubscriptionsPage((page) => page + 1)} />}>
+        <TablePanel title="Client Subscriptions" refreshing={subscriptionsLoading && clientSubs.length > 0} pagination={subscriptionsMeta && <Pagination page={subscriptionsMeta.page} pageSize={subscriptionsMeta.pageSize} totalCount={subscriptionsMeta.count} onPageChange={setSubscriptionsPage} />}>
         {subscriptionsLoading && clientSubs.length === 0 ? <TableSkeleton columns={6} label="Loading client subscriptions..." /> : (
         <Table label="Client subscriptions">
             <thead>
@@ -318,18 +321,15 @@ export default function SubscriptionsPage() {
                   <tr key={sub.id}>
                     <td style={{ fontWeight: 600, color: 'hsl(var(--primary))' }}>{sub.client_detail?.name || "Unknown"}</td>
                     <td>{sub.subscription_plan_detail?.name || "Unknown"}</td>
-                    <td>{new Date(sub.start_date).toLocaleDateString()}</td>
-                    <td>{sub.end_date ? new Date(sub.end_date).toLocaleDateString() : "Permanent"}</td>
+                    <td>{formatCalendarDate(sub.start_date)}</td>
+                    <td>{sub.end_date ? formatCalendarDate(sub.end_date) : "Permanent"}</td>
                     <td>
                       <StatusBadge variant={sub.is_active ? "success" : "neutral"}>
                         {sub.is_active ? "ACTIVE" : "INACTIVE"}
                       </StatusBadge>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <Button onClick={() => handleOpenSubModal(sub)}>✎</Button>
-                        <Button variant="danger" onClick={() => handleDeleteSub(sub.id)}>🗑</Button>
-                      </div>
+                      <RowActions itemName={`subscription for ${sub.client_detail?.name || "client"}`} onEdit={() => handleOpenSubModal(sub)} onDelete={() => handleDeleteSub(sub.id)} />
                     </td>
                   </tr>
                 ))
@@ -402,6 +402,9 @@ export default function SubscriptionsPage() {
                   </Select>
                 </FormField>
               </div>
+              <FormField label="End Date">
+                <Input type="date" value={subForm.end_date} onChange={e => setSubForm({...subForm, end_date: e.target.value})} />
+              </FormField>
               <ActionGroup>
                 <Button type="button" onClick={() => setActiveModal(null)}>Cancel</Button>
                 <Button type="submit" variant="primary" loading={isSubmittingSubscription} loadingLabel="Saving...">Save Subscription</Button>

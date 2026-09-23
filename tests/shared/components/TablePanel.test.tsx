@@ -70,7 +70,7 @@ describe("TablePanel shared behavior", () => {
     const onNext = vi.fn();
     await act(async () => {
       root.render(
-        <TablePanel title="Empty records" pagination={<Pagination page={1} totalPages={2} totalCount={40} hasNext hasPrevious={false} onNext={onNext} onPrevious={vi.fn()} />}>
+        <TablePanel title="Empty records" pagination={<Pagination page={1} pageSize={20} totalCount={40} onPageChange={onNext} />}>
           <Table label="Empty table"><thead><tr><th>ID</th></tr></thead><tbody><TableEmpty colSpan={1} label="No records available." /></tbody></Table>
         </TablePanel>
       );
@@ -78,11 +78,20 @@ describe("TablePanel shared behavior", () => {
     expect(container.textContent).toContain("No records available.");
     expect(container.querySelector(".ant-pagination")).not.toBeNull();
     await click(container.querySelector(".ant-pagination-next button"));
-    expect(onNext).toHaveBeenCalledOnce();
+    expect(onNext).toHaveBeenCalledWith(2);
   });
 
   it("accepts a shared EmptyState as conditional content", async () => {
     await act(async () => { root.render(<TablePanel title="No data">{false}<EmptyState label="Nothing to show" /></TablePanel>); });
     expect(container.textContent).toContain("Nothing to show");
+  });
+
+  it("passes a selected page number directly to the page handler", async () => {
+    const onPageChange = vi.fn();
+    await act(async () => {
+      root.render(<Pagination page={1} pageSize={20} totalCount={100} onPageChange={onPageChange} />);
+    });
+    await click(container.querySelector(".ant-pagination-item-4"));
+    expect(onPageChange).toHaveBeenCalledWith(4);
   });
 });

@@ -10,8 +10,10 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
-import { ActionGroup, Button, ErrorState, FormField, Input, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
+import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
+import { ActionGroup, Button, ErrorState, FormField, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
+import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
 
@@ -32,6 +34,7 @@ const emptyForm: ClientFormData = {
 };
 
 export default function ClientsPage() {
+  const feedback = useActionFeedback();
   const [clients, setClients] =
     useState<Client[]>([]);
 
@@ -119,7 +122,7 @@ export default function ClientsPage() {
       setIsModalOpen(false);
       await fetchClients();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error saving client: ${getErrorMessage(
           err
         )}`
@@ -132,27 +135,15 @@ export default function ClientsPage() {
   const handleDelete = async (
     clientId: number
   ) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this client?"
-      )
-    ) {
-      return;
-    }
-
     try {
       await clientService.deleteClient(
         clientId
       );
-
-      setClients((current) =>
-        current.filter(
-          (client) =>
-            client.id !== clientId
-        )
-      );
+      const nextPage = meta ? pageAfterDeletion(meta) : page;
+      if (nextPage !== page) setPage(nextPage);
+      else await fetchClients();
     } catch (err: unknown) {
-      alert(
+      feedback.error(
         `Error deleting client: ${getErrorMessage(
           err
         )}`
@@ -170,7 +161,7 @@ export default function ClientsPage() {
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="Clients" refreshing={loading && clients.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={Math.ceil(meta.count / meta.pageSize)} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setPage((current) => Math.max(1, current - 1))} onNext={() => setPage((current) => current + 1)} />}>
+      <TablePanel title="Clients" refreshing={loading && clients.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
       <Table label="Client management">
           <thead>
             <tr>
@@ -219,28 +210,7 @@ export default function ClientsPage() {
                   </td>
 
                   <td>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <Button type="button" variant="ghost"
-                        onClick={() =>
-                          handleOpenModal(client)
-                        }
-                      >
-                        ✎
-                      </Button>
-
-                      <Button type="button" variant="danger"
-                        onClick={() =>
-                          handleDelete(client.id)
-                        }
-                      >
-                        🗑
-                      </Button>
-                    </div>
+                    <RowActions itemName={`client ${client.name}`} onEdit={() => handleOpenModal(client)} onDelete={() => handleDelete(client.id)} />
                   </td>
                 </tr>
               ))

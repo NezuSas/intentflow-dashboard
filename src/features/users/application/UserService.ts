@@ -1,6 +1,7 @@
 import type {
   User,
   UserUpdatePayload,
+  UserCreatePayload,
 } from "../domain/User";
 
 import type {
@@ -16,6 +17,14 @@ export class UserService {
 
   listUsers(query?: ListQuery): Promise<PaginatedResponse<User>> {
     return this.repository.list(query);
+  }
+
+  getCurrentUser(): Promise<User> {
+    return this.repository.getCurrent();
+  }
+
+  createUser(data: UserCreatePayload): Promise<void> {
+    return this.repository.create(data);
   }
 
   toggleActive(

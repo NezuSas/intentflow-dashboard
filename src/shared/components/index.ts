@@ -1,4 +1,5 @@
 export * from "./actions/Button";
+export * from "./actions/RowActions";
 export * from "./forms/Controls";
 export * from "./forms/CheckboxGroup";
 export * from "./layout/Primitives";

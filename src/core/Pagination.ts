@@ -6,6 +6,9 @@ export interface PageMeta {
   previous: string | null;
 }
 
+export const pageAfterDeletion = (meta: PageMeta): number =>
+  Math.min(meta.page, Math.max(1, Math.ceil((meta.count - 1) / meta.pageSize)));
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: PageMeta;

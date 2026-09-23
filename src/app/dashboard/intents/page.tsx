@@ -15,6 +15,7 @@ import React, {
 import styles from "../dashboard.module.css";
 import {
   IntentErrorDetails,
+  IntentStatusBadge,
   type Intent,
   type IntentListQuery,
 } from "@/features/intents";
@@ -25,6 +26,7 @@ import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
+import { formatGuayaquilDateTime } from "@/shared/format/date";
 import type { PageMeta } from "@/core/Pagination";
 import {
   Button,
@@ -36,7 +38,6 @@ import {
   PageHeader,
   Pagination,
   Select,
-  StatusBadge,
   Table,
   TableEmpty,
   TablePanel,
@@ -92,6 +93,7 @@ export default function IntentsPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
 
   const loadIntents = useCallback(async () => {
     const requestId = ++requestSequence.current;
@@ -142,28 +144,37 @@ export default function IntentsPage() {
     selectedClientId,
   ]);
 
-  useEffect(() => {
-    const fetchCatalogs = async () => {
-      try {
-        const clientsData = await clientService.getClientCatalog();
-        setClients(clientsData as Client[]);
-      } catch (err: unknown) {
-        setError(getErrorMessage(err));
-      }
-    };
-
-    void fetchCatalogs();
+  const loadClients = useCallback(async () => {
+    try {
+      const clientsData = await clientService.getClientCatalog();
+      setClients(clientsData as Client[]);
+      setCatalogError(null);
+    } catch (err: unknown) {
+      setCatalogError(getErrorMessage(err));
+    }
   }, []);
 
+  useEffect(() => { void loadClients(); }, [loadClients]);
+
   useEffect(() => {
+    let cancelled = false;
     if (!selectedClientId) {
       setBoards([]);
-      return;
+      return () => { cancelled = true; };
     }
 
+    setBoards([]);
     void boardService.getBoardCatalog(Number(selectedClientId))
-      .then((data) => setBoards(data as Board[]))
-      .catch((err: unknown) => setError(getErrorMessage(err)));
+      .then((data) => {
+        if (!cancelled) {
+          setBoards(data as Board[]);
+          setCatalogError(null);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setCatalogError(getErrorMessage(err));
+      });
+    return () => { cancelled = true; };
   }, [selectedClientId]);
 
   useEffect(() => {
@@ -176,10 +187,6 @@ export default function IntentsPage() {
 
   // Get boards filtered by selected client
   const availableBoards = boards;
-
-  const totalPages = meta
-    ? Math.max(1, Math.ceil(meta.count / meta.pageSize))
-    : 1;
 
   const handleClientFilterChange = (clientId: string) => {
     setSelectedClientId(clientId);
@@ -204,20 +211,9 @@ export default function IntentsPage() {
     setCurrentPage(1);
   };
 
-  const getStatusVariant = (status: string): "success" | "warning" | "error" | "neutral" => {
-    switch (status.toLowerCase()) {
-      case 'ok':
-      case 'success': return 'success';
-      case 'error':
-      case 'failed': return 'error';
-      case 'pending': return 'warning';
-      default: return 'neutral';
-    }
-  };
-
   return (
     <div>
-      <PageHeader title="Intents" actions={<Button variant="primary" onClick={() => window.location.reload()}>
+      <PageHeader title="Intents" actions={<Button variant="primary" loading={loading} onClick={() => void loadIntents()}>
           🔄 Refresh
         </Button>} />
 
@@ -281,7 +277,9 @@ export default function IntentsPage() {
         )}
       </Card>
 
-      <TablePanel title="Intents" refreshing={loading && intents.length > 0} pagination={meta && <Pagination page={meta.page} totalPages={totalPages} totalCount={meta.count} hasPrevious={Boolean(meta.previous)} hasNext={Boolean(meta.next)} onPrevious={() => setCurrentPage((page) => page - 1)} onNext={() => setCurrentPage((page) => page + 1)} />}>
+      {catalogError && <ErrorState message={`Filter options: ${catalogError}`} />}
+
+      <TablePanel title="Intents" refreshing={loading && intents.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setCurrentPage} />}>
         {loading && intents.length === 0 ? (
           <TableSkeleton columns={6} label="Loading intents..." />
         ) : error ? (
@@ -324,26 +322,10 @@ export default function IntentsPage() {
                           </strong>
                       </td>
 
-                      <td
-                        style={{
-                          cursor: intent.status?.toString().toUpperCase().trim() === 'ERROR' ? "pointer" : "default",
-                          userSelect: "none"
-                        }}
-                        onMouseDown={(e) => {
-                          const status = intent.status?.toString().toUpperCase().trim();
-                          if (status === 'ERROR') {
-                            e.preventDefault();
-                            handleShowError(intent);
-                          }
-                        }}
-                      >
-                        <StatusBadge variant={getStatusVariant(intent.status)}>
-                          {intent.status} {intent.status === 'ERROR' && '🔍'}
-                        </StatusBadge>
-                      </td>
+                      <td><IntentStatusBadge intent={intent} onShowError={handleShowError} /></td>
 
                       <td>
-                        {new Date(intent.executed_at).toLocaleString()}
+                        {formatGuayaquilDateTime(intent.executed_at)}
                       </td>
                     </tr>
                   ))

@@ -69,6 +69,14 @@ export class ApiClient
       ) {
         return data.message;
       }
+
+      if (data.errors && typeof data.errors === "object") {
+        const [field, messages] = Object.entries(data.errors)[0] ?? [];
+        const message = Array.isArray(messages) ? messages[0] : messages;
+        if (typeof message === "string") {
+          return field === "non_field_errors" ? message : `${field}: ${message}`;
+        }
+      }
     }
 
     return `API request failed (${status})`;
