@@ -1,10 +1,13 @@
 "use client";
 
+import {
+  commandService,
+} from "@/composition";
+
 import React, { useEffect, useState } from "react";
 import styles from "../users/users.module.css";
-import {
+import type {
   ADBCommand,
-  commandService,
 } from "@/features/commands";
 import { getErrorMessage } from "@/utils/errors";
 

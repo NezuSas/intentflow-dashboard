@@ -1,15 +1,21 @@
 "use client";
 
+import {
+  boardService,
+  clientService,
+  intentService,
+} from "@/composition";
+
 import React, { useEffect, useState } from "react";
 import styles from "../dashboard.module.css";
-import { intentService, Intent } from "@/features/intents";
-import {
+import type {
+  Intent,
+} from "@/features/intents";
+import type {
   Board,
-  boardService,
 } from "@/features/boards";
-import {
+import type {
   Client,
-  clientService,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 

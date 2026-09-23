@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import styles from "./dashboard.module.css";
-import type { Intent } from "@/features/intents";
 import {
   dashboardService,
-} from "@/features/dashboard";
+} from "@/composition";
+
+import React, { useEffect, useState, useRef } from "react";
+import styles from "./dashboard.module.css";
+import type {
+  Intent,
+} from "@/features/intents";
+
 import type {
   DashboardStats,
 } from "@/features/dashboard";

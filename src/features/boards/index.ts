@@ -1,13 +1,3 @@
-import { httpClient } from "@/composition/http";
-import { BoardService } from "./application/BoardService";
-import { BoardApiRepository } from "./infrastructure/BoardApiRepository";
-
-const boardRepository =
-  new BoardApiRepository(httpClient);
-
-export const boardService =
-  new BoardService(boardRepository);
-
 export type {
   Board,
   BoardPayload,
@@ -19,7 +9,5 @@ export type {
   BoardRepository,
 } from "./domain/BoardRepository";
 
-export {
-  BoardService,
-  BoardApiRepository,
-};
+export { BoardService } from "./application/BoardService";
+export { BoardApiRepository } from "./infrastructure/BoardApiRepository";

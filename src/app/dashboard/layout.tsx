@@ -1,14 +1,16 @@
 "use client";
 
+import {
+  authService,
+  authTokenManager,
+} from "@/composition";
+
 import React, { useState, useEffect } from "react";
 import styles from "./dashboard.module.css";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeProvider";
-import {
-  authService,
-  authTokenManager,
-} from "@/features/auth";
+
 
 function DashboardLayoutContent({
   children,

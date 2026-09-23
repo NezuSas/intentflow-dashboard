@@ -1,11 +1,18 @@
 "use client";
 
+import {
+  clientService,
+  subscriptionService,
+} from "@/composition";
+
 import React, { useEffect, useState } from "react";
 import styles from "../users/users.module.css";
-import { subscriptionService, SubscriptionPlan, ClientSubscription } from "@/features/subscriptions";
-import {
+import type {
+  SubscriptionPlan,
+  ClientSubscription,
+} from "@/features/subscriptions";
+import type {
   Client,
-  clientService,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
 
