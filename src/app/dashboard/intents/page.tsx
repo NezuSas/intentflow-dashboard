@@ -3,14 +3,21 @@
 import React, { useEffect, useState } from "react";
 import styles from "../dashboard.module.css";
 import { intentService, Intent } from "@/services/intentService";
-import { boardService } from "@/services/boardService";
-import { clientService } from "@/services/clientService";
+import {
+  Board,
+  boardService,
+} from "@/services/boardService";
+import {
+  Client,
+  clientService,
+} from "@/services/clientService";
+import { getErrorMessage } from "@/utils/errors";
 
 export default function IntentsPage() {
   const [intents, setIntents] = useState<Intent[]>([]);
   const [filteredIntents, setFilteredIntents] = useState<Intent[]>([]);
-  const [boards, setBoards] = useState<any[]>([]); // For filter dropdown
-  const [clients, setClients] = useState<any[]>([]); // For client filter
+  const [boards, setBoards] = useState<Board[]>([]); // For filter dropdown
+  const [clients, setClients] = useState<Client[]>([]); // For client filter
   
   // Filters
   const [selectedClientId, setSelectedClientId] = useState<string>("");
@@ -19,9 +26,9 @@ export default function IntentsPage() {
 
   // Error modal
   const [errorModalOpen, setErrorModalOpen] = useState(false);
-  const [selectedIntent, setSelectedIntent] = useState<any>(null);
+  const [selectedIntent, setSelectedIntent] = useState<Intent | null>(null);
 
-  const handleShowError = (intent: any) => {
+  const handleShowError = (intent: Intent) => {
     setSelectedIntent(intent);
     setErrorModalOpen(true);
   };
@@ -46,14 +53,14 @@ export default function IntentsPage() {
         setFilteredIntents(intentsData);
         setBoards(boardsData);
         setClients(clientsData);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    void fetchData();
   }, []);
 
   // Filter effect

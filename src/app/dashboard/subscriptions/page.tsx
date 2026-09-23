@@ -3,18 +3,22 @@
 import React, { useEffect, useState } from "react";
 import styles from "../users/users.module.css";
 import { subscriptionService, SubscriptionPlan, ClientSubscription } from "@/services/subscriptionService";
-import { clientService } from "@/services/clientService";
+import {
+  Client,
+  clientService,
+} from "@/services/clientService";
+import { getErrorMessage } from "@/utils/errors";
 
 export default function SubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [clientSubs, setClientSubs] = useState<ClientSubscription[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Modal states
   const [activeModal, setActiveModal] = useState<'PLAN' | 'SUBSCRIPTION' | null>(null);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<SubscriptionPlan | ClientSubscription | null>(null);
   
   const [planForm, setPlanForm] = useState({
     name: "",
@@ -34,7 +38,7 @@ export default function SubscriptionsPage() {
   });
 
   useEffect(() => {
-    fetchData();
+    void void fetchData();
   }, []);
 
   const fetchData = async () => {
@@ -49,8 +53,8 @@ export default function SubscriptionsPage() {
       setClientSubs(subsData);
       setClients(clientsData);
       setError(null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -62,7 +66,7 @@ export default function SubscriptionsPage() {
       setPlanForm({
         name: plan.name,
         description: plan.description,
-        price: plan.price,
+        price: Number(plan.price),
         max_boards: plan.max_boards || 20,
         plan_type: plan.plan_type,
         is_active: plan.is_active
@@ -88,10 +92,13 @@ export default function SubscriptionsPage() {
       // The serializer has client (ID) and client_detail (Object)
       // We need to cast carefully or just use the IDs if they are present in the top level (ClientSubscriptionSerializer has client=PrimaryKey)
       setSubForm({
-        client: (sub as any).client || sub.client_detail?.id || "",
-        subscription_plan: (sub as any).subscription_plan || sub.subscription_plan_detail?.id || "",
-        is_active: sub.status === 'ACTIVE',
-        payment_status: (sub as any).payment_status || "PAID",
+        client: String(sub.client_detail.id),
+        subscription_plan: String(
+          sub.subscription_plan_detail.id
+        ),
+        is_active: sub.is_active,
+        payment_status:
+          sub.payment_status || "PAID",
         end_date: sub.end_date || ""
       });
     } else {
@@ -116,9 +123,11 @@ export default function SubscriptionsPage() {
         await subscriptionService.createPlan(planForm);
       }
       setActiveModal(null);
-      fetchData();
-    } catch (err: any) {
-      alert(`Error saving plan: ${err.message}`);
+      void fetchData();
+    } catch (err: unknown) {
+      alert(
+        `Error saving plan: ${getErrorMessage(err)}`
+      );
     }
   };
 
@@ -137,9 +146,11 @@ export default function SubscriptionsPage() {
         await subscriptionService.createClientSubscription(payload);
       }
       setActiveModal(null);
-      fetchData();
-    } catch (err: any) {
-      alert(`Error saving subscription: ${err.message}`);
+      void fetchData();
+    } catch (err: unknown) {
+      alert(
+        `Error saving subscription: ${getErrorMessage(err)}`
+      );
     }
   };
 
@@ -147,9 +158,9 @@ export default function SubscriptionsPage() {
     if (!confirm("Delete this plan?")) return;
     try {
       await subscriptionService.deletePlan(id);
-      fetchData();
-    } catch (err: any) {
-      alert(err.message);
+      void fetchData();
+    } catch (err: unknown) {
+      alert(getErrorMessage(err));
     }
   };
 
@@ -157,9 +168,9 @@ export default function SubscriptionsPage() {
     if (!confirm("Cancel/Delete this subscription?")) return;
     try {
       await subscriptionService.deleteClientSubscription(id);
-      fetchData();
-    } catch (err: any) {
-      alert(err.message);
+      void fetchData();
+    } catch (err: unknown) {
+      alert(getErrorMessage(err));
     }
   };
 
@@ -247,8 +258,8 @@ export default function SubscriptionsPage() {
                     <td>{new Date(sub.start_date).toLocaleDateString()}</td>
                     <td>{sub.end_date ? new Date(sub.end_date).toLocaleDateString() : "Permanent"}</td>
                     <td>
-                      <span className={`${styles.badge} ${sub.status === 'ACTIVE' ? styles.badgeActive : styles.badgeInactive}`}>
-                        {sub.status}
+                      <span className={`${styles.badge} ${sub.is_active ? styles.badgeActive : styles.badgeInactive}`}>
+                        {sub.is_active ? "ACTIVE" : "INACTIVE"}
                       </span>
                     </td>
                     <td>
@@ -288,7 +299,7 @@ export default function SubscriptionsPage() {
                     <option value="FREE">FREE</option>
                     <option value="BASIC">BASIC</option>
                     <option value="PREMIUM">PREMIUM</option>
-                    <option value="ENTERPRISE">ENTERPRISE</option>
+                    <option value="CIAL">CIAL</option>
                   </select>
                 </div>
                 <div className={styles.formGroup}>
