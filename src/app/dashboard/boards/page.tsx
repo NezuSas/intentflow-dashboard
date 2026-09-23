@@ -7,7 +7,6 @@ import {
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
-import styles from "@/shared/components/page.module.css";
 
 import type {
   Board,
@@ -19,7 +18,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -260,7 +259,7 @@ export default function BoardsPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <Page>
       <PageHeader title="Board Management" actions={<Button
           variant="primary"
           onClick={() =>
@@ -480,7 +479,7 @@ export default function BoardsPage() {
                 </Select>
               </FormField>
 
-              <div>
+              <ActionGroup>
                 <Button
                   type="button"
                   onClick={() =>
@@ -496,9 +495,9 @@ export default function BoardsPage() {
                   loading={submitting}
                   disabled={submitting}
                 >Save Board</Button>
-              </div>
+              </ActionGroup>
             </form>
       </Modal>
-    </div>
+    </Page>
   );
 }

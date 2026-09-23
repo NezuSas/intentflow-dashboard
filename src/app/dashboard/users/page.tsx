@@ -5,12 +5,11 @@ import {
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
-import styles from "./users.module.css";
 import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
+import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -133,11 +132,11 @@ export default function UsersPage() {
   };
 
   if (loading && users.length === 0) {
-    return <div className={styles.container}><LoadingState label="Loading users..." /></div>;
+    return <Page><LoadingState label="Loading users..." /></Page>;
   }
 
   return (
-    <div className={styles.container}>
+    <Page>
       <PageHeader title="User Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New User</Button>} />
 
       {meta && (
@@ -233,12 +232,12 @@ export default function UsersPage() {
                   <option value="SUPERADMIN">Super Admin</option>
                 </Select>
               </FormField>
-              <div className={styles.modalActions}>
+              <ActionGroup>
                 <Button type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                 <Button type="submit" variant="primary" loading={submitting} disabled={!editingUser}>Save User</Button>
-              </div>
+              </ActionGroup>
             </form>
       </Modal>
-    </div>
+    </Page>
   );
 }

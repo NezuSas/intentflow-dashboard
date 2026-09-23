@@ -9,7 +9,7 @@ import styles from "./login.module.css";
 import { useRouter } from "next/navigation";
 
 import { getErrorMessage } from "@/utils/errors";
-import { Button, FormField, Input } from "@/shared/components";
+import { Button, Card, ErrorState, FormField, Input } from "@/shared/components";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -40,16 +40,14 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.loginCard}>
+      <Card className={styles.loginCard}>
         <div className={styles.header}>
           <h1 className={styles.logo}>IntentFlow</h1>
           <p className={styles.subtitle}>Admin Dashboard Access</p>
         </div>
 
         {error && (
-          <div className={styles.errorMessage}>
-            {error}
-          </div>
+          <ErrorState message={error} />
         )}
 
         <form className={styles.form} onSubmit={handleLogin}>
@@ -89,7 +87,7 @@ export default function LoginPage() {
         <div className={styles.footer}>
           <p>© 2025 Nezu. All rights reserved.</p>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

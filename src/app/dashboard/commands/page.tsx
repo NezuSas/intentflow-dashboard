@@ -7,7 +7,6 @@ import {
 } from "@/composition";
 
 import React, { useEffect, useState } from "react";
-import styles from "@/shared/components/page.module.css";
 import type {
   ADBCommand,
 } from "@/features/commands";
@@ -18,7 +17,7 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { getErrorMessage } from "@/utils/errors";
-import { Button, CheckboxGroup, ErrorState, FormField, Input, LoadingState, Modal, PageHeader, Pagination, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
+import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, StatusBadge, Table, TableEmpty, Textarea } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -164,7 +163,7 @@ export default function CommandsPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <Page>
       <PageHeader title="ADB Command Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New Command</Button>} />
 
       {error && <ErrorState message={error} />}
@@ -253,12 +252,12 @@ export default function CommandsPage() {
               </FormField>
               <FormField label="Available Versions"><CheckboxGroup options={versions.map((version) => ({ id: version.id, label: version.code }))} value={formData.versions} onChange={(versions) => setFormData((current) => ({ ...current, versions }))} /></FormField>
               <FormField label="Subscription Plans"><CheckboxGroup options={plans.map((plan) => ({ id: plan.id, label: plan.name }))} value={formData.subscription_plans} onChange={(subscription_plans) => setFormData((current) => ({ ...current, subscription_plans }))} /></FormField>
-              <div>
+              <ActionGroup>
                 <Button type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                 <Button type="submit" variant="primary" loading={submitting}>Save Command</Button>
-              </div>
+              </ActionGroup>
             </form>
       </Modal>
-    </div>
+    </Page>
   );
 }
