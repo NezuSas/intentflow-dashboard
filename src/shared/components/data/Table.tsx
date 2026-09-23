@@ -1,9 +1,21 @@
 import { Empty, Table as AntTable, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
+import { isValidElement, type ReactElement, type ReactNode } from "react";
 
 type Row = { key: string; cells: ReactNode[] };
-const elements = (value: ReactNode) => Children.toArray(value).filter(isValidElement);
+const elements = (value: ReactNode) => {
+  const result: ReactElement[] = [];
+  const visit = (child: ReactNode): void => {
+    if (Array.isArray(child)) {
+      child.forEach(visit);
+    } else if (isValidElement(child)) {
+      result.push(child);
+    }
+  };
+
+  visit(value);
+  return result;
+};
 
 /** Canonical Ant Design table adapter for the declarative table markup used by feature pages. */
 export const Table = ({ children, label }: { children: ReactNode; label: string }) => {
@@ -15,8 +27,14 @@ export const Table = ({ children, label }: { children: ReactNode; label: string 
   const parsedRows = elements(body?.props.children).map((row, index) => {
     const cells = elements((row.props as { children?: ReactNode }).children);
     if (cells.length === 1 && (cells[0].props as { colSpan?: number }).colSpan) {
-      const child = (cells[0].props as { children?: ReactNode }).children;
-      return { rows: [] as Row[], emptyMessage: isValidElement(child) && typeof (child.props as { label?: unknown }).label === "string" ? (child.props as { label: string }).label : "No records found." };
+      const cell = cells[0].props as { children?: ReactNode; label?: unknown };
+      const child = cell.children;
+      const label = typeof cell.label === "string"
+        ? cell.label
+        : isValidElement(child) && typeof (child.props as { label?: unknown }).label === "string"
+          ? (child.props as { label: string }).label
+          : "No records found.";
+      return { rows: [] as Row[], emptyMessage: label };
     }
     return { rows: [{ key: String(row.key ?? index), cells: cells.map((cell) => (cell.props as { children?: ReactNode }).children) }], emptyMessage: "No records found." };
   });
