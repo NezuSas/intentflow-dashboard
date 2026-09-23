@@ -4,13 +4,15 @@ import React, { useEffect, useState, useRef } from "react";
 import styles from "./dashboard.module.css";
 import { authService } from "@/services/authService";
 import { API_URL } from "@/config/api";
+import { Intent } from "@/services/intentService";
+import { getErrorMessage } from "@/utils/errors";
 
 interface DashboardStats {
   total_intents_30d: number;
   total_users: number;
   total_clients: number;
   active_boards: number;
-  recent_intents: any[];
+  recent_intents: Intent[];
 }
 
 export default function DashboardHomePage() {
@@ -21,9 +23,9 @@ export default function DashboardHomePage() {
 
   // Error modal state
   const [errorModalOpen, setErrorModalOpen] = useState(false);
-  const [selectedIntent, setSelectedIntent] = useState<any>(null);
+  const [selectedIntent, setSelectedIntent] = useState<Intent | null>(null);
 
-  const handleShowError = (intent: any) => {
+  const handleShowError = (intent: Intent) => {
     setSelectedIntent(intent);
     setErrorModalOpen(true);
   };
@@ -49,14 +51,19 @@ export default function DashboardHomePage() {
         
         const json = await response.json();
         setStats(json.data || json);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load dashboard statistics');
+      } catch (err: unknown) {
+        setError(
+          getErrorMessage(
+            err,
+            "Failed to load dashboard statistics"
+          )
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    void fetchStats();
   }, []); // Empty dependency array - only fetch on page load
 
   const statCards = stats ? [
@@ -106,7 +113,7 @@ export default function DashboardHomePage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <h1 style={{ fontSize: "1.875rem", fontWeight: 700 }}>Dashboard Overview</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            Monitor your system's performance and activity.
+            Monitor your system’s performance and activity.
           </p>
         </div>
       </div>

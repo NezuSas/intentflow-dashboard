@@ -2,13 +2,24 @@ import { authService } from "./authService";
 
 import { API_URL } from "@/config/api";
 
+export interface CommandPlanDetail {
+  id: number;
+  name: string;
+  plan_type?: string;
+}
+
 export interface ADBCommand {
   id: number;
   key: string;
-  display_name: string;
-  description: string;
+  display_name: string | null;
+  description: string | null;
   command: string;
-  subscription_plans: { id: number; name: string }[];
+  versions: number[];
+  subscription_plans: number[];
+  subscription_plans_detail?: CommandPlanDetail[];
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const commandService = {
