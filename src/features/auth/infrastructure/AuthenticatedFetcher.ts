@@ -76,10 +76,13 @@ export class AuthenticatedFetcher {
         }
       );
 
-    if (
-      response.status === 401 &&
-      this.tokens.getRefreshToken()
-    ) {
+    if (response.status === 401) {
+      if (!this.tokens.getRefreshToken()) {
+        this.tokens.clear();
+        this.events.notifyLogout();
+        throw new Error("Authentication required");
+      }
+
       const newToken =
         await this.tokens
           .refreshAccessToken();
@@ -97,6 +100,12 @@ export class AuthenticatedFetcher {
                 ),
             }
           );
+
+        if (response.status === 401) {
+          this.tokens.clear();
+          this.events.notifyLogout();
+          throw new Error("Authentication required");
+        }
       } else {
         this.events.notifyLogout();
         throw new Error(

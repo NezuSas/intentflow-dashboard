@@ -17,11 +17,20 @@ import type {
 import type {
   ADBVersion,
 } from "@/features/versions";
+import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
 import { getErrorMessage } from "@/utils/errors";
 import { ActionGroup, Button, ErrorState, FormField, Input, LoadingState, Modal, Page, PageHeader, Pagination, Select, StatusBadge, Table, TableEmpty, TablePanel } from "@/shared/components";
 import type { PageMeta } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
+
+const loadBoardCatalogs = async () => {
+  const [clients, versions] = await Promise.all([
+    clientService.getClientCatalog(),
+    versionService.getVersions(),
+  ]);
+  return { clients: clients as Client[], versions };
+};
 
 interface BoardFormData {
   name: string;
@@ -65,9 +74,9 @@ function parseAdbIdentifier(identifier: string) {
 
 export default function BoardsPage() {
   const [boards, setBoards] = useState<Board[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [versions, setVersions] =
-    useState<ADBVersion[]>([]);
+  const catalog = useLazyCatalog(loadBoardCatalogs);
+  const clients = catalog.data?.clients ?? [];
+  const versions: ADBVersion[] = catalog.data?.versions ?? [];
 
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -86,24 +95,12 @@ export default function BoardsPage() {
     useState<BoardFormData>(emptyForm);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchBoardPage = async () => {
       try {
         setLoading(true);
-
-        const [
-          boardData,
-          clientData,
-          versionData,
-        ] = await Promise.all([
-          boardService.listBoards({ page, pageSize: PAGE_SIZE }),
-          clientService.getClientCatalog(),
-          versionService.getVersions(),
-        ]);
-
+        const boardData = await boardService.listBoards({ page, pageSize: PAGE_SIZE });
         setBoards(boardData.data);
         setMeta(boardData.meta);
-        setClients(clientData as Client[]);
-        setVersions(versionData);
         setError(null);
       } catch (err: unknown) {
         setError(getErrorMessage(err));
@@ -112,8 +109,18 @@ export default function BoardsPage() {
       }
     };
 
-    void fetchInitialData();
+    void fetchBoardPage();
   }, [page]);
+
+  useEffect(() => {
+    const catalogData = catalog.data;
+    if (!isModalOpen || editingBoard || !catalogData) return;
+    setFormData((current) => ({
+      ...current,
+      client: current.client === "" ? catalogData.clients[0]?.id ?? "" : current.client,
+      version: current.version === "" ? catalogData.versions[0]?.id ?? "" : current.version,
+    }));
+  }, [isModalOpen, editingBoard, catalog.data]);
 
   const fetchBoards = async () => {
     try {
@@ -163,6 +170,7 @@ export default function BoardsPage() {
     }
 
     setIsModalOpen(true);
+    void catalog.load().catch(() => {});
   };
 
   const handleSubmit = async (
@@ -368,6 +376,9 @@ export default function BoardsPage() {
       </TablePanel>
 
       <Modal open={isModalOpen} title={editingBoard ? "Edit Board" : "Register New Board"} onClose={() => setIsModalOpen(false)}>
+          {!catalog.data ? (
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <LoadingState label="Loading form options..." />
+          ) : (
             <form onSubmit={handleSubmit}>
               <FormField label="Display Name" required>
                 <Input
@@ -497,6 +508,7 @@ export default function BoardsPage() {
                 >Save Board</Button>
               </ActionGroup>
             </form>
+          )}
       </Modal>
     </Page>
   );
