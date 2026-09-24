@@ -8,6 +8,19 @@
   padding-right: 4px;
 }
 
+.summary {
+  padding: 14px 16px;
+  border: 1px solid hsl(var(--error) / .35);
+  border-inline-start: 3px solid hsl(var(--error));
+  border-radius: 10px;
+  background: hsl(var(--error) / .08);
+}
+.summaryTitle { margin: 0; color: var(--text-primary); font-size: 15px; font-weight: 650; }
+.summaryDescription { margin: 6px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.technicalDetails summary { color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; }
+.technicalDetails summary:focus-visible { outline: 2px solid hsl(var(--focus-ring)); outline-offset: 3px; border-radius: 4px; }
+.technicalDetails .code { margin-top: 12px; }
+
 .field { min-width: 0; }
 .field + .field { border-top: 1px solid hsl(var(--border) / .6); padding-top: 16px; }
 .label { margin: 0 0 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
