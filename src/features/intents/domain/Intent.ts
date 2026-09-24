@@ -31,5 +31,6 @@ export interface Intent {
   status: string;
   source?: IntentSource | null;
   output: string | null;
+  error_code?: string | null;
   executed_at: string;
 }
