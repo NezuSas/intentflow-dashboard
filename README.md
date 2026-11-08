@@ -1,62 +1,76 @@
-# Nezu Dashboard (Frontend)
+<div align="center">
+  <img src=".github/banner.svg" alt="NEZU · IntentFlow Dashboard, panel administrativo del Intent Manager" width="100%">
+</div>
 
-The modern administrative dashboard for the **Nezu Intent Manager**. Built with **Next.js 14** (App Router), this interface allows users to view intent status, manage devices (boards), and monitor system activity in real-time.
+# IntentFlow Dashboard
 
-## 🚀 Technologies
+Panel administrativo del **Nezu Intent Manager**, el servicio que recibe intenciones, las traduce en comandos y las sincroniza con las placas y dispositivos del ecosistema NEZU. Desde este panel el operador ve el estado de las intenciones, administra placas, clientes, usuarios y suscripciones, revisa comandos y ajusta la configuración.
 
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **State/Fetching**: React Hooks, SWR (or Axios)
-- **Icons**: Lucide React
-- **Deployment**: Vercel
+El backend (API en Django) es privado. Este repositorio contiene solo la interfaz.
 
-## 🛠️ Installation & Setup
+## Secciones
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/NezuSas/intentflow-dashboard.git
-   cd intentflow-dashboard
-   ```
+| Ruta | Contenido |
+|---|---|
+| `/login` | Acceso |
+| `/dashboard` | Resumen y actividad |
+| `/dashboard/intents` | Intenciones y su estado |
+| `/dashboard/boards` | Placas y dispositivos |
+| `/dashboard/commands` | Comandos emitidos |
+| `/dashboard/clients` | Clientes |
+| `/dashboard/users` | Usuarios |
+| `/dashboard/subscriptions` | Suscripciones |
+| `/dashboard/settings` | Configuración |
 
-2. **Install Dependencies:**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+## Ejecutar en desarrollo
 
-3. **Environment Setup:**
-   Create a `.env.local` file in the root directory:
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Configure the connection to your backend:
-   ```env
-   # Default local backend URL
-   NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
-   ```
+```bash
+npm install
+npm run dev
+```
 
-4. **Run Development Server:**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
+Crea `.env.local` con la URL de la API. Si no se define, el panel usa el backend local por defecto:
 
-## 📦 Deployment (Vercel)
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+```
 
-This project is optimized for **Vercel**.
+El panel queda en `http://localhost:3000`.
 
-1. Import the repository into Vercel.
-2. The framework preset should detect **Next.js** automatically.
-3. **Environment Variables**:
-   - `NEXT_PUBLIC_API_URL`: Set this to your production backend URL (e.g., `https://intentflow-api.onrender.com`).
-4. Click **Deploy**.
+## Calidad y construcción
 
-## 📂 Project Structure
+```bash
+npm run lint     # ESLint
+npm test         # Vitest
+npm run build    # Next.js build
+npm start        # sirve la build
+```
 
-- `src/app/`: App Router pages and layouts.
-- `src/components/`: Reusable UI components.
-- `src/services/`: API integration services.
-- `src/types/`: TypeScript definitions for Intents and Boards.
+## Despliegue
+
+Optimizado para Vercel: importa el repositorio, Vercel detecta Next.js y solo hace falta definir `NEXT_PUBLIC_API_URL` con la URL pública del backend.
+
+## Estructura
+
+```text
+src/
+  app/            rutas (App Router): login y dashboard/*
+  features/       funcionalidades por dominio
+  components/     componentes de interfaz
+  composition/    composición de pantallas
+  contexts/       contextos de React
+  core/           lógica compartida
+  config/         configuración, incluida la URL de la API
+  shared/ utils/  apoyo
+tests/            pruebas con Vitest
+```
+
+## Tecnología
+
+Next.js 16 (App Router) · React 19 · TypeScript · Ant Design 5 · Vitest · Vercel
+
+---
+
+<div align="center">
+  <sub>Parte del ecosistema <a href="https://github.com/NezuSas">NEZU</a> · <a href="https://nezuecuador.com">nezuecuador.com</a> · © NEZU S.A.S. Publicado para clientes e integradores de NEZU.</sub>
+</div>
