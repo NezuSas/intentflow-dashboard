@@ -69,6 +69,10 @@ tests/            pruebas con Vitest
 
 Next.js 16 (App Router) · React 19 · TypeScript · Ant Design 5 · Vitest · Vercel
 
+## ¿Lo necesitas en tu operación?
+
+Este panel es gratuito: lo publicamos porque lo usamos en nuestros propios proyectos. Si quieres un panel así para tu operación, conectado a tus dispositivos y a tu equipo, [cuéntanos qué necesitas](https://nezuecuador.com/es/contacto) y te respondemos con una propuesta concreta. Aquí está [lo que hacemos](https://nezuecuador.com/es/servicios).
+
 ---
 
 <div align="center">
