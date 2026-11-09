@@ -4,6 +4,8 @@
 
 # IntentFlow Dashboard
 
+> **In English.** The admin dashboard of NEZU's Intent Manager: intents, Android boards, commands, clients, users and subscriptions. The backend is private, but a public demo with sample data runs entirely in the browser. Next.js, React and Ant Design.
+
 Panel administrativo del **Nezu Intent Manager**, el servicio que recibe intenciones, las traduce en comandos y las sincroniza con las placas y dispositivos del ecosistema NEZU. Desde este panel el operador ve el estado de las intenciones, administra placas, clientes, usuarios y suscripciones, revisa comandos y ajusta la configuración.
 
 El backend (API en Django) es privado. Este repositorio contiene solo la interfaz.
@@ -21,6 +23,24 @@ El backend (API en Django) es privado. Este repositorio contiene solo la interfa
 | `/dashboard/users` | Usuarios |
 | `/dashboard/subscriptions` | Suscripciones |
 | `/dashboard/settings` | Configuración |
+
+## Demo pública
+
+No hace falta el backend para ver el panel: la [**demo en línea**](https://nezusas.github.io/intentflow-dashboard/) corre con datos de ejemplo (tres clientes, seis pantallas, un mes de actividad) y permite recorrer todas las secciones, crear, editar y borrar registros. Todo ocurre en el navegador; nada se guarda ni se envía.
+
+![Resumen del panel con datos de ejemplo](.github/screenshots/dashboard.jpg)
+
+| Intenciones | Pantallas |
+|---|---|
+| ![Intenciones](.github/screenshots/intenciones.jpg) | ![Pantallas](.github/screenshots/pantallas.jpg) |
+
+Para levantarla en local:
+
+```bash
+NEXT_PUBLIC_DEMO=1 npm run dev
+```
+
+Con `NEXT_PUBLIC_DEMO=1`, `npm run build` genera además la exportación estática en `out/` que alimenta la demo pública (ruta base `/intentflow-dashboard`, configurable con `NEXT_PUBLIC_BASE_PATH`). Los datos y los repositorios de la demo viven en `src/demo/`; una build normal no los usa.
 
 ## Ejecutar en desarrollo
 

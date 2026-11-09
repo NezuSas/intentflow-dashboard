@@ -10,21 +10,23 @@ import { useRouter } from "next/navigation";
 
 import { getErrorMessage } from "@/utils/errors";
 import { Button, Card, ErrorState, FormField, Input } from "@/shared/components";
+import { DEMO_ACCOUNT, isDemoMode } from "@/demo/demoMode";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // In the public demo the form comes filled in and any credentials are accepted.
+  const demo = isDemoMode();
+  const [email, setEmail] = useState(demo ? DEMO_ACCOUNT.email : "");
+  const [password, setPassword] = useState(demo ? DEMO_ACCOUNT.password : "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const signIn = async (userEmail: string, userPassword: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      await authService.login(email, password);
+      await authService.login(userEmail, userPassword);
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(
@@ -38,6 +40,11 @@ export default function LoginPage() {
     }
   };
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await signIn(email, password);
+  };
+
   return (
     <div className={styles.container}>
       <Card className={styles.loginCard}>
@@ -45,6 +52,24 @@ export default function LoginPage() {
           <h1 className={styles.logo}>IntentFlow</h1>
           <p className={styles.subtitle}>Admin Dashboard Access</p>
         </div>
+
+        {demo && (
+          <div role="note">
+            <p className={styles.subtitle}>
+              Demo pública con datos de ejemplo. Nada se guarda ni sale de tu navegador.
+            </p>
+            <Button
+              type="button"
+              variant="primary"
+              className={styles.submitButton}
+              loading={loading}
+              loadingLabel="Entrando..."
+              onClick={() => void signIn(DEMO_ACCOUNT.email, DEMO_ACCOUNT.password)}
+            >
+              Entrar a la demo
+            </Button>
+          </div>
+        )}
 
         {error && (
           <ErrorState message={error} />
