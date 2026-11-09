@@ -73,6 +73,10 @@ Next.js 16 (App Router) · React 19 · TypeScript · Ant Design 5 · Vitest · V
 
 Este panel es gratuito: lo publicamos porque lo usamos en nuestros propios proyectos. Si quieres un panel así para tu operación, conectado a tus dispositivos y a tu equipo, [cuéntanos qué necesitas](https://nezuecuador.com/es/contacto) y te respondemos con una propuesta concreta. Aquí está [lo que hacemos](https://nezuecuador.com/es/servicios).
 
+## Licencia
+
+Licencia NEZU de uso para clientes e integradores: puedes leer, instalar y operar el código y proponer mejoras; no puedes redistribuirlo, venderlo ni usarlo para construir un producto o servicio competidor. Texto completo en [LICENSE.md](LICENSE.md).
+
 ---
 
 <div align="center">
