@@ -65,7 +65,7 @@ function parseAdbIdentifier(identifier: string) {
     port > 65535
   ) {
     throw new Error(
-      "ADB Identifier must use the format IP:PORT."
+      "El identificador ADB debe tener el formato IP:PUERTO."
     );
   }
 
@@ -157,7 +157,7 @@ export default function BoardsPage() {
         formData.version === ""
       ) {
         throw new Error(
-          "Client and version are required."
+          "El cliente y la versión son obligatorios."
         );
       }
 
@@ -193,7 +193,7 @@ export default function BoardsPage() {
       boardsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
-        `Error saving board: ${getErrorMessage(
+        `No se pudo guardar la placa: ${getErrorMessage(
           err
         )}`
       );
@@ -212,7 +212,7 @@ export default function BoardsPage() {
       else boardsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
-        `Error deleting board: ${getErrorMessage(
+        `No se pudo eliminar la placa: ${getErrorMessage(
           err
         )}`
       );
@@ -220,42 +220,42 @@ export default function BoardsPage() {
   };
 
   if (loading && boards.length === 0) {
-    return <TablePageSkeleton title="Board Management" tableTitle="Boards" columns={7} />;
+    return <TablePageSkeleton title="Placas" tableTitle="Placas" columns={7} />;
   }
 
   return (
     <Page>
-      <PageHeader title="Board Management" actions={<Button
+      <PageHeader title="Placas" description="Las pantallas Android de cada cliente y su estado de conexión." actions={<Button
           variant="primary"
           onClick={() =>
             handleOpenModal(null)
           }
         >
-          + Register Board
+          + Registrar placa
         </Button>} />
 
       {error && (
         <ErrorState message={error} />
       )}
 
-      <TablePanel title="Boards" refreshing={loading && boards.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
-      <Table label="Board management">
+      <TablePanel title="Placas" refreshing={loading && boards.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
+      <Table label="Placas">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
-              <th>ADB Identifier</th>
-              <th>Client</th>
-              <th>Version</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>Nombre</th>
+              <th>Identificador ADB</th>
+              <th>Cliente</th>
+              <th>Versión</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
 
           <tbody>
             {boards.length === 0 ? (
               <tr>
-                <TableEmpty colSpan={7} label="No boards found." />
+                <TableEmpty colSpan={7} label="No hay placas registradas." />
               </tr>
             ) : (
               boards.map((board) => (
@@ -288,13 +288,13 @@ export default function BoardsPage() {
                     <StatusBadge variant={board.computed_status === "online" ? "success" : "neutral"}>
                       {board.computed_status ===
                       "online"
-                        ? "Online"
-                        : "Offline"}
+                        ? "En línea"
+                        : "Sin conexión"}
                     </StatusBadge>
                   </td>
 
                   <td>
-                    <RowActions itemName={`board ${board.name}`} onEdit={() => handleOpenModal(board)} onDelete={() => handleDelete(board.id)} />
+                    <RowActions itemName={`la placa ${board.name}`} onEdit={() => handleOpenModal(board)} onDelete={() => handleDelete(board.id)} />
                   </td>
                 </tr>
               ))
@@ -303,12 +303,12 @@ export default function BoardsPage() {
       </Table>
       </TablePanel>
 
-      <Modal open={isModalOpen} title={editingBoard ? "Edit Board" : "Register New Board"} onClose={() => setIsModalOpen(false)}>
+      <Modal open={isModalOpen} title={editingBoard ? "Editar placa" : "Registrar placa"} onClose={() => setIsModalOpen(false)}>
           {!catalog.data ? (
-            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <FormSkeleton fields={5} />
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Reintentar</Button></> : <FormSkeleton fields={5} />
           ) : (
             <form onSubmit={handleSubmit}>
-              <FormField label="Display Name" required>
+              <FormField label="Nombre visible" required>
                 <Input
                   value={formData.name}
                   onChange={(e) =>
@@ -321,7 +321,7 @@ export default function BoardsPage() {
                 />
               </FormField>
 
-              <FormField label="ADB Identifier (IP:Port)" required>
+              <FormField label="Identificador ADB (IP:puerto)" required>
                 <Input
                   value={
                     formData.adb_identifier
@@ -338,7 +338,7 @@ export default function BoardsPage() {
                 />
               </FormField>
 
-              <FormField label="Assign to Client" required>
+              <FormField label="Cliente" required>
                 <Select
                   value={formData.client}
                   onChange={(e) =>
@@ -352,7 +352,7 @@ export default function BoardsPage() {
                   required
                 >
                   <option value="">
-                    Select a client...
+                    Elige un cliente...
                   </option>
 
                   {clients.map((client) => (
@@ -366,7 +366,7 @@ export default function BoardsPage() {
                 </Select>
               </FormField>
 
-              <FormField label="Firmware / ADB Version" required>
+              <FormField label="Versión de firmware / ADB" required>
                 <Select
                   value={formData.version}
                   onChange={(e) =>
@@ -380,7 +380,7 @@ export default function BoardsPage() {
                   required
                 >
                   <option value="">
-                    Select a version...
+                    Elige una versión...
                   </option>
 
                   {versions.map((version) => (
@@ -394,7 +394,7 @@ export default function BoardsPage() {
                 </Select>
               </FormField>
 
-              <FormField label="Stored Status">
+              <FormField label="Estado registrado">
                 <Select
                   value={formData.status}
                   onChange={(e) =>
@@ -409,11 +409,11 @@ export default function BoardsPage() {
                   }
                 >
                   <option value="ONLINE">
-                    Online
+                    En línea
                   </option>
 
                   <option value="OFFLINE">
-                    Offline
+                    Sin conexión
                   </option>
                 </Select>
               </FormField>
@@ -425,7 +425,7 @@ export default function BoardsPage() {
                     setIsModalOpen(false)
                   }
                 >
-                  Cancel
+                  Cancelar
                 </Button>
 
                 <Button
@@ -433,7 +433,7 @@ export default function BoardsPage() {
                   variant="primary"
                   loading={submitting}
                   disabled={submitting}
-                >Save Board</Button>
+                >Guardar placa</Button>
               </ActionGroup>
             </form>
           )}

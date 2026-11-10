@@ -4,7 +4,7 @@
 
 # IntentFlow Dashboard
 
-> **In English.** The admin dashboard of NEZU's Intent Manager: intents, Android boards, commands, clients, users and subscriptions. The backend is private, but a public demo with sample data runs entirely in the browser. Feature-sliced architecture (domain · application · infrastructure per feature), services injected through a composition root, data loading through a small `useQuery` hook that never sets state synchronously in effects, NEZU design system (ink and paper neutrals, orange primary, Rubik, light and dark), 118 tests with Vitest, zero known vulnerabilities, single `main` branch. Next.js 16, React 19 and Ant Design.
+> **In English.** The admin dashboard (Spanish UI) of NEZU's Intent Manager: intents, Android boards, commands, clients, users and subscriptions. The backend is private, but a public demo with sample data runs entirely in the browser. Feature-sliced architecture (domain · application · infrastructure per feature), services injected through a composition root, data loading through a small `useQuery` hook that never sets state synchronously in effects, NEZU design system (ink and paper neutrals, orange primary, Rubik, light and dark), 118 tests with Vitest, zero known vulnerabilities, single `main` branch. Next.js 16, React 19 and Ant Design.
 
 Panel administrativo del **Nezu Intent Manager**, el servicio que recibe intenciones, las traduce en comandos y las sincroniza con las placas y dispositivos del ecosistema NEZU. Desde este panel el operador ve el estado de las intenciones, administra placas, clientes, usuarios y suscripciones, revisa comandos y ajusta la configuración.
 

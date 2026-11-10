@@ -1,6 +1,6 @@
 export function getErrorMessage(
   error: unknown,
-  fallback = "Unexpected error"
+  fallback = "Error inesperado"
 ): string {
   if (error instanceof Error && error.message) {
     return error.message;

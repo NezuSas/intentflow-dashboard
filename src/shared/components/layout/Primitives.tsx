@@ -18,14 +18,14 @@ export const PageHeader = ({ title, actions, description }: { title: string; act
   </header>
 );
 
-export const LoadingState = ({ label = "Loading…" }: { label?: string }) => (
+export const LoadingState = ({ label = "Cargando…" }: { label?: string }) => (
   <Flex className={styles.state} vertical align="center" gap={8}>
     <Spin />
     <Typography.Text type="secondary">{label}</Typography.Text>
   </Flex>
 );
 
-export const EmptyState = ({ label = "No records found." }: { label?: string }) => <Empty description={label} image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+export const EmptyState = ({ label = "Sin registros." }: { label?: string }) => <Empty description={label} image={Empty.PRESENTED_IMAGE_SIMPLE} />;
 
 export const ErrorState = ({ message }: { message: string }) => <Alert type="error" message={message} showIcon style={{ marginBottom: 16 }} />;
 

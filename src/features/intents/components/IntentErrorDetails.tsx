@@ -13,32 +13,32 @@ export function IntentErrorDetails({ intent }: { intent: Intent }) {
         <p className={styles.summaryDescription}>{error.description}</p>
       </section>
       <section className={styles.field}>
-        <h3 className={styles.label}>Source</h3>
+        <h3 className={styles.label}>Origen</h3>
         <IntentSourceBadge source={intent.source} />
       </section>
       <section className={styles.field}>
-        <h3 className={styles.label}>Board</h3>
+        <h3 className={styles.label}>Placa</h3>
         <p className={styles.value}>
           {intent.board?.name} ({intent.board?.adb_identifier})
         </p>
       </section>
 
       <section className={styles.field}>
-        <h3 className={styles.label}>Command</h3>
+        <h3 className={styles.label}>Comando</h3>
         <code className={styles.code}>{intent.resolved_command}</code>
       </section>
 
       <section className={styles.field}>
         <details className={styles.technicalDetails}>
-          <summary>Show technical details</summary>
+          <summary>Ver el detalle técnico</summary>
           <pre className={`${styles.code} ${styles.output}`}>
-            {intent.output || "No error output available"}
+            {intent.output || "Sin salida de error disponible"}
           </pre>
         </details>
       </section>
 
       <section className={styles.field}>
-        <h3 className={styles.label}>Executed At</h3>
+        <h3 className={styles.label}>Ejecutada</h3>
         <p className={styles.value}>
           {formatGuayaquilDateTime(intent.executed_at)}
         </p>

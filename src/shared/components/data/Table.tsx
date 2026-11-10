@@ -42,16 +42,16 @@ export const Table = ({ children, label }: { children: ReactNode; label: string 
         ? cell.label
         : isValidElement(child) && typeof (child.props as { label?: unknown }).label === "string"
           ? (child.props as { label: string }).label
-          : "No records found.";
+          : "Sin registros.";
       return { rows: [] as Row[], emptyMessage: label };
     }
     return { rows: [{ key: String(row.key ?? index), cells: cells.map((cell) => {
       const { children: content, ...props } = cell.props as TdHTMLAttributes<HTMLTableCellElement>;
       return { content, props };
-    }) }], emptyMessage: "No records found." };
+    }) }], emptyMessage: "Sin registros." };
   });
   const rows = parsedRows.flatMap((result) => result.rows);
-  const emptyMessage = parsedRows.find((result) => result.rows.length === 0)?.emptyMessage ?? "No records found.";
+  const emptyMessage = parsedRows.find((result) => result.rows.length === 0)?.emptyMessage ?? "Sin registros.";
   const columns: ColumnsType<Row> = headers.map((title, index) => ({
     key: String(index),
     title,
@@ -65,7 +65,7 @@ export const TablePanel = ({ title, children, pagination, refreshing = false }: 
   <Card className={styles.tablePanel}>
     <div className={styles.tablePanelHeading}>
       <h2 className={styles.tablePanelTitle}>{title}</h2>
-      {refreshing && <div className={styles.tablePanelRefresh} role="status"><Skeleton.Input active size="small" style={{ width: 64 }} /><span>Updating...</span></div>}
+      {refreshing && <div className={styles.tablePanelRefresh} role="status"><Skeleton.Input active size="small" style={{ width: 64 }} /><span>Actualizando...</span></div>}
     </div>
     {children}
     {pagination && <div className={styles.tablePanelPagination}>{pagination}</div>}

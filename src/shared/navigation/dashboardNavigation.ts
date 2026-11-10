@@ -15,26 +15,26 @@ export interface NavigationGroup {
 /** La navegación del panel, agrupada por lo que el operador hace. */
 export const dashboardNavigationGroups: readonly NavigationGroup[] = [
   {
-    label: "Operation",
+    label: "Operación",
     items: [
-      { key: "/dashboard", label: "Overview", icon: "dashboard" },
-      { key: "/dashboard/intents", label: "Intents", icon: "intents" },
-      { key: "/dashboard/commands", label: "Commands", icon: "commands" },
+      { key: "/dashboard", label: "Resumen", icon: "dashboard" },
+      { key: "/dashboard/intents", label: "Intenciones", icon: "intents" },
+      { key: "/dashboard/commands", label: "Comandos", icon: "commands" },
     ],
   },
   {
-    label: "Fleet",
+    label: "Flota",
     items: [
-      { key: "/dashboard/boards", label: "Boards", icon: "boards" },
-      { key: "/dashboard/clients", label: "Clients", icon: "clients" },
-      { key: "/dashboard/subscriptions", label: "Subscriptions", icon: "subscriptions" },
+      { key: "/dashboard/boards", label: "Placas", icon: "boards" },
+      { key: "/dashboard/clients", label: "Clientes", icon: "clients" },
+      { key: "/dashboard/subscriptions", label: "Suscripciones", icon: "subscriptions" },
     ],
   },
   {
-    label: "Account",
+    label: "Cuenta",
     items: [
-      { key: "/dashboard/users", label: "Users", icon: "users" },
-      { key: "/dashboard/settings", label: "Settings", icon: "settings" },
+      { key: "/dashboard/users", label: "Usuarios", icon: "users" },
+      { key: "/dashboard/settings", label: "Configuración", icon: "settings" },
     ],
   },
 ] as const;

@@ -8,9 +8,14 @@ export function IntentStatusBadge({ intent, onShowError }: { intent: Intent; onS
     : status === "ERROR" || status === "FAILED"
       ? "error"
       : status === "PENDING" ? "warning" : "neutral";
-  const badge = <StatusBadge variant={variant}>{intent.status}</StatusBadge>;
+  const label = status === "OK" || status === "SUCCESS"
+    ? "Correcta"
+    : status === "ERROR" || status === "FAILED"
+      ? "Fallida"
+      : status === "PENDING" ? "Pendiente" : intent.status;
+  const badge = <StatusBadge variant={variant}>{label}</StatusBadge>;
 
   return status === "ERROR"
-    ? <Button type="button" variant="text" aria-label={`View error details for intent ${intent.id}`} onClick={() => onShowError(intent)}>{badge}</Button>
+    ? <Button type="button" variant="text" aria-label={`Ver el error de la intención ${intent.id}`} onClick={() => onShowError(intent)}>{badge}</Button>
     : badge;
 }

@@ -69,7 +69,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     return (
       <div className={styles.validating} role="status">
         <BrandMark size={40} />
-        <span>Validating session...</span>
+        <span>Validando la sesión...</span>
       </div>
     );
   }
@@ -78,13 +78,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`${styles.shell} ${collapsed ? styles.shellCollapsed : ""}`}>
-      <aside className={styles.sidebar} aria-label="Main navigation">
+      <aside className={styles.sidebar} aria-label="Navegación principal">
         <div className={styles.brand}>
           <BrandMark size={34} />
           {!collapsed && (
             <div className={styles.brandText}>
               <span className={styles.brandName}>IntentFlow</span>
-              <span className={styles.brandSub}>Intent Manager · NEZU</span>
+              <span className={styles.brandSub}>Gestor de intenciones · NEZU</span>
             </div>
           )}
         </div>
@@ -120,22 +120,22 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <Tooltip title={currentTheme === "dark" ? "Light mode" : "Dark mode"} placement="right">
-            <button type="button" className={styles.footerButton} aria-label="Toggle theme" onClick={toggleTheme}>
+          <Tooltip title={currentTheme === "dark" ? "Modo claro" : "Modo oscuro"} placement="right">
+            <button type="button" className={styles.footerButton} aria-label="Cambiar tema" onClick={toggleTheme}>
               {currentTheme === "dark" ? <SunOutlined /> : <MoonOutlined />}
-              {!collapsed && <span>{currentTheme === "dark" ? "Light mode" : "Dark mode"}</span>}
+              {!collapsed && <span>{currentTheme === "dark" ? "Modo claro" : "Modo oscuro"}</span>}
             </button>
           </Tooltip>
-          <Tooltip title={collapsed ? "Expand navigation" : "Collapse navigation"} placement="right">
-            <button type="button" className={styles.footerButton} aria-label="Toggle navigation" onClick={() => setCollapsed((value) => !value)}>
+          <Tooltip title={collapsed ? "Expandir el menú" : "Contraer el menú"} placement="right">
+            <button type="button" className={styles.footerButton} aria-label="Contraer o expandir el menú" onClick={() => setCollapsed((value) => !value)}>
               {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              {!collapsed && <span>Collapse</span>}
+              {!collapsed && <span>Contraer</span>}
             </button>
           </Tooltip>
-          <Tooltip title="Logout" placement="right">
+          <Tooltip title="Cerrar sesión" placement="right">
             <button type="button" className={`${styles.footerButton} ${styles.logout}`} onClick={() => void authService.logout()}>
               <LogoutOutlined />
-              {!collapsed && <span>Logout</span>}
+              {!collapsed && <span>Cerrar sesión</span>}
             </button>
           </Tooltip>
         </div>

@@ -69,13 +69,13 @@ const subscriptions = [
 ];
 
 const routes = [
-  { path: "/dashboard", Page: DashboardPage, text: "Recent Activity", empty: "No recent activity to display.", fail: mocks.dashboardService.getStats },
-  { path: "/dashboard/users", Page: UsersPage, text: "alice@example.test", empty: "No users found.", fail: mocks.userService.listUsers },
-  { path: "/dashboard/clients", Page: ClientsPage, text: "North Client", empty: "No clients found.", fail: mocks.clientService.listClients },
-  { path: "/dashboard/boards", Page: BoardsPage, text: "Office Board", empty: "No boards found.", fail: mocks.boardService.listBoards },
-  { path: "/dashboard/commands", Page: CommandsPage, text: "power_on", empty: "No commands found.", fail: mocks.commandService.listCommands },
-  { path: "/dashboard/intents", Page: IntentsPage, text: "power_on", empty: "No intents found matching criteria.", fail: mocks.intentService.list },
-  { path: "/dashboard/subscriptions", Page: SubscriptionsPage, text: "Starter Plan", empty: "No plans found.", fail: mocks.subscriptionService.listPlans },
+  { path: "/dashboard", Page: DashboardPage, text: "Actividad reciente", empty: "Todavía no hay actividad reciente.", fail: mocks.dashboardService.getStats },
+  { path: "/dashboard/users", Page: UsersPage, text: "alice@example.test", empty: "No hay usuarios.", fail: mocks.userService.listUsers },
+  { path: "/dashboard/clients", Page: ClientsPage, text: "North Client", empty: "No hay clientes registrados.", fail: mocks.clientService.listClients },
+  { path: "/dashboard/boards", Page: BoardsPage, text: "Office Board", empty: "No hay placas registradas.", fail: mocks.boardService.listBoards },
+  { path: "/dashboard/commands", Page: CommandsPage, text: "power_on", empty: "No hay comandos definidos.", fail: mocks.commandService.listCommands },
+  { path: "/dashboard/intents", Page: IntentsPage, text: "power_on", empty: "No hay intenciones con esos filtros.", fail: mocks.intentService.list },
+  { path: "/dashboard/subscriptions", Page: SubscriptionsPage, text: "Starter Plan", empty: "No hay planes definidos.", fail: mocks.subscriptionService.listPlans },
 ] as const;
 
 let container: HTMLDivElement;
@@ -152,7 +152,7 @@ describe("dashboard routes with mocked services", () => {
     await render(Page);
     expect(container.textContent).toContain(empty);
     if (path !== "/dashboard") expect(container.querySelector(".ant-empty")).not.toBeNull();
-    if (path === "/dashboard/subscriptions") expect(container.textContent).toContain("No client subscriptions found.");
+    if (path === "/dashboard/subscriptions") expect(container.textContent).toContain("Ningún cliente tiene suscripción.");
   });
 
   it.each(routes)("renders $path service error", async ({ Page, fail }) => {
@@ -165,7 +165,7 @@ describe("dashboard routes with mocked services", () => {
 
   it("renders login and the authenticated user's profile", async () => {
     await render(LoginPage);
-    expect(container.textContent).toContain("Sign In");
+    expect(container.textContent).toContain("Entrar");
     await render(SettingsPage);
     expect(container.textContent).toContain("alice@example.test");
     expect(mocks.userService.getCurrentUser).toHaveBeenCalledOnce();
@@ -183,16 +183,16 @@ describe("dashboard routes with mocked services", () => {
     mocks.authService.login.mockReturnValue(new Promise(() => undefined));
     await render(LoginPage);
     await act(async () => { container.querySelector("form")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
-    expect(container.textContent).toContain("Authenticating...");
+    expect(container.textContent).toContain("Entrando...");
   });
 
   it("shows Overview OK and ERROR rows and opens error details", async () => {
     await render(DashboardPage);
     expect(container.querySelectorAll(".ant-table-tbody tr.ant-table-row")).toHaveLength(2);
-    expect(container.textContent).toContain("OK");
+    expect(container.textContent).toContain("Correcta");
     expect(container.textContent).toContain("Google Home");
     expect(container.textContent).toContain("Home Assistant");
-    await click(container.querySelector('button[aria-label="View error details for intent 42"]'));
+    await click(container.querySelector('button[aria-label="Ver el error de la intención 42"]'));
     expect(document.body.textContent).toContain("ADB disconnected");
   });
 
@@ -202,7 +202,7 @@ describe("dashboard routes with mocked services", () => {
       recent_intents: [{ ...intents[0], source: undefined }],
     });
     await render(DashboardPage);
-    expect(container.textContent).toContain("Unknown");
+    expect(container.textContent).toContain("Desconocido");
   });
 
   it("routes every sidebar item through router.push", async () => {
@@ -217,19 +217,19 @@ describe("dashboard routes with mocked services", () => {
   it("opens Users edit modal and keeps role and status controls active", async () => {
     await render(UsersPage);
     const row = container.querySelector(".ant-table-tbody tr.ant-table-row");
-    await click(button("Active", row ?? undefined));
+    await click(button("Activo", row ?? undefined));
     expect(mocks.userService.toggleActive).toHaveBeenCalledWith(1);
-    await click(row?.querySelector('button[aria-label^="Edit user"]') ?? null);
-    expect(document.body.textContent).toContain("Edit User Profile");
+    await click(row?.querySelector('button[aria-label^="Editar el usuario"]') ?? null);
+    expect(document.body.textContent).toContain("Editar usuario");
     await openSelect(document.body.querySelector(".ant-modal .ant-select"));
-    expect(document.body.textContent).toContain("Standard User");
+    expect(document.body.textContent).toContain("Usuario estándar");
   });
 
   it("shows the backend-required password only when creating a user", async () => {
     await render(UsersPage);
-    await click(button("New User", container));
+    await click(button("Nuevo usuario", container));
     expect(document.body.querySelector('.ant-modal input[type="password"]')).not.toBeNull();
-    expect(document.body.textContent).toContain("New users start with the User role");
+    expect(document.body.textContent).toContain("Los usuarios nuevos empiezan con el rol Usuario");
     expect(document.body.querySelectorAll(".ant-modal .ant-select")).toHaveLength(0);
     const inputs = document.body.querySelectorAll(".ant-modal input") as NodeListOf<HTMLInputElement>;
     await setInput(inputs[0], "New");
@@ -242,23 +242,23 @@ describe("dashboard routes with mocked services", () => {
 
   it("opens Clients create and edit modals with form controls", async () => {
     await render(ClientsPage);
-    await click(button("New Client", container));
-    expect(document.body.textContent).toContain("Create New Client");
+    await click(button("Nuevo cliente", container));
+    expect(document.body.textContent).toContain("Nuevo cliente");
     expect(document.body.querySelector('input[type="email"]')).not.toBeNull();
     const clientName = document.body.querySelector(".ant-modal input") as HTMLInputElement;
     await setInput(clientName, "Test Client");
     expect(clientName.value).toBe("Test Client");
     await openSelect(document.body.querySelector(".ant-modal .ant-select"));
     expect(document.body.textContent).toContain("COMPANY");
-    await click(button("Cancel"));
-    await click(container.querySelector('.ant-table-tbody tr.ant-table-row button[aria-label^="Edit client"]'));
-    expect(document.body.textContent).toContain("Edit Client");
+    await click(button("Cancelar"));
+    await click(container.querySelector('.ant-table-tbody tr.ant-table-row button[aria-label^="Editar el cliente"]'));
+    expect(document.body.textContent).toContain("Editar cliente");
   });
 
   it("opens Boards modal with client and version selects", async () => {
     await render(BoardsPage);
-    await click(button("Register Board", container));
-    expect(document.body.textContent).toContain("Register New Board");
+    await click(button("Registrar placa", container));
+    expect(document.body.textContent).toContain("Registrar placa");
     expect(document.body.querySelectorAll(".ant-modal .ant-select")).toHaveLength(3);
     expect(container.textContent).toContain("Lab Board");
     const selectors = document.body.querySelectorAll(".ant-modal .ant-select");
@@ -273,8 +273,8 @@ describe("dashboard routes with mocked services", () => {
 
   it("opens Commands modal and selects multiple versions and plans", async () => {
     await render(CommandsPage);
-    await click(button("New Command", container));
-    expect(document.body.textContent).toContain("New ADB Command");
+    await click(button("Nuevo comando", container));
+    expect(document.body.textContent).toContain("Nuevo comando ADB");
     const checkboxes = document.body.querySelectorAll('.ant-modal input[type="checkbox"]');
     expect(checkboxes).toHaveLength(4);
     await click(checkboxes[0]); await click(checkboxes[1]); await click(checkboxes[2]); await click(checkboxes[3]);
@@ -297,9 +297,9 @@ describe("dashboard routes with mocked services", () => {
     const date = container.querySelector('input[type="date"]') as HTMLInputElement;
     await setInput(date, "2026-09-23");
     expect(mocks.intentService.list).toHaveBeenLastCalledWith(expect.objectContaining({ executedAtAfter: "2026-09-23T00:00:00-05:00" }));
-    await click(container.querySelector('button[aria-label="View error details for intent 42"]'));
+    await click(container.querySelector('button[aria-label="Ver el error de la intención 42"]'));
     expect(document.body.textContent).toContain("ADB disconnected");
-    await click(button("Close", document.body.querySelector(".ant-modal") ?? undefined));
+    await click(button("Cerrar", document.body.querySelector(".ant-modal") ?? undefined));
     await click(container.querySelector(".ant-pagination-next button"));
     expect(mocks.intentService.list).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
   });
@@ -307,11 +307,11 @@ describe("dashboard routes with mocked services", () => {
   it("opens both Subscription modals with populated catalogs", async () => {
     await render(SubscriptionsPage);
     expect(container.textContent).toContain("South Client");
-    await click(button("New Plan", container));
-    expect(document.body.textContent).toContain("Create New Plan");
-    await click(button("Cancel"));
-    await click(button("New Subscription", container));
-    expect(document.body.textContent).toContain("Assign Plan to Client");
+    await click(button("Nuevo plan", container));
+    expect(document.body.textContent).toContain("Nuevo plan");
+    await click(button("Cancelar"));
+    await click(button("Nueva suscripción", container));
+    expect(document.body.textContent).toContain("Asignar un plan");
     expect(document.body.querySelector('.ant-modal input[type="date"]')).not.toBeNull();
     expect(document.body.querySelectorAll(".ant-modal .ant-select")).toHaveLength(4);
     expect(container.querySelectorAll(".ant-table-tbody tr.ant-table-row")).toHaveLength(4);

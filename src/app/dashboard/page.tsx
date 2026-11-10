@@ -10,10 +10,10 @@ import { useQuery } from "@/shared/hooks/useQuery";
 import { Button, CardGridSkeleton, ErrorState, Modal, PageHeader, Table, TablePanel, TableSkeleton } from "@/shared/components";
 
 const statsOf = (stats: DashboardStats) => [
-  { label: "Intents", value: stats.total_intents_30d, caption: "Last 30 days" },
-  { label: "Clients", value: stats.total_clients, caption: "Active" },
-  { label: "Boards", value: stats.active_boards, caption: "Connected", live: true },
-  { label: "Users", value: stats.total_users, caption: "With access" },
+  { label: "Intenciones", value: stats.total_intents_30d, caption: "Últimos 30 días" },
+  { label: "Clientes", value: stats.total_clients, caption: "Activos" },
+  { label: "Placas", value: stats.active_boards, caption: "Conectadas", live: true },
+  { label: "Usuarios", value: stats.total_users, caption: "Con acceso" },
 ];
 
 export default function DashboardHomePage() {
@@ -24,23 +24,23 @@ export default function DashboardHomePage() {
   return (
     <div>
       <PageHeader
-        title="Overview"
-        description="What the fleet did in the last 30 days and the latest intents."
-        actions={<Button onClick={() => statsQuery.reload()} loading={loading && stats !== null}>Refresh</Button>}
+        title="Resumen"
+        description="Lo que hizo la flota en los últimos 30 días y las intenciones más recientes."
+        actions={<Button onClick={() => statsQuery.reload()} loading={loading && stats !== null}>Actualizar</Button>}
       />
 
       {loading && !stats ? (
         <>
           <CardGridSkeleton count={4} />
-          <TablePanel title="Recent activity">
-            <TableSkeleton columns={6} label="Loading recent activity..." />
+          <TablePanel title="Actividad reciente">
+            <TableSkeleton columns={6} label="Cargando actividad reciente..." />
           </TablePanel>
         </>
       ) : error && !stats ? (
         <ErrorState message={`Error: ${error}`} />
       ) : stats ? (
         <>
-          <section className={styles.statsStrip} aria-label="Fleet summary">
+          <section className={styles.statsStrip} aria-label="Resumen de la flota">
             {statsOf(stats).map((stat) => (
               <div key={stat.label} className={styles.stat}>
                 <span className={styles.statLabel}>{stat.label}</span>
@@ -50,17 +50,17 @@ export default function DashboardHomePage() {
             ))}
           </section>
 
-          <TablePanel title="Recent Activity" refreshing={loading}>
+          <TablePanel title="Actividad reciente" refreshing={loading}>
             {stats.recent_intents.length > 0 ? (
-              <Table label="Recent activity">
+              <Table label="Actividad reciente">
                 <thead>
                   <tr>
-                    <th>Command</th>
-                    <th>Board</th>
-                    <th>Client</th>
-                    <th>Source</th>
-                    <th>Status</th>
-                    <th>Time</th>
+                    <th>Comando</th>
+                    <th>Placa</th>
+                    <th>Cliente</th>
+                    <th>Origen</th>
+                    <th>Estado</th>
+                    <th>Hora</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -69,11 +69,11 @@ export default function DashboardHomePage() {
                       <td>{intent.command_key}</td>
                       <td>
                         <div className={styles.board}>
-                          <span>{intent.board?.name || "Unknown"}</span>
+                          <span>{intent.board?.name || "Desconocido"}</span>
                           <span className={styles.boardAddress}>{intent.board?.adb_identifier}</span>
                         </div>
                       </td>
-                      <td>{intent.board?.client_detail?.name || "Unknown"}</td>
+                      <td>{intent.board?.client_detail?.name || "Desconocido"}</td>
                       <td><IntentSourceBadge source={intent.source} /></td>
                       <td><IntentStatusBadge intent={intent} onShowError={setSelectedIntent} /></td>
                       <td className={styles.timeCell}>{formatGuayaquilDateTime(intent.executed_at)}</td>
@@ -82,7 +82,7 @@ export default function DashboardHomePage() {
                 </tbody>
               </Table>
             ) : (
-              <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--text-muted)" }}>No recent activity to display.</div>
+              <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--text-muted)" }}>Todavía no hay actividad reciente.</div>
             )}
           </TablePanel>
         </>
@@ -91,10 +91,10 @@ export default function DashboardHomePage() {
       {selectedIntent && (
         <Modal
           open
-          title="Error details"
-          description={`Intent #${selectedIntent.id} · ${selectedIntent.command_key}`}
+          title="Detalle del error"
+          description={`Intención ${selectedIntent.id} · ${selectedIntent.command_key}`}
           onClose={() => setSelectedIntent(null)}
-          footer={<Button variant="primary" onClick={() => setSelectedIntent(null)}>Close</Button>}
+          footer={<Button variant="primary" onClick={() => setSelectedIntent(null)}>Cerrar</Button>}
         >
           <IntentErrorDetails intent={selectedIntent} />
         </Modal>

@@ -79,7 +79,7 @@ export class ApiClient
       }
     }
 
-    return `API request failed (${status})`;
+    return `La solicitud a la API falló (${status})`;
   }
 
   async request<T>(

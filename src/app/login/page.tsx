@@ -25,7 +25,7 @@ export default function LoginPage() {
       await authService.login(userEmail, userPassword);
       router.push("/dashboard");
     } catch (err: unknown) {
-      setError(getErrorMessage(err, "Invalid credentials. Please try again."));
+      setError(getErrorMessage(err, "Credenciales incorrectas. Inténtalo de nuevo."));
     } finally {
       setLoading(false);
     }
@@ -43,14 +43,14 @@ export default function LoginPage() {
           <BrandMark size={40} />
           <div>
             <span className={styles.brandName}>IntentFlow</span>
-            <span className={styles.brandSub}>Intent Manager · NEZU</span>
+            <span className={styles.brandSub}>Gestor de intenciones · NEZU</span>
           </div>
         </div>
         <div>
-          <h1 className={styles.headline}>Every screen in the fleet, one intent away.</h1>
+          <h1 className={styles.headline}>Toda la flota de pantallas, a una intención de distancia.</h1>
           <p className={styles.lead}>
-            Follow intents as they reach each Android board, manage clients, commands and subscriptions, and see what
-            failed and why.
+            Sigue cada intención hasta la placa Android que la recibe, administra clientes, comandos y suscripciones, y
+            mira qué falló y por qué.
           </p>
         </div>
         <div className={styles.asideFooter}>NEZU S.A.S. · Cuenca, Ecuador</div>
@@ -58,8 +58,8 @@ export default function LoginPage() {
 
       <div className={styles.formColumn}>
         <div className={styles.loginCard}>
-          <h2 className={styles.formTitle}>Sign in</h2>
-          <p className={styles.formHint}>Use your operator account.</p>
+          <h2 className={styles.formTitle}>Iniciar sesión</h2>
+          <p className={styles.formHint}>Entra con tu cuenta de operador.</p>
 
           {demo && (
             <div role="note" className={styles.demoNote}>
@@ -80,14 +80,14 @@ export default function LoginPage() {
           {error && <ErrorState message={error} />}
 
           <form className={styles.form} onSubmit={handleLogin}>
-            <FormField label="Email">
-              <Input type="email" id="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <FormField label="Correo">
+              <Input type="email" id="email" placeholder="tu@empresa.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </FormField>
-            <FormField label="Password">
+            <FormField label="Contraseña">
               <Input type="password" id="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </FormField>
-            <Button type="submit" variant="primary" className={styles.submitButton} loading={loading} loadingLabel="Authenticating...">
-              Sign In
+            <Button type="submit" variant="primary" className={styles.submitButton} loading={loading} loadingLabel="Entrando...">
+              Entrar
             </Button>
           </form>
 

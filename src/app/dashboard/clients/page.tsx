@@ -97,7 +97,7 @@ export default function ClientsPage() {
       clientsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
-        `Error saving client: ${getErrorMessage(
+        `No se pudo guardar el cliente: ${getErrorMessage(
           err
         )}`
       );
@@ -118,7 +118,7 @@ export default function ClientsPage() {
       else clientsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
-        `Error deleting client: ${getErrorMessage(
+        `No se pudo eliminar el cliente: ${getErrorMessage(
           err
         )}`
       );
@@ -126,32 +126,32 @@ export default function ClientsPage() {
   };
 
   if (loading && clients.length === 0) {
-    return <TablePageSkeleton title="Client Management" tableTitle="Clients" columns={7} />;
+    return <TablePageSkeleton title="Clientes" tableTitle="Clientes" columns={7} />;
   }
 
   return (
     <Page>
-      <PageHeader title="Client Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New Client</Button>} />
+      <PageHeader title="Clientes" description="Empresas y personas con placas en operación." actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ Nuevo cliente</Button>} />
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="Clients" refreshing={loading && clients.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
-      <Table label="Client management">
+      <TablePanel title="Clientes" refreshing={loading && clients.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
+      <Table label="Clientes">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Subscription</th>
-              <th>ID Number</th>
-              <th>Email</th>
-              <th>Actions</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Suscripción</th>
+              <th>Identificación</th>
+              <th>Correo</th>
+              <th>Acciones</th>
             </tr>
           </thead>
 
           <tbody>
             {clients.length === 0 ? (
-              <TableEmpty colSpan={7} label="No clients found." />
+              <TableEmpty colSpan={7} label="No hay clientes registrados." />
             ) : (
               clients.map((client) => (
                 <tr key={client.id}>
@@ -183,7 +183,7 @@ export default function ClientsPage() {
                   </td>
 
                   <td>
-                    <RowActions itemName={`client ${client.name}`} onEdit={() => handleOpenModal(client)} onDelete={() => handleDelete(client.id)} />
+                    <RowActions itemName={`el cliente ${client.name}`} onEdit={() => handleOpenModal(client)} onDelete={() => handleDelete(client.id)} />
                   </td>
                 </tr>
               ))
@@ -192,9 +192,9 @@ export default function ClientsPage() {
       </Table>
       </TablePanel>
 
-      <Modal open={isModalOpen} title={editingClient ? "Edit Client" : "Create New Client"} onClose={() => setIsModalOpen(false)}>
+      <Modal open={isModalOpen} title={editingClient ? "Editar cliente" : "Nuevo cliente"} onClose={() => setIsModalOpen(false)}>
             <form onSubmit={handleSubmit}>
-              <FormField label="Client Name" required>
+              <FormField label="Nombre" required>
                 <Input
                   value={formData.name}
                   onChange={(e) =>
@@ -207,7 +207,7 @@ export default function ClientsPage() {
                 />
               </FormField>
 
-              <FormField label="Business Type">
+              <FormField label="Tipo">
                 <Select
                   value={formData.type}
                   onChange={(e) =>
@@ -226,7 +226,7 @@ export default function ClientsPage() {
                 </Select>
               </FormField>
 
-              <FormField label="Subscription">
+              <FormField label="Nivel de suscripción">
                 <Select
                   value={
                     formData.subscription_level
@@ -251,7 +251,7 @@ export default function ClientsPage() {
                 </Select>
               </FormField>
 
-              <FormField label="ID / TAX Number">
+              <FormField label="Cédula o RUC">
                 <Input
                   value={
                     formData.identification_number
@@ -266,7 +266,7 @@ export default function ClientsPage() {
                 />
               </FormField>
 
-              <FormField label="Contact Email">
+              <FormField label="Correo de contacto">
                 <Input
                   type="email"
                   value={formData.email}
@@ -286,14 +286,14 @@ export default function ClientsPage() {
                     setIsModalOpen(false)
                   }
                 >
-                  Cancel
+                  Cancelar
                 </Button>
 
                 <Button
                   type="submit"
                   variant="primary"
                   loading={submitting}
-                >Save Client</Button>
+                >Guardar cliente</Button>
               </ActionGroup>
             </form>
       </Modal>

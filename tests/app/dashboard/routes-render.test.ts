@@ -29,7 +29,7 @@ describe("route initial render", () => {
 
   it("renders the protected dashboard layout before session validation", () => {
     const markup = renderToStaticMarkup(createElement(ThemeProvider, null, createElement(DashboardLayout, null, "Dashboard")));
-    expect(markup).toContain("Validating session...");
+    expect(markup).toContain("Validando la sesión...");
   });
 
   const routes = [

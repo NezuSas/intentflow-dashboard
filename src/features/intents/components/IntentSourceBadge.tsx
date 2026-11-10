@@ -2,7 +2,7 @@ import { Chip } from "@/shared/components";
 import type { Intent, IntentSource } from "../domain/Intent";
 
 const sourceLabels: Record<IntentSource, string> = {
-  unknown: "Unknown",
+  unknown: "Desconocido",
   google_home: "Google Home",
   home_assistant: "Home Assistant",
   api: "API",

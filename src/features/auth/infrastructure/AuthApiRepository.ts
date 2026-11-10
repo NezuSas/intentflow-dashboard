@@ -43,7 +43,7 @@ export class AuthApiRepository
       }
     }
 
-    return `Authentication request failed (${response.status})`;
+    return `La autenticación falló (${response.status})`;
   }
 
   async login(

@@ -136,21 +136,21 @@ export default function IntentsPage() {
 
   return (
     <div>
-      <PageHeader title="Intents" description="Every intent that reached a board, newest first." actions={<Button variant="secondary" icon={<ReloadOutlined />} loading={loading && intents.length > 0} onClick={() => intentsQuery.reload()}>
-          Refresh
+      <PageHeader title="Intenciones" description="Cada orden que llegó a una placa, de la más reciente a la más antigua." actions={<Button variant="secondary" icon={<ReloadOutlined />} loading={loading && intents.length > 0} onClick={() => intentsQuery.reload()}>
+          Actualizar
         </Button>} />
 
       {/* FILTERS TOOLBAR */}
       <Card className={styles.filtersToolbar}>
 
         {/* Client Filter */}
-        <FormField label="Filter by Client">
+        <FormField label="Cliente">
             <Select
                 value={selectedClientId}
                 onChange={(e) => handleClientFilterChange(e.target.value)}
                 className={styles.filterControl}
             >
-                <option value="">All Clients</option>
+                <option value="">Todos los clientes</option>
                 {clients.map(c => (
                     <option key={c.id} value={c.id}>
                         {c.name}
@@ -160,7 +160,7 @@ export default function IntentsPage() {
         </FormField>
 
         {/* Board Filter (filtered by selected client) */}
-        <FormField className={`${styles.filterGroupWide}`} label={`Filter by Board ${selectedClientId ? `(${clients.find(c => c.id === parseInt(selectedClientId))?.name || "Client"})` : ""}`}>
+        <FormField className={`${styles.filterGroupWide}`} label={`Placa ${selectedClientId ? `(${clients.find(c => c.id === parseInt(selectedClientId))?.name || "cliente"})` : ""}`}>
             <Select
                 value={selectedBoardId}
                 onChange={(e) => handleBoardFilterChange(e.target.value)}
@@ -168,7 +168,7 @@ export default function IntentsPage() {
                 className={styles.filterControl}
             >
                 <option value="">
-                    {selectedClientId ? 'All Boards' : 'Select a client first'}
+                    {selectedClientId ? 'Todas las placas' : 'Elige primero un cliente'}
                 </option>
                 {availableBoards.map(b => (
                     <option key={b.id} value={b.id}>
@@ -179,7 +179,7 @@ export default function IntentsPage() {
         </FormField>
 
         {/* Date Filter */}
-        <FormField label="Filter by Date">
+        <FormField label="Fecha">
             <Input
                 type="date"
                 value={filterDate}
@@ -196,35 +196,35 @@ export default function IntentsPage() {
                 icon={<CloseOutlined />}
                 className={styles.clearFiltersButton}
             >
-                Clear filters
+                Quitar filtros
             </Button>
         )}
       </Card>
 
-      {catalogError && <ErrorState message={`Filter options: ${catalogError}`} />}
+      {catalogError && <ErrorState message={`Filtros: ${catalogError}`} />}
 
-      <TablePanel title="Intents" refreshing={loading && intents.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setCurrentPage} />}>
+      <TablePanel title="Intenciones" refreshing={loading && intents.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setCurrentPage} />}>
         {loading && intents.length === 0 ? (
-          <TableSkeleton columns={7} label="Loading intents..." />
+          <TableSkeleton columns={7} label="Cargando intenciones..." />
         ) : error ? (
           <ErrorState message={`Error: ${error}`} />
         ) : (
-          <Table label="Intents">
+          <Table label="Intenciones">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Command</th>
-                  <th>Board</th>
-                  <th>Client</th>
-                  <th>Source</th>
-                  <th>Status</th>
-                  <th>Executed at</th>
+                  <th>Comando</th>
+                  <th>Placa</th>
+                  <th>Cliente</th>
+                  <th>Origen</th>
+                  <th>Estado</th>
+                  <th>Ejecutada</th>
                 </tr>
               </thead>
               <tbody>
                 {intents.length === 0 ? (
                   <tr>
-                    <TableEmpty colSpan={7} label="No intents found matching criteria." />
+                    <TableEmpty colSpan={7} label="No hay intenciones con esos filtros." />
                   </tr>
                 ) : (
                   intents.map((intent) => (
@@ -235,7 +235,7 @@ export default function IntentsPage() {
                       {/* Board column with name and ADB identifier */}
                       <td>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <span style={{ fontWeight: 500 }}>{intent.board?.name || "Unknown"}</span>
+                              <span style={{ fontWeight: 500 }}>{intent.board?.name || "Desconocido"}</span>
                               <small>{intent.board?.adb_identifier}</small>
                           </div>
                       </td>
@@ -243,7 +243,7 @@ export default function IntentsPage() {
                       {/* Client column - showing which client owns the board */}
                       <td>
                           <strong>
-                              {intent.board?.client_detail?.name || "Unknown"}
+                              {intent.board?.client_detail?.name || "Desconocido"}
                           </strong>
                       </td>
 
@@ -263,7 +263,7 @@ export default function IntentsPage() {
 
       {/* Error Details Modal */}
       {errorModalOpen && selectedIntent && (
-        <Modal open title="Error Details" description={`Intent #${selectedIntent.id} - ${selectedIntent.command_key}`} onClose={handleCloseErrorModal} footer={<Button variant="primary" onClick={handleCloseErrorModal}>Close</Button>}>
+        <Modal open title="Detalle del error" description={`Intención ${selectedIntent.id} · ${selectedIntent.command_key}`} onClose={handleCloseErrorModal} footer={<Button variant="primary" onClick={handleCloseErrorModal}>Cerrar</Button>}>
           <IntentErrorDetails intent={selectedIntent} />
         </Modal>
       )}

@@ -76,7 +76,7 @@ export default function UsersPage() {
       if (!editingUser && page !== 1) setPage(1);
       else usersQuery.reload();
     } catch (err: unknown) {
-      feedback.error(`Error saving user: ${getErrorMessage(err)}`);
+      feedback.error(`No se pudo guardar el usuario: ${getErrorMessage(err)}`);
     } finally {
       setSubmitting(false);
     }
@@ -89,7 +89,7 @@ export default function UsersPage() {
       if (nextPage !== page) setPage(nextPage);
       else usersQuery.reload();
     } catch (err: unknown) {
-      feedback.error(`Error deleting user: ${getErrorMessage(err)}`);
+      feedback.error(`No se pudo eliminar el usuario: ${getErrorMessage(err)}`);
     }
   };
 
@@ -98,7 +98,7 @@ export default function UsersPage() {
       await userService.toggleActive(user.id);
       usersQuery.patchItems((current) => current.map(u => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
     } catch (err: unknown) {
-      feedback.error(`Error toggling status: ${getErrorMessage(err)}`);
+      feedback.error(`No se pudo cambiar el estado: ${getErrorMessage(err)}`);
     }
   };
 
@@ -107,43 +107,43 @@ export default function UsersPage() {
       await userService.changeRole(userId, newRole);
       usersQuery.patchItems((current) => current.map(u => u.id === userId ? { ...u, role: newRole } : u));
     } catch (err: unknown) {
-      feedback.error(`Error changing role: ${getErrorMessage(err)}`);
+      feedback.error(`No se pudo cambiar el rol: ${getErrorMessage(err)}`);
     }
   };
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Invalid Date";
+    if (isNaN(date.getTime())) return "Fecha inválida";
     return date.toLocaleDateString();
   };
 
   if (loading && users.length === 0) {
-    return <TablePageSkeleton title="User Management" tableTitle="Users" columns={7} />;
+    return <TablePageSkeleton title="Usuarios" tableTitle="Usuarios" columns={7} />;
   }
 
   return (
     <Page>
-      <PageHeader title="User Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New User</Button>} />
+      <PageHeader title="Usuarios" description="Quién entra al panel y con qué permisos." actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ Nuevo usuario</Button>} />
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="Users" refreshing={loading && users.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
-      <Table label="User management">
+      <TablePanel title="Usuarios" refreshing={loading && users.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
+      <Table label="Usuarios">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Email</th>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Joined</th>
-              <th>Actions</th>
+              <th>Correo</th>
+              <th>Nombre</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Alta</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0 ? (
-              <TableEmpty colSpan={7} label="No users found." />
+              <TableEmpty colSpan={7} label="No hay usuarios." />
             ) : (
               users.map((user) => (
                 <tr key={user.id}>
@@ -155,17 +155,17 @@ export default function UsersPage() {
                       value={user.role}
                       onChange={(e) => handleChangeRole(user.id, e.target.value)}
                     >
-                      <option value="USER">User</option>
-                      <option value="ADMIN">Admin</option>
-                      <option value="SUPERADMIN">Super Admin</option>
+                      <option value="USER">Usuario</option>
+                      <option value="ADMIN">Administrador</option>
+                      <option value="SUPERADMIN">Superadministrador</option>
                     </Select>
                   </td>
                   <td>
-                    <button type="button" aria-label={`${user.is_active ? "Deactivate" : "Activate"} user ${user.email}`} onClick={() => handleToggleActive(user)} style={{ background: "none", border: 0, cursor: "pointer" }}><StatusBadge variant={user.is_active ? "success" : "neutral"}>{user.is_active ? "Active" : "Inactive"}</StatusBadge></button>
+                    <button type="button" aria-label={`${user.is_active ? "Desactivar" : "Activar"} al usuario ${user.email}`} onClick={() => handleToggleActive(user)} style={{ background: "none", border: 0, cursor: "pointer" }}><StatusBadge variant={user.is_active ? "success" : "neutral"}>{user.is_active ? "Activo" : "Inactivo"}</StatusBadge></button>
                   </td>
                   <td>{formatDate(user.date_joined)}</td>
                   <td>
-                    <RowActions itemName={`user ${user.email}`} onEdit={() => handleOpenModal(user)} onDelete={() => handleDelete(user.id)} />
+                    <RowActions itemName={`el usuario ${user.email}`} onEdit={() => handleOpenModal(user)} onDelete={() => handleDelete(user.id)} />
                   </td>
                 </tr>
               ))
@@ -174,51 +174,51 @@ export default function UsersPage() {
       </Table>
       </TablePanel>
 
-      <Modal open={isModalOpen} title={editingUser ? "Edit User Profile" : "Create New User"} description={editingUser ? "Update profile information and system permissions for this user." : "New users start with the User role. You can change it after creation."} onClose={() => { setPassword(""); setIsModalOpen(false); }}>
+      <Modal open={isModalOpen} title={editingUser ? "Editar usuario" : "Nuevo usuario"} description={editingUser ? "Actualiza los datos y los permisos de este usuario." : "Los usuarios nuevos empiezan con el rol Usuario; puedes cambiarlo después."} onClose={() => { setPassword(""); setIsModalOpen(false); }}>
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <FormField label="First Name" required>
+                <FormField label="Nombre" required>
                   <Input
                     value={formData.first_name}
-                    placeholder="e.g. John"
+                    placeholder="p. ej. Ana"
                     onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                     required
                   />
                 </FormField>
-                <FormField label="Last Name" required>
+                <FormField label="Apellido" required>
                   <Input
                     value={formData.last_name}
-                    placeholder="e.g. Doe"
+                    placeholder="p. ej. Pérez"
                     onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                     required
                   />
                 </FormField>
               </div>
               
-              <FormField label="Email Address" required>
+              <FormField label="Correo" required>
                 <Input
                   type="email"
                   value={formData.email}
-                  placeholder="name@example.com"
+                  placeholder="nombre@empresa.com"
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
                 />
               </FormField>
-              {editingUser ? <FormField label="System Role">
+              {editingUser ? <FormField label="Rol">
                 <Select
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
                 >
-                  <option value="USER">Standard User</option>
-                  <option value="ADMIN">Administrator</option>
-                  <option value="SUPERADMIN">Super Admin</option>
+                  <option value="USER">Usuario estándar</option>
+                  <option value="ADMIN">Administrador</option>
+                  <option value="SUPERADMIN">Superadministrador</option>
                 </Select>
-              </FormField> : <FormField label="Password" required>
+              </FormField> : <FormField label="Contraseña" required>
                 <Input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </FormField>}
               <ActionGroup>
-                <Button type="button" onClick={() => { setPassword(""); setIsModalOpen(false); }}>Cancel</Button>
-                <Button type="submit" variant="primary" loading={submitting}>Save User</Button>
+                <Button type="button" onClick={() => { setPassword(""); setIsModalOpen(false); }}>Cancelar</Button>
+                <Button type="submit" variant="primary" loading={submitting}>Guardar usuario</Button>
               </ActionGroup>
             </form>
       </Modal>

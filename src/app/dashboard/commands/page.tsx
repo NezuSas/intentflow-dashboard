@@ -88,7 +88,7 @@ export default function CommandsPage() {
 
     if (formData.versions.length === 0) {
       feedback.error(
-        "Select at least one ADB version."
+        "Elige al menos una versión de ADB."
       );
       return;
     }
@@ -97,7 +97,7 @@ export default function CommandsPage() {
       formData.subscription_plans.length === 0
     ) {
       feedback.error(
-        "Select at least one subscription plan."
+        "Elige al menos un plan de suscripción."
       );
       return;
     }
@@ -113,7 +113,7 @@ export default function CommandsPage() {
       commandsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
-        `Error saving command: ${getErrorMessage(err)}`
+        `No se pudo guardar el comando: ${getErrorMessage(err)}`
       );
     } finally {
       setSubmitting(false);
@@ -128,37 +128,37 @@ export default function CommandsPage() {
       else commandsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
-        `Error deleting command: ${getErrorMessage(err)}`
+        `No se pudo eliminar el comando: ${getErrorMessage(err)}`
       );
     }
   };
 
   if (loading && commands.length === 0) {
-    return <TablePageSkeleton title="ADB Command Management" tableTitle="ADB Commands" columns={7} />;
+    return <TablePageSkeleton title="Comandos" tableTitle="Comandos ADB" columns={7} />;
   }
 
   return (
     <Page>
-      <PageHeader title="ADB Command Management" actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ New Command</Button>} />
+      <PageHeader title="Comandos" description="Lo que una intención puede ordenar a una placa, y qué planes lo incluyen." actions={<Button variant="primary" onClick={() => handleOpenModal(null)}>+ Nuevo comando</Button>} />
 
       {error && <ErrorState message={error} />}
 
-      <TablePanel title="ADB Commands" refreshing={loading && commands.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
-      <Table label="ADB command management">
+      <TablePanel title="Comandos ADB" refreshing={loading && commands.length > 0} pagination={meta && <Pagination page={meta.page} pageSize={meta.pageSize} totalCount={meta.count} onPageChange={setPage} />}>
+      <Table label="Comandos ADB">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Key</th>
-              <th>Display Name</th>
-              <th>Description</th>
-              <th>Plans</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>Clave</th>
+              <th>Nombre visible</th>
+              <th>Descripción</th>
+              <th>Planes</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {commands.length === 0 ? (
-              <TableEmpty colSpan={7} label="No commands found." />
+              <TableEmpty colSpan={7} label="No hay comandos definidos." />
             ) : (
               commands.map((command) => (
                 <tr key={command.id}>
@@ -177,17 +177,17 @@ export default function CommandsPage() {
                           </StatusBadge>
                         ))
                       ) : (
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>All Plans</span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Todos los planes</span>
                       )}
                     </div>
                   </td>
                   <td>
                     <StatusBadge variant={command.is_active ? "success" : "neutral"}>
-                      {command.is_active ? "Active" : "Inactive"}
+                      {command.is_active ? "Activo" : "Inactivo"}
                     </StatusBadge>
                   </td>
                   <td>
-                    <RowActions itemName={`command ${command.key}`} onEdit={() => handleOpenModal(command)} onDelete={() => handleDelete(command.id)} />
+                    <RowActions itemName={`el comando ${command.key}`} onEdit={() => handleOpenModal(command)} onDelete={() => handleDelete(command.id)} />
                   </td>
                 </tr>
               ))
@@ -196,40 +196,40 @@ export default function CommandsPage() {
       </Table>
       </TablePanel>
 
-      <Modal open={isModalOpen} title={editingCommand ? "Edit Command" : "New ADB Command"} description={editingCommand ? "Modify this command's execution string and accessibility." : "Define a new command to be executed on the boards."} onClose={() => setIsModalOpen(false)}>
+      <Modal open={isModalOpen} title={editingCommand ? "Editar comando" : "Nuevo comando ADB"} description={editingCommand ? "Cambia la cadena que se ejecuta y quién puede usarla." : "Define un comando nuevo para ejecutar en las placas."} onClose={() => setIsModalOpen(false)}>
           {!catalog.data ? (
-            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Retry</Button></> : <FormSkeleton fields={5} />
+            catalog.error ? <><ErrorState message={catalog.error} /><Button type="button" onClick={() => void catalog.load().catch(() => {})}>Reintentar</Button></> : <FormSkeleton fields={5} />
           ) : (
             <form onSubmit={handleSubmit}>
-              <FormField label="Command Key (Identifier)" required>
+              <FormField label="Clave (identificador)" required>
                 <Input
                   value={formData.key}
-                  placeholder="e.g. SCREEN_OFF"
+                  placeholder="p. ej. SCREEN_OFF"
                   onChange={(e) => setFormData({...formData, key: e.target.value})}
                   required
                 />
               </FormField>
-              <FormField label="ADB Command String" required>
+              <FormField label="Comando ADB" required>
                 <Textarea
                   value={formData.command}
-                  placeholder="e.g. input keyevent 26"
+                  placeholder="p. ej. input keyevent 26"
                   onChange={(e) => setFormData({...formData, command: e.target.value})}
                   required
                   style={{ fontFamily: 'var(--font-mono)', fontSize: '14px' }}
                 />
               </FormField>
-              <FormField label="Description">
+              <FormField label="Descripción">
                 <Textarea
                   style={{ minHeight: '100px', resize: 'vertical' }}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </FormField>
-              <FormField label="Available Versions"><CheckboxGroup options={versions.map((version) => ({ id: version.id, label: version.code }))} value={formData.versions} onChange={(versions) => setFormData((current) => ({ ...current, versions }))} /></FormField>
-              <FormField label="Subscription Plans"><CheckboxGroup options={plans.map((plan) => ({ id: plan.id, label: plan.name }))} value={formData.subscription_plans} onChange={(subscription_plans) => setFormData((current) => ({ ...current, subscription_plans }))} /></FormField>
+              <FormField label="Versiones disponibles"><CheckboxGroup options={versions.map((version) => ({ id: version.id, label: version.code }))} value={formData.versions} onChange={(versions) => setFormData((current) => ({ ...current, versions }))} /></FormField>
+              <FormField label="Planes de suscripción"><CheckboxGroup options={plans.map((plan) => ({ id: plan.id, label: plan.name }))} value={formData.subscription_plans} onChange={(subscription_plans) => setFormData((current) => ({ ...current, subscription_plans }))} /></FormField>
               <ActionGroup>
-                <Button type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" loading={submitting}>Save Command</Button>
+                <Button type="button" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+                <Button type="submit" variant="primary" loading={submitting}>Guardar comando</Button>
               </ActionGroup>
             </form>
           )}

@@ -4,9 +4,9 @@ import { Button } from "./Button";
 
 export function RowActions({ itemName, onEdit, onDelete }: { itemName: string; onEdit: () => void; onDelete: () => void | Promise<void> }) {
   return <Space size={8}>
-    <Button type="button" variant="ghost" aria-label={`Edit ${itemName}`} icon={<EditOutlined />} onClick={onEdit} />
-    <Popconfirm title={`Delete ${itemName}?`} description="This action cannot be undone." okText="Delete" okButtonProps={{ danger: true }} cancelText="Cancel" onConfirm={onDelete}>
-      <Button type="button" variant="dangerText" aria-label={`Delete ${itemName}`} icon={<DeleteOutlined />} />
+    <Button type="button" variant="ghost" aria-label={`Editar ${itemName}`} icon={<EditOutlined />} onClick={onEdit} />
+    <Popconfirm title={`¿Eliminar ${itemName}?`} description="Esta acción no se puede deshacer." okText="Eliminar" okButtonProps={{ danger: true }} cancelText="Cancelar" onConfirm={onDelete}>
+      <Button type="button" variant="dangerText" aria-label={`Eliminar ${itemName}`} icon={<DeleteOutlined />} />
     </Popconfirm>
   </Space>;
 }

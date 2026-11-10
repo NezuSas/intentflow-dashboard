@@ -6,7 +6,7 @@ import styles from "../shared.module.css";
 export function TableSkeleton({
   columns,
   rows = 5,
-  label = "Loading table...",
+  label = "Cargando la tabla...",
 }: {
   columns: number;
   rows?: number;
@@ -49,7 +49,7 @@ export function TablePageSkeleton({
     <Page>
       <PageHeader title={title} actions={<Skeleton.Button active size="large" />} />
       <TablePanel title={tableTitle}>
-        <TableSkeleton columns={columns} label={`Loading ${tableTitle.toLowerCase()}...`} />
+        <TableSkeleton columns={columns} label={`Cargando ${tableTitle.toLowerCase()}...`} />
       </TablePanel>
     </Page>
   );
@@ -57,7 +57,7 @@ export function TablePageSkeleton({
 
 export function CardGridSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className={styles.skeletonCards} role="status" aria-label="Loading dashboard statistics...">
+    <div className={styles.skeletonCards} role="status" aria-label="Cargando las cifras...">
       {Array.from({ length: count }, (_, index) => (
         <Card key={index} className={styles.skeletonCard}>
           <Skeleton active title={{ width: "45%" }} paragraph={{ rows: 2, width: ["70%", "55%"] }} />
@@ -69,7 +69,7 @@ export function CardGridSkeleton({ count = 4 }: { count?: number }) {
 
 export function FormSkeleton({ fields = 3 }: { fields?: number }) {
   return (
-    <div className={styles.skeletonForm} role="status" aria-label="Loading form options...">
+    <div className={styles.skeletonForm} role="status" aria-label="Cargando las opciones del formulario...">
       {Array.from({ length: fields }, (_, index) => (
         <div key={index} className={styles.skeletonField} aria-hidden="true">
           <Skeleton.Input active size="small" style={{ width: 110 }} />
