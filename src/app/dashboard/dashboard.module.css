@@ -195,11 +195,15 @@
 
 /* ── Filtros y estadísticas (los usan las páginas) ──────────────────────────────────────────────────────────── */
 .filtersToolbar {
+  margin-bottom: 20px;
+}
+
+/* La clase cae en la tarjeta; el cuerpo es quien alinea los filtros en una fila */
+.filtersToolbar :global(.ant-card-body) {
   display: flex;
   flex-wrap: wrap;
   align-items: end;
   gap: 16px 20px;
-  margin-bottom: 20px;
 }
 
 .filtersToolbar :global(.ant-form-item) {
