@@ -11,6 +11,7 @@ import React, {
   useState,
 } from "react";
 import styles from "../dashboard.module.css";
+import { CloseOutlined, ReloadOutlined } from "@ant-design/icons";
 import {
   IntentErrorDetails,
   IntentStatusBadge,
@@ -135,8 +136,8 @@ export default function IntentsPage() {
 
   return (
     <div>
-      <PageHeader title="Intents" actions={<Button variant="primary" loading={loading} onClick={() => intentsQuery.reload()}>
-          🔄 Refresh
+      <PageHeader title="Intents" description="Every intent that reached a board, newest first." actions={<Button variant="secondary" icon={<ReloadOutlined />} loading={loading && intents.length > 0} onClick={() => intentsQuery.reload()}>
+          Refresh
         </Button>} />
 
       {/* FILTERS TOOLBAR */}
@@ -191,10 +192,11 @@ export default function IntentsPage() {
         {(selectedClientId || selectedBoardId || filterDate) && (
             <Button
                 onClick={handleClearFilters}
-                variant="danger"
+                variant="text"
+                icon={<CloseOutlined />}
                 className={styles.clearFiltersButton}
             >
-                ✕ Clear Filters
+                Clear filters
             </Button>
         )}
       </Card>

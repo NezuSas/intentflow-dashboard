@@ -163,7 +163,7 @@ export default function CommandsPage() {
               commands.map((command) => (
                 <tr key={command.id}>
                   <td>{command.id}</td>
-                  <td style={{ fontFamily: 'monospace', fontWeight: 600, color: 'hsl(var(--primary))' }}>{command.key}</td>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 500 }}>{command.key}</td>
                   <td>{command.display_name || '---'}</td>
                   <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {command.description || '---'}
@@ -215,7 +215,7 @@ export default function CommandsPage() {
                   placeholder="e.g. input keyevent 26"
                   onChange={(e) => setFormData({...formData, command: e.target.value})}
                   required
-                  style={{ fontFamily: 'monospace', fontSize: '1rem' }}
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '14px' }}
                 />
               </FormField>
               <FormField label="Description">

@@ -1,18 +1,203 @@
-.page { width: 100%; min-width: 0; }
-.actionGroup { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.pageHeader { margin-bottom: 20px; }
-.state { min-height: 160px; justify-content: center; }
-.tablePanel { width: 100%; }
-.tablePanelHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; margin-bottom: 24px; }
-.tablePanelTitle { margin: 0; font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
-.tablePanelRefresh { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 12px; }
-.tablePanelPagination { display: flex; justify-content: flex-end; margin-top: 20px; }
-.skeletonTable { width: 100%; overflow-x: auto; }
-.skeletonRow { display: grid; gap: 12px; align-items: center; min-height: 52px; padding: 10px 12px; border-bottom: 1px solid hsl(var(--border) / .45); }
-.skeletonHeader { min-height: 40px; background: hsl(var(--muted) / .7); border-radius: 10px 10px 0 0; }
-.skeletonRow :global(.ant-skeleton-input) { max-width: 100%; }
-.skeletonCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
-.skeletonCard { min-height: 148px; }
-.skeletonForm { display: grid; gap: 20px; }
-.skeletonField { display: grid; gap: 8px; }
-.successBadge:global(.ant-tag) { color: hsl(var(--success)); background: hsl(var(--success) / .12); border-color: hsl(var(--success) / .35); font-weight: 600; }
+.page {
+  width: 100%;
+  min-width: 0;
+}
+
+.actionGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* Cabecera de página: título a la izquierda, acciones a la derecha, descripción en una línea tranquila */
+.pageHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+}
+
+.pageHeader h1 {
+  margin: 0 !important;
+  font-size: 26px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em;
+  line-height: 1.15 !important;
+}
+
+.pageDescription {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.state {
+  min-height: 160px;
+  justify-content: center;
+}
+
+/* Panel de tabla: título pequeño y firme, tabla sin cromo, paginación al pie */
+.tablePanel {
+  width: 100%;
+}
+
+.tablePanel :global(.ant-card-body) {
+  padding: 8px 0 0 !important;
+}
+
+.tablePanelHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+  padding: 10px 24px 14px;
+}
+
+.tablePanelTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.tablePanelRefresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.tablePanel :global(.ant-table-wrapper) {
+  padding: 0 8px;
+}
+
+.tablePanel :global(.ant-table) {
+  background: transparent !important;
+}
+
+.tablePanel :global(.ant-table-thead > tr > th) {
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  padding-top: 8px !important;
+}
+
+.tablePanel :global(.ant-table-tbody > tr:last-child > td) {
+  border-bottom: 0 !important;
+}
+
+.tablePanelPagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 24px 18px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Esqueletos */
+.skeletonTable {
+  width: 100%;
+  overflow-x: auto;
+  padding: 0 24px 16px;
+}
+
+.skeletonRow {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  min-height: 50px;
+  padding: 8px 0;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+}
+
+.skeletonHeader {
+  min-height: 36px;
+}
+
+.skeletonRow :global(.ant-skeleton-input) {
+  max-width: 100%;
+}
+
+.skeletonCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.skeletonCard {
+  min-height: 112px;
+}
+
+.skeletonForm {
+  display: grid;
+  gap: 20px;
+}
+
+.skeletonField {
+  display: grid;
+  gap: 8px;
+}
+
+/* Estados: un punto de color y la palabra; sin cajas llamativas en cada fila */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--badge-color, hsl(var(--border-bright)));
+  flex: none;
+}
+
+.badgeSuccess {
+  --badge-color: hsl(var(--success));
+}
+
+.badgeWarning {
+  --badge-color: hsl(var(--warning));
+}
+
+.badgeError {
+  --badge-color: hsl(var(--error));
+}
+
+.badgeInfo {
+  --badge-color: hsl(var(--info));
+}
+
+.badgeNeutral {
+  --badge-color: hsl(var(--border-bright));
+  color: var(--text-secondary);
+}
+
+/* Etiqueta de origen o categoría: texto sobrio con un borde suave */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}

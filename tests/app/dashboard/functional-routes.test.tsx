@@ -208,7 +208,7 @@ describe("dashboard routes with mocked services", () => {
   it("routes every sidebar item through router.push", async () => {
     await act(async () => { root.render(createElement(ThemeProvider, null, createElement(DashboardLayout, null, "Content"))); });
     for (const item of dashboardNavigation) {
-      const menuItem = [...container.querySelectorAll(".ant-menu-item")].find((node) => node.textContent?.includes(item.label));
+      const menuItem = [...container.querySelectorAll("nav button")].find((node) => node.textContent?.includes(item.label));
       await click(menuItem ?? null);
       expect(mocks.push).toHaveBeenLastCalledWith(item.key);
     }

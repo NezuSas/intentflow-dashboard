@@ -1,4 +1,4 @@
-import { StatusBadge } from "@/shared/components";
+import { Chip } from "@/shared/components";
 import type { Intent, IntentSource } from "../domain/Intent";
 
 const sourceLabels: Record<IntentSource, string> = {
@@ -13,5 +13,5 @@ export function IntentSourceBadge({ source }: { source: Intent["source"] }) {
     ? sourceLabels[source]
     : sourceLabels.unknown;
 
-  return <StatusBadge variant="neutral">{label}</StatusBadge>;
+  return <Chip>{label}</Chip>;
 }

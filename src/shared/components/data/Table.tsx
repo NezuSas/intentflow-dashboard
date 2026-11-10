@@ -1,4 +1,4 @@
-import { Empty, Skeleton, Table as AntTable, Tag } from "antd";
+import { Empty, Skeleton, Table as AntTable } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { isValidElement, type ReactElement, type ReactNode, type TdHTMLAttributes } from "react";
 import { Card } from "../layout/Primitives";
@@ -74,4 +74,6 @@ export const TablePanel = ({ title, children, pagination, refreshing = false }: 
 
 export const TableEmpty = ({ colSpan, label }: { colSpan: number; label: string }) => <td colSpan={colSpan}><span data-table-empty={label} /></td>;
 export type BadgeVariant = "success" | "warning" | "error" | "info" | "neutral";
-export const StatusBadge = ({ variant = "neutral", children }: { variant?: BadgeVariant; children: ReactNode }) => <Tag color={variant === "neutral" || variant === "success" ? undefined : variant} className={variant === "success" ? styles.successBadge : undefined}>{children}</Tag>;
+const badgeClass: Record<BadgeVariant, string> = { success: styles.badgeSuccess, warning: styles.badgeWarning, error: styles.badgeError, info: styles.badgeInfo, neutral: styles.badgeNeutral };
+/** Estado como punto de color y palabra; el color significa, la palabra explica. */
+export const StatusBadge = ({ variant = "neutral", children }: { variant?: BadgeVariant; children: ReactNode }) => <span className={`${styles.badge} ${badgeClass[variant]}`}>{children}</span>;

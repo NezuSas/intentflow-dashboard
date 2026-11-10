@@ -263,20 +263,13 @@ export default function BoardsPage() {
                   <td>{board.id}</td>
 
                   <td
-                    style={{
-                      fontWeight: 600,
-                      color: "hsl(var(--primary))",
-                    }}
+                    style={{ fontWeight: 500 }}
                   >
                     {board.name}
                   </td>
 
                   <td
-                    style={{
-                      fontFamily: "monospace",
-                      fontSize: "0.8rem",
-                      opacity: 0.8,
-                    }}
+                    style={{ fontFamily: "var(--font-mono)", fontSize: "12.5px", color: "var(--text-muted)" }}
                   >
                     {board.adb_identifier}
                   </td>

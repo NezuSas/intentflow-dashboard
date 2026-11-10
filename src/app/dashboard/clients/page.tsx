@@ -159,8 +159,7 @@ export default function ClientsPage() {
 
                   <td
                     style={{
-                      fontWeight: 600,
-                      color: "hsl(var(--primary))",
+                      fontWeight: 500,
                     }}
                   >
                     {client.name}

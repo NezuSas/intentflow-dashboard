@@ -2,21 +2,47 @@
 
 import { authService, authTokenManager } from "@/composition";
 import { useTheme } from "@/contexts/ThemeProvider";
-import { dashboardNavigation } from "@/shared/navigation/dashboardNavigation";
+import { dashboardNavigationGroups, type NavigationIcon } from "@/shared/navigation/dashboardNavigation";
+import { BrandMark } from "@/shared/components/layout/BrandMark";
 import styles from "./dashboard.module.css";
-import { AppstoreOutlined, CloudServerOutlined, DashboardOutlined, FileTextOutlined, LogoutOutlined, MacCommandOutlined, MenuFoldOutlined, MenuUnfoldOutlined, MoonOutlined, SettingOutlined, SunOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Flex, Layout, Menu, Tooltip, Typography, theme } from "antd";
-import type { MenuProps } from "antd";
+import {
+  AppstoreOutlined,
+  CloudServerOutlined,
+  DashboardOutlined,
+  FileTextOutlined,
+  LogoutOutlined,
+  MacCommandOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  MoonOutlined,
+  SettingOutlined,
+  SunOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState, type ReactNode } from "react";
 
-const { Sider, Content } = Layout;
+const icons: Record<NavigationIcon, ReactNode> = {
+  dashboard: <DashboardOutlined />,
+  intents: <FileTextOutlined />,
+  users: <UserOutlined />,
+  clients: <TeamOutlined />,
+  boards: <CloudServerOutlined />,
+  commands: <MacCommandOutlined />,
+  subscriptions: <AppstoreOutlined />,
+  settings: <SettingOutlined />,
+};
 
+/**
+ * Armazón del panel: barra lateral oscura con la marca, la navegación agrupada por lo que hace el operador y los
+ * controles de cuenta; a la derecha, el contenido con un ancho máximo cómodo para tablas.
+ */
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { theme: currentTheme, toggleTheme } = useTheme();
-  const { token } = theme.useToken();
   const [collapsed, setCollapsed] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
@@ -33,32 +59,95 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       if (!cancelled) setAuthChecked(true);
     };
     void validateSession();
-    return () => { cancelled = true; window.removeEventListener("intentflow:logout", redirectToLogin); };
+    return () => {
+      cancelled = true;
+      window.removeEventListener("intentflow:logout", redirectToLogin);
+    };
   }, [router]);
 
-  const items = useMemo<MenuProps["items"]>(() => {
-    const icons = { dashboard: <DashboardOutlined />, intents: <FileTextOutlined />, users: <UserOutlined />, clients: <TeamOutlined />, boards: <CloudServerOutlined />, commands: <MacCommandOutlined />, subscriptions: <AppstoreOutlined />, settings: <SettingOutlined /> };
-    return dashboardNavigation.map((item) => ({ key: item.key, label: item.label, icon: icons[item.icon] }));
-  }, []);
-
-  if (!authChecked) return <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>Validating session...</Flex>;
-
-  return <Layout className={styles.dashboardShell} style={{ background: token.colorBgLayout }}>
-    <Sider className={styles.dashboardSidebar} collapsible collapsed={collapsed} onCollapse={setCollapsed} breakpoint="md" collapsedWidth={64} width={248} trigger={null} theme={currentTheme === "dark" ? "dark" : "light"} style={{ background: token.colorBgContainer, borderInlineEnd: `1px solid ${token.colorBorderSecondary}` }}>
-      <Flex align="center" justify="space-between" style={{ height: 64, flexShrink: 0, padding: "0 12px", borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
-        <Typography.Text strong style={{ color: token.colorText, whiteSpace: "nowrap", fontSize: 16, overflow: "hidden" }}>{collapsed ? "I" : "IntentFlow"}</Typography.Text>
-        <Flex gap={0}>
-          {!collapsed && <Tooltip title={currentTheme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}><Button type="text" shape="circle" aria-label="Toggle theme" icon={currentTheme === "dark" ? <SunOutlined /> : <MoonOutlined />} onClick={toggleTheme} /></Tooltip>}
-          <Tooltip title={collapsed ? "Expandir navegación" : "Contraer navegación"}><Button type="text" shape="circle" aria-label="Toggle navigation" icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} onClick={() => setCollapsed((value) => !value)} /></Tooltip>
-        </Flex>
-      </Flex>
-      <Menu theme={currentTheme === "dark" ? "dark" : "light"} mode="inline" selectedKeys={[pathname]} items={items} onClick={({ key }) => router.push(key)} style={{ background: "transparent", borderInlineEnd: 0, padding: 8, flex: "1 1 auto", minHeight: 0, overflowY: "auto" }} />
-      <div style={{ flexShrink: 0, padding: 8, borderTop: `1px solid ${token.colorBorderSecondary}` }}>
-        <Button danger type="text" icon={<LogoutOutlined />} block onClick={() => void authService.logout()}> {!collapsed && "Logout"}</Button>
+  if (!authChecked) {
+    return (
+      <div className={styles.validating} role="status">
+        <BrandMark size={40} />
+        <span>Validating session...</span>
       </div>
-    </Sider>
-    <Content className={styles.dashboardContent} style={{ padding: 20, background: token.colorBgLayout }}><main>{children}</main></Content>
-  </Layout>;
+    );
+  }
+
+  const isActive = (key: string) => (key === "/dashboard" ? pathname === key : pathname === key || pathname.startsWith(`${key}/`));
+
+  return (
+    <div className={`${styles.shell} ${collapsed ? styles.shellCollapsed : ""}`}>
+      <aside className={styles.sidebar} aria-label="Main navigation">
+        <div className={styles.brand}>
+          <BrandMark size={34} />
+          {!collapsed && (
+            <div className={styles.brandText}>
+              <span className={styles.brandName}>IntentFlow</span>
+              <span className={styles.brandSub}>Intent Manager · NEZU</span>
+            </div>
+          )}
+        </div>
+
+        <nav className={styles.nav}>
+          {dashboardNavigationGroups.map((group) => (
+            <div key={group.label} className={styles.navGroup}>
+              {!collapsed && <div className={styles.navGroupLabel}>{group.label}</div>}
+              {group.items.map((item) => {
+                const active = isActive(item.key);
+                const link = (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={`${styles.navItem} ${active ? styles.navItemActive : ""}`}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => router.push(item.key)}
+                  >
+                    <span className={styles.navIcon}>{icons[item.icon]}</span>
+                    {!collapsed && <span className={styles.navLabel}>{item.label}</span>}
+                  </button>
+                );
+                return collapsed ? (
+                  <Tooltip key={item.key} title={item.label} placement="right">
+                    {link}
+                  </Tooltip>
+                ) : (
+                  link
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <Tooltip title={currentTheme === "dark" ? "Light mode" : "Dark mode"} placement="right">
+            <button type="button" className={styles.footerButton} aria-label="Toggle theme" onClick={toggleTheme}>
+              {currentTheme === "dark" ? <SunOutlined /> : <MoonOutlined />}
+              {!collapsed && <span>{currentTheme === "dark" ? "Light mode" : "Dark mode"}</span>}
+            </button>
+          </Tooltip>
+          <Tooltip title={collapsed ? "Expand navigation" : "Collapse navigation"} placement="right">
+            <button type="button" className={styles.footerButton} aria-label="Toggle navigation" onClick={() => setCollapsed((value) => !value)}>
+              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              {!collapsed && <span>Collapse</span>}
+            </button>
+          </Tooltip>
+          <Tooltip title="Logout" placement="right">
+            <button type="button" className={`${styles.footerButton} ${styles.logout}`} onClick={() => void authService.logout()}>
+              <LogoutOutlined />
+              {!collapsed && <span>Logout</span>}
+            </button>
+          </Tooltip>
+        </div>
+      </aside>
+
+      <div className={styles.content}>
+        <main className={styles.contentInner}>{children}</main>
+      </div>
+    </div>
+  );
 }
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) { return <DashboardLayoutContent>{children}</DashboardLayoutContent>; }
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return <DashboardLayoutContent>{children}</DashboardLayoutContent>;
+}

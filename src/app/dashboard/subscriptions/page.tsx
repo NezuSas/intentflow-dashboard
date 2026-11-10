@@ -268,7 +268,7 @@ export default function SubscriptionsPage() {
               ) : (
                 clientSubs.map((sub) => (
                   <tr key={sub.id}>
-                    <td style={{ fontWeight: 600, color: 'hsl(var(--primary))' }}>{sub.client_detail?.name || "Unknown"}</td>
+                    <td style={{ fontWeight: 500 }}>{sub.client_detail?.name || "Unknown"}</td>
                     <td>{sub.subscription_plan_detail?.name || "Unknown"}</td>
                     <td>{formatCalendarDate(sub.start_date)}</td>
                     <td>{sub.end_date ? formatCalendarDate(sub.end_date) : "Permanent"}</td>

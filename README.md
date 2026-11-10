@@ -4,7 +4,7 @@
 
 # IntentFlow Dashboard
 
-> **In English.** The admin dashboard of NEZU's Intent Manager: intents, Android boards, commands, clients, users and subscriptions. The backend is private, but a public demo with sample data runs entirely in the browser. Feature-sliced architecture (domain · application · infrastructure per feature), services injected through a composition root, data loading through a small `useQuery` hook that never sets state synchronously in effects, 118 tests with Vitest, zero known vulnerabilities, single `main` branch. Next.js 16, React 19 and Ant Design.
+> **In English.** The admin dashboard of NEZU's Intent Manager: intents, Android boards, commands, clients, users and subscriptions. The backend is private, but a public demo with sample data runs entirely in the browser. Feature-sliced architecture (domain · application · infrastructure per feature), services injected through a composition root, data loading through a small `useQuery` hook that never sets state synchronously in effects, NEZU design system (ink and paper neutrals, orange primary, Rubik, light and dark), 118 tests with Vitest, zero known vulnerabilities, single `main` branch. Next.js 16, React 19 and Ant Design.
 
 Panel administrativo del **Nezu Intent Manager**, el servicio que recibe intenciones, las traduce en comandos y las sincroniza con las placas y dispositivos del ecosistema NEZU. Desde este panel el operador ve el estado de las intenciones, administra placas, clientes, usuarios y suscripciones, revisa comandos y ajusta la configuración.
 
@@ -30,9 +30,13 @@ No hace falta el backend para ver el panel: la [**demo en línea**](https://nezu
 
 ![Resumen del panel con datos de ejemplo](.github/screenshots/dashboard.jpg)
 
-| Intenciones | Pantallas |
+| Intenciones | Placas y alta de una placa |
 |---|---|
-| ![Intenciones](.github/screenshots/intenciones.jpg) | ![Pantallas](.github/screenshots/pantallas.jpg) |
+| ![Intenciones](.github/screenshots/intenciones.jpg) | ![Registro de una placa](.github/screenshots/pantallas.jpg) |
+
+| Acceso | Modo claro |
+|---|---|
+| ![Acceso](.github/screenshots/acceso.jpg) | ![Resumen en modo claro](.github/screenshots/claro.jpg) |
 
 Para levantarla en local:
 
@@ -41,6 +45,10 @@ NEXT_PUBLIC_DEMO=1 npm run dev
 ```
 
 La demo se construye con `npm run build:demo`: una exportación estática de Next.js con `NEXT_PUBLIC_DEMO=1` (ruta base `/intentflow-dashboard`, configurable con `NEXT_PUBLIC_BASE_PATH`) que queda en `docs/`, de donde GitHub Pages la sirve desde la rama `main`. El repositorio tiene una sola rama. Los datos y los repositorios de la demo viven en `src/demo/`; una build normal no los usa.
+
+## Diseño
+
+El panel comparte identidad con [nezuecuador.com](https://nezuecuador.com) y con NEZU Kiosk: neutros con tinte verde (tinta y papel), naranja NEZU como único color de acción, lima solo para «correcto» o «activo», y Rubik como única familia tipográfica con contraste por peso. Los tokens viven en `src/shared/design-system/` y alimentan a la vez el tema de Ant Design y las hojas de estilo propias; hay modo claro y oscuro. La barra lateral agrupa la navegación por lo que hace el operador (operación, flota, cuenta); las cifras del resumen van en una sola franja; los estados son un punto de color y la palabra, no una etiqueta chillona por fila.
 
 ## Ejecutar en desarrollo
 

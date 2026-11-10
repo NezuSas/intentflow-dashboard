@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Rubik } from "next/font/google";
 import "./globals.css";
 import "antd/dist/reset.css";
 import { ClientThemeProvider } from "@/components/ClientThemeProvider";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Rubik es la tipografía de NEZU en el kiosko y aquí: una sola familia, contraste por peso.
+const rubik = Rubik({
+  variable: "--font-rubik",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "IntentFlow | Admin Dashboard",
-  description: "Advanced Intent Management System",
+  title: "IntentFlow · NEZU",
+  description: "Panel administrativo del Nezu Intent Manager: intenciones, placas, comandos, clientes y suscripciones.",
 };
 
 export default function RootLayout({
@@ -20,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.variable}>
+    <html lang="es">
+      <body className={rubik.variable}>
         <ClientThemeProvider>
           {children}
         </ClientThemeProvider>

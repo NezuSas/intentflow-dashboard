@@ -30,4 +30,4 @@ export const Select = ({ children, onChange, value, defaultValue, ...props }: Se
     : options.find((option) => String(option.value) === String(selected))?.value ?? selected;
   return <AntSelect {...(props as unknown as SelectProps)} value={matchOptionValue(value)} defaultValue={matchOptionValue(defaultValue)} options={options} onChange={(selected) => onChange?.({ target: { value: String(selected) } } as ChangeEvent<HTMLSelectElement>)} />;
 };
-export function FormField({ label, error, required, children, className = "" }: { label: string; error?: string; required?: boolean; children: ReactNode; className?: string }) { return <Form.Item className={className} label={label} required={required} validateStatus={error ? "error" : undefined} help={error}>{children}</Form.Item>; }
+export function FormField({ label, error, required, children, className = "" }: { label: string; error?: string; required?: boolean; children: ReactNode; className?: string }) { return <Form.Item className={className} layout="vertical" colon={false} label={label} required={required} validateStatus={error ? "error" : undefined} help={error}>{children}</Form.Item>; }
