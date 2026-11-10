@@ -6,7 +6,7 @@ import {
   versionService,
 } from "@/composition";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import type {
   Board,
@@ -18,10 +18,11 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
+import { usePagedQuery } from "@/shared/hooks/useQuery";
+
 import { getErrorMessage } from "@/utils/errors";
 import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
 import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
-import type { PageMeta } from "@/core/Pagination";
 import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -76,17 +77,14 @@ function parseAdbIdentifier(identifier: string) {
 
 export default function BoardsPage() {
   const feedback = useActionFeedback();
-  const [boards, setBoards] = useState<Board[]>([]);
   const catalog = useLazyCatalog(loadBoardCatalogs);
   const clients = catalog.data?.clients ?? [];
   const versions: ADBVersion[] = catalog.data?.versions ?? [];
 
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const boardsQuery = usePagedQuery(useCallback(() => boardService.listBoards({ page, pageSize: PAGE_SIZE }), [page]));
+  const { items: boards, meta, loading, error } = boardsQuery;
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] =
-    useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] =
     useState(false);
@@ -96,47 +94,6 @@ export default function BoardsPage() {
 
   const [formData, setFormData] =
     useState<BoardFormData>(emptyForm);
-
-  useEffect(() => {
-    const fetchBoardPage = async () => {
-      try {
-        setLoading(true);
-        const boardData = await boardService.listBoards({ page, pageSize: PAGE_SIZE });
-        setBoards(boardData.data);
-        setMeta(boardData.meta);
-        setError(null);
-      } catch (err: unknown) {
-        setError(getErrorMessage(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchBoardPage();
-  }, [page]);
-
-  useEffect(() => {
-    const catalogData = catalog.data;
-    if (!isModalOpen || editingBoard || !catalogData) return;
-    setFormData((current) => ({
-      ...current,
-      client: current.client === "" ? catalogData.clients[0]?.id ?? "" : current.client,
-      version: current.version === "" ? catalogData.versions[0]?.id ?? "" : current.version,
-    }));
-  }, [isModalOpen, editingBoard, catalog.data]);
-
-  const fetchBoards = async () => {
-    try {
-      const response = await boardService.listBoards({ page, pageSize: PAGE_SIZE });
-      setBoards(response.data);
-      setMeta(response.meta);
-    } catch (err: unknown) {
-      console.error(
-        "Error refreshing boards:",
-        getErrorMessage(err)
-      );
-    }
-  };
 
   const handleOpenModal = (
     board: Board | null = null
@@ -173,7 +130,18 @@ export default function BoardsPage() {
     }
 
     setIsModalOpen(true);
-    void catalog.load().catch(() => {});
+    // When the catalog arrives after the modal opened, fill the empty selects with the first option.
+    void catalog
+      .load()
+      .then((data) => {
+        if (board) return;
+        setFormData((current) => ({
+          ...current,
+          client: current.client === "" ? data.clients[0]?.id ?? "" : current.client,
+          version: current.version === "" ? data.versions[0]?.id ?? "" : current.version,
+        }));
+      })
+      .catch(() => {});
   };
 
   const handleSubmit = async (
@@ -222,7 +190,7 @@ export default function BoardsPage() {
       }
 
       setIsModalOpen(false);
-      await fetchBoards();
+      boardsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error saving board: ${getErrorMessage(
@@ -241,7 +209,7 @@ export default function BoardsPage() {
       await boardService.deleteBoard(boardId);
       const nextPage = meta ? pageAfterDeletion(meta) : page;
       if (nextPage !== page) setPage(nextPage);
-      else await fetchBoards();
+      else boardsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error deleting board: ${getErrorMessage(

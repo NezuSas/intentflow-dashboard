@@ -4,7 +4,7 @@
 
 # IntentFlow Dashboard
 
-> **In English.** The admin dashboard of NEZU's Intent Manager: intents, Android boards, commands, clients, users and subscriptions. The backend is private, but a public demo with sample data runs entirely in the browser. Next.js, React and Ant Design.
+> **In English.** The admin dashboard of NEZU's Intent Manager: intents, Android boards, commands, clients, users and subscriptions. The backend is private, but a public demo with sample data runs entirely in the browser. Feature-sliced architecture (domain · application · infrastructure per feature), services injected through a composition root, data loading through a small `useQuery` hook that never sets state synchronously in effects, 118 tests with Vitest, zero known vulnerabilities, single `main` branch. Next.js 16, React 19 and Ant Design.
 
 Panel administrativo del **Nezu Intent Manager**, el servicio que recibe intenciones, las traduce en comandos y las sincroniza con las placas y dispositivos del ecosistema NEZU. Desde este panel el operador ve el estado de las intenciones, administra placas, clientes, usuarios y suscripciones, revisa comandos y ajusta la configuración.
 
@@ -40,7 +40,7 @@ Para levantarla en local:
 NEXT_PUBLIC_DEMO=1 npm run dev
 ```
 
-Con `NEXT_PUBLIC_DEMO=1`, `npm run build` genera además la exportación estática en `out/` que alimenta la demo pública (ruta base `/intentflow-dashboard`, configurable con `NEXT_PUBLIC_BASE_PATH`). Los datos y los repositorios de la demo viven en `src/demo/`; una build normal no los usa.
+La demo se construye con `npm run build:demo`: una exportación estática de Next.js con `NEXT_PUBLIC_DEMO=1` (ruta base `/intentflow-dashboard`, configurable con `NEXT_PUBLIC_BASE_PATH`) que queda en `docs/`, de donde GitHub Pages la sirve desde la rama `main`. El repositorio tiene una sola rama. Los datos y los repositorios de la demo viven en `src/demo/`; una build normal no los usa.
 
 ## Ejecutar en desarrollo
 
@@ -60,11 +60,14 @@ El panel queda en `http://localhost:3000`.
 ## Calidad y construcción
 
 ```bash
-npm run lint     # ESLint
-npm test         # Vitest
-npm run build    # Next.js build
-npm start        # sirve la build
+npm run lint        # ESLint con las reglas de React Hooks estrictas
+npm test            # Vitest: dominio, servicios, hooks y las pantallas con servicios simulados
+npm run build       # Next.js build
+npm start           # sirve la build
+npm run build:demo  # exportación estática de la demo en docs/
 ```
+
+Las pantallas cargan datos con `useQuery` y `usePagedQuery` (`src/shared/hooks/useQuery.ts`): el estado de carga se deriva de «la petición actual aún no respondió», los datos anteriores siguen visibles mientras llega la página nueva, las respuestas tardías se descartan y las listas admiten cambios optimistas. Así ninguna pantalla cambia estado de forma síncrona dentro de un efecto.
 
 ## Despliegue
 
@@ -75,19 +78,24 @@ Optimizado para Vercel: importa el repositorio, Vercel detecta Next.js y solo ha
 ```text
 src/
   app/            rutas (App Router): login y dashboard/*
-  features/       funcionalidades por dominio
-  components/     componentes de interfaz
-  composition/    composición de pantallas
+  features/       una carpeta por dominio (auth, boards, clients, commands, dashboard, intents, subscriptions, users, versions),
+                  cada una con domain/ (tipos y puertos), application/ (servicios) e infrastructure/ (repositorios HTTP)
+  demo/           datos de ejemplo y repositorios en memoria para la demo pública
+  components/     proveedor de tema
+  composition/    raíz de composición: elige repositorios reales o de demo e instancia los servicios
   contexts/       contextos de React
   core/           lógica compartida
   config/         configuración, incluida la URL de la API
-  shared/ utils/  apoyo
+  shared/         componentes de interfaz, sistema de diseño, hooks (useQuery, useLazyCatalog, useActionFeedback), formato y navegación
+  utils/          apoyo
 tests/            pruebas con Vitest
+scripts/          build-demo.mjs: la demo para GitHub Pages
+docs/             build de la demo (generada, no se edita)
 ```
 
 ## Tecnología
 
-Next.js 16 (App Router) · React 19 · TypeScript · Ant Design 5 · Vitest · Vercel
+Next.js 16 (App Router) · React 19 · TypeScript · Ant Design 5 · Vitest 5 · Vercel
 
 ## ¿Lo necesitas en tu operación?
 

@@ -4,26 +4,24 @@ import {
   userService,
 } from "@/composition";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import type {
   User,
 } from "@/features/users";
 import { getErrorMessage } from "@/utils/errors";
+import { usePagedQuery } from "@/shared/hooks/useQuery";
 import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
 import { ActionGroup, Button, ErrorState, FormField, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
-import type { PageMeta } from "@/core/Pagination";
 import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
 
 export default function UsersPage() {
   const feedback = useActionFeedback();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const usersQuery = usePagedQuery(useCallback(() => userService.listUsers({ page, pageSize: PAGE_SIZE }), [page]));
+  const { items: users, meta, loading, error } = usersQuery;
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,28 +33,6 @@ export default function UsersPage() {
     email: "",
     role: "USER"
   });
-
-  // The request intentionally follows only the selected page.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { void fetchUsers(); }, [page]);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await userService.listUsers({ page, pageSize: PAGE_SIZE });
-      setUsers(response.data);
-      setMeta(response.meta);
-      setError(null);
-    } catch (err: unknown) {
-      console.error(
-        "Fetch users error:",
-        getErrorMessage(err)
-      );
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleOpenModal = (user: User | null = null) => {
     setPassword("");
@@ -98,7 +74,7 @@ export default function UsersPage() {
       setPassword("");
       setIsModalOpen(false);
       if (!editingUser && page !== 1) setPage(1);
-      else await fetchUsers();
+      else usersQuery.reload();
     } catch (err: unknown) {
       feedback.error(`Error saving user: ${getErrorMessage(err)}`);
     } finally {
@@ -111,7 +87,7 @@ export default function UsersPage() {
       await userService.deleteUser(userId);
       const nextPage = meta ? pageAfterDeletion(meta) : page;
       if (nextPage !== page) setPage(nextPage);
-      else await fetchUsers();
+      else usersQuery.reload();
     } catch (err: unknown) {
       feedback.error(`Error deleting user: ${getErrorMessage(err)}`);
     }
@@ -120,7 +96,7 @@ export default function UsersPage() {
   const handleToggleActive = async (user: User) => {
     try {
       await userService.toggleActive(user.id);
-      setUsers(users.map(u => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
+      usersQuery.patchItems((current) => current.map(u => u.id === user.id ? { ...u, is_active: !u.is_active } : u));
     } catch (err: unknown) {
       feedback.error(`Error toggling status: ${getErrorMessage(err)}`);
     }
@@ -129,7 +105,7 @@ export default function UsersPage() {
   const handleChangeRole = async (userId: number, newRole: string) => {
     try {
       await userService.changeRole(userId, newRole);
-      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      usersQuery.patchItems((current) => current.map(u => u.id === userId ? { ...u, role: newRole } : u));
     } catch (err: unknown) {
       feedback.error(`Error changing role: ${getErrorMessage(err)}`);
     }

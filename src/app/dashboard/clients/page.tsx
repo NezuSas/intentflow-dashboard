@@ -4,15 +4,15 @@ import {
   clientService,
 } from "@/composition";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import type {
   Client,
 } from "@/features/clients";
 import { getErrorMessage } from "@/utils/errors";
+import { usePagedQuery } from "@/shared/hooks/useQuery";
 import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
 import { ActionGroup, Button, ErrorState, FormField, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel } from "@/shared/components";
-import type { PageMeta } from "@/core/Pagination";
 import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -35,17 +35,10 @@ const emptyForm: ClientFormData = {
 
 export default function ClientsPage() {
   const feedback = useActionFeedback();
-  const [clients, setClients] =
-    useState<Client[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
   const [page, setPage] = useState(1);
-  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const clientsQuery = usePagedQuery(useCallback(() => clientService.listClients({ page, pageSize: PAGE_SIZE }), [page]));
+  const { items: clients, meta, loading, error } = clientsQuery;
   const [submitting, setSubmitting] = useState(false);
-
-  const [error, setError] =
-    useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] =
     useState(false);
@@ -57,25 +50,6 @@ export default function ClientsPage() {
 
   const [formData, setFormData] =
     useState<ClientFormData>(emptyForm);
-
-  const fetchClients = async () => {
-    try {
-      setLoading(true);
-
-      const response = await clientService.listClients({ page, pageSize: PAGE_SIZE });
-      setClients(response.data);
-      setMeta(response.meta);
-      setError(null);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void fetchClients();
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOpenModal = (
     client: Client | null = null
@@ -120,7 +94,7 @@ export default function ClientsPage() {
       }
 
       setIsModalOpen(false);
-      await fetchClients();
+      clientsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error saving client: ${getErrorMessage(
@@ -141,7 +115,7 @@ export default function ClientsPage() {
       );
       const nextPage = meta ? pageAfterDeletion(meta) : page;
       if (nextPage !== page) setPage(nextPage);
-      else await fetchClients();
+      else clientsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error deleting client: ${getErrorMessage(

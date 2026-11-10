@@ -6,7 +6,7 @@ import {
   versionService,
 } from "@/composition";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import type {
   ADBCommand,
 } from "@/features/commands";
@@ -17,10 +17,11 @@ import type {
   ADBVersion,
 } from "@/features/versions";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
+import { usePagedQuery } from "@/shared/hooks/useQuery";
+
 import { getErrorMessage } from "@/utils/errors";
 import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
 import { ActionGroup, Button, CheckboxGroup, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, RowActions, StatusBadge, Table, TableEmpty, TablePageSkeleton, TablePanel, Textarea } from "@/shared/components";
-import type { PageMeta } from "@/core/Pagination";
 import { pageAfterDeletion } from "@/core/Pagination";
 
 const PAGE_SIZE = 20;
@@ -35,15 +36,13 @@ const loadCommandCatalogs = async () => {
 
 export default function CommandsPage() {
   const feedback = useActionFeedback();
-  const [commands, setCommands] = useState<ADBCommand[]>([]);
   const catalog = useLazyCatalog(loadCommandCatalogs);
   const versions: ADBVersion[] = catalog.data?.versions ?? [];
   const plans = catalog.data?.plans ?? [];
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [meta, setMeta] = useState<PageMeta | null>(null);
+  const commandsQuery = usePagedQuery(useCallback(() => commandService.listCommands({ page, pageSize: PAGE_SIZE }), [page]));
+  const { items: commands, meta, loading, error } = commandsQuery;
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,38 +55,6 @@ export default function CommandsPage() {
     subscription_plans: [] as number[],
     is_active: true
   });
-
-  useEffect(() => {
-    void fetchData();
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const commandsData = await commandService.listCommands({ page, pageSize: PAGE_SIZE });
-      setCommands(commandsData.data);
-      setMeta(commandsData.meta);
-      setError(null);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCommands = async () => {
-    try {
-      setLoading(true);
-      const response = await commandService.listCommands({ page, pageSize: PAGE_SIZE });
-      setCommands(response.data);
-      setMeta(response.meta);
-      setError(null);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleOpenModal = (command: ADBCommand | null = null) => {
     if (command) {
@@ -143,7 +110,7 @@ export default function CommandsPage() {
         await commandService.createCommand(formData);
       }
       setIsModalOpen(false);
-      await fetchCommands();
+      commandsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error saving command: ${getErrorMessage(err)}`
@@ -158,7 +125,7 @@ export default function CommandsPage() {
       await commandService.deleteCommand(commandId);
       const nextPage = meta ? pageAfterDeletion(meta) : page;
       if (nextPage !== page) setPage(nextPage);
-      else await fetchCommands();
+      else commandsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error deleting command: ${getErrorMessage(err)}`

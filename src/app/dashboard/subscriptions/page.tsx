@@ -5,7 +5,7 @@ import {
   subscriptionService,
 } from "@/composition";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import type {
   SubscriptionPlan,
   ClientSubscription,
@@ -14,10 +14,11 @@ import type {
   Client,
 } from "@/features/clients";
 import { useLazyCatalog } from "@/shared/hooks/useLazyCatalog";
+import { usePagedQuery } from "@/shared/hooks/useQuery";
+
 import { getErrorMessage } from "@/utils/errors";
 import { useActionFeedback } from "@/shared/hooks/useActionFeedback";
 import { formatCalendarDate } from "@/shared/format/date";
-import type { PageMeta } from "@/core/Pagination";
 import { pageAfterDeletion } from "@/core/Pagination";
 import { ActionGroup, Button, ErrorState, FormField, FormSkeleton, Input, Modal, Page, PageHeader, Pagination, RowActions, Select, StatusBadge, Table, TableEmpty, TablePanel, TableSkeleton, Textarea } from "@/shared/components";
 
@@ -33,21 +34,19 @@ const loadSubscriptionCatalogs = async () => {
 
 export default function SubscriptionsPage() {
   const feedback = useActionFeedback();
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [clientSubs, setClientSubs] = useState<ClientSubscription[]>([]);
   const catalog = useLazyCatalog(loadSubscriptionCatalogs);
   const clients = catalog.data?.clients ?? [];
   const planCatalog = catalog.data?.plans ?? [];
-  const [plansLoading, setPlansLoading] = useState(true);
-  const [subscriptionsLoading, setSubscriptionsLoading] = useState(true);
   const [plansPage, setPlansPage] = useState(1);
   const [subscriptionsPage, setSubscriptionsPage] = useState(1);
-  const [plansMeta, setPlansMeta] = useState<PageMeta | null>(null);
-  const [subscriptionsMeta, setSubscriptionsMeta] = useState<PageMeta | null>(null);
+  const plansQuery = usePagedQuery(useCallback(() => subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE }), [plansPage]));
+  const subscriptionsQuery = usePagedQuery(
+    useCallback(() => subscriptionService.listClientSubscriptions({ page: subscriptionsPage, pageSize: PAGE_SIZE }), [subscriptionsPage])
+  );
+  const { items: plans, meta: plansMeta, loading: plansLoading, error: plansError } = plansQuery;
+  const { items: clientSubs, meta: subscriptionsMeta, loading: subscriptionsLoading, error: subscriptionsError } = subscriptionsQuery;
   const [isSubmittingPlan, setIsSubmittingPlan] = useState(false);
   const [isSubmittingSubscription, setIsSubmittingSubscription] = useState(false);
-  const [plansError, setPlansError] = useState<string | null>(null);
-  const [subscriptionsError, setSubscriptionsError] = useState<string | null>(null);
 
   // Modal states
   const [activeModal, setActiveModal] = useState<'PLAN' | 'SUBSCRIPTION' | null>(null);
@@ -69,56 +68,6 @@ export default function SubscriptionsPage() {
     payment_status: "PAID",
     end_date: ""
   });
-
-  useEffect(() => {
-    let cancelled = false;
-    setPlansLoading(true);
-    void subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE })
-      .then((response) => {
-        if (cancelled) return;
-        setPlans(response.data);
-        setPlansMeta(response.meta);
-        setPlansError(null);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setPlansError(getErrorMessage(err));
-      })
-      .finally(() => {
-        if (!cancelled) setPlansLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [plansPage]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setSubscriptionsLoading(true);
-    void subscriptionService.listClientSubscriptions({ page: subscriptionsPage, pageSize: PAGE_SIZE })
-      .then((response) => {
-        if (cancelled) return;
-        setClientSubs(response.data);
-        setSubscriptionsMeta(response.meta);
-        setSubscriptionsError(null);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setSubscriptionsError(getErrorMessage(err));
-      })
-      .finally(() => {
-        if (!cancelled) setSubscriptionsLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [subscriptionsPage]);
-
-  const refreshPlans = async () => {
-    const plansData = await subscriptionService.listPlans({ page: plansPage, pageSize: PAGE_SIZE });
-    setPlans(plansData.data);
-    setPlansMeta(plansData.meta);
-  };
-
-  const refreshClientSubscriptions = async () => {
-    const subscriptionsData = await subscriptionService.listClientSubscriptions({ page: subscriptionsPage, pageSize: PAGE_SIZE });
-    setClientSubs(subscriptionsData.data);
-    setSubscriptionsMeta(subscriptionsData.meta);
-  };
 
   const handleOpenPlanModal = (plan: SubscriptionPlan | null = null) => {
     if (plan) {
@@ -187,7 +136,7 @@ export default function SubscriptionsPage() {
       }
       setActiveModal(null);
       catalog.invalidate();
-      await refreshPlans();
+      plansQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error saving plan: ${getErrorMessage(err)}`
@@ -214,7 +163,7 @@ export default function SubscriptionsPage() {
         await subscriptionService.createClientSubscription(payload);
       }
       setActiveModal(null);
-      await refreshClientSubscriptions();
+      subscriptionsQuery.reload();
     } catch (err: unknown) {
       feedback.error(
         `Error saving subscription: ${getErrorMessage(err)}`
@@ -230,7 +179,7 @@ export default function SubscriptionsPage() {
       catalog.invalidate();
       const nextPage = plansMeta ? pageAfterDeletion(plansMeta) : plansPage;
       if (nextPage !== plansPage) setPlansPage(nextPage);
-      else await refreshPlans();
+      else plansQuery.reload();
     } catch (err: unknown) {
       feedback.error(getErrorMessage(err));
     }
@@ -241,7 +190,7 @@ export default function SubscriptionsPage() {
       await subscriptionService.deleteClientSubscription(id);
       const nextPage = subscriptionsMeta ? pageAfterDeletion(subscriptionsMeta) : subscriptionsPage;
       if (nextPage !== subscriptionsPage) setSubscriptionsPage(nextPage);
-      else await refreshClientSubscriptions();
+      else subscriptionsQuery.reload();
     } catch (err: unknown) {
       feedback.error(getErrorMessage(err));
     }

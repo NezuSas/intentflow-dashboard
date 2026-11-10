@@ -1,0 +1,6 @@
+:HL["/intentflow-dashboard/_next/static/chunks/1yanx1lg38-gp.css","style"]
+:HL["/intentflow-dashboard/_next/static/chunks/2nascd62oo2nc.css","style"]
+:HL["/intentflow-dashboard/_next/static/media/07c7676b89ed2778-s.p.2bn3s6zvc0dyp.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+2:[["children",{"s":"__PAGE__","h":160}]]
+1:[["children",{"s":"dashboard","h":96,"c":"$Q2"}]]
+0:{"b":"3Tagg17DhtctyZ5mirBDw","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

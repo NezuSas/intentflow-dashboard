@@ -8,8 +8,6 @@ import {
 
 import React, {
   useCallback,
-  useEffect,
-  useRef,
   useState,
 } from "react";
 import styles from "../dashboard.module.css";
@@ -26,9 +24,8 @@ import type {
 import type {
   Client,
 } from "@/features/clients";
-import { getErrorMessage } from "@/utils/errors";
+import { usePagedQuery, useQuery } from "@/shared/hooks/useQuery";
 import { formatGuayaquilDateTime } from "@/shared/format/date";
-import type { PageMeta } from "@/core/Pagination";
 import {
   Button,
   Card,
@@ -66,12 +63,7 @@ export const getGuayaquilDayBounds = (date: string) => {
 };
 
 export default function IntentsPage() {
-  const [intents, setIntents] = useState<Intent[]>([]);
-  const [boards, setBoards] = useState<Board[]>([]); // For filter dropdown
-  const [clients, setClients] = useState<Client[]>([]); // For client filter
-  const [meta, setMeta] = useState<PageMeta | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const requestSequence = useRef(0);
 
   // Filters
   const [selectedClientId, setSelectedClientId] = useState<string>("");
@@ -92,99 +84,28 @@ export default function IntentsPage() {
     setSelectedIntent(null);
   };
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [catalogError, setCatalogError] = useState<string | null>(null);
+  // The list follows the page and the filters; the catalogs feed the filter selects.
+  const intentsQuery = usePagedQuery(
+    useCallback(() => {
+      const query: IntentListQuery = { page: currentPage, pageSize: PAGE_SIZE };
+      if (selectedClientId) query.client = Number(selectedClientId);
+      if (selectedBoardId) query.board = Number(selectedBoardId);
+      if (filterDate) Object.assign(query, getGuayaquilDayBounds(filterDate));
+      return intentService.list(query);
+    }, [currentPage, filterDate, selectedBoardId, selectedClientId])
+  );
+  const { items: intents, meta, loading, error } = intentsQuery;
 
-  const loadIntents = useCallback(async () => {
-    const requestId = ++requestSequence.current;
-    const query: IntentListQuery = {
-      page: currentPage,
-      pageSize: PAGE_SIZE,
-    };
-
-    if (selectedClientId) {
-      query.client = Number(selectedClientId);
-    }
-
-    if (selectedBoardId) {
-      query.board = Number(selectedBoardId);
-    }
-
-    if (filterDate) {
-      Object.assign(query, getGuayaquilDayBounds(filterDate));
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await intentService.list(query);
-
-      if (requestId !== requestSequence.current) {
-        return;
-      }
-
-      setIntents(response.data);
-      setMeta(response.meta);
-    } catch (err: unknown) {
-      if (requestId !== requestSequence.current) {
-        return;
-      }
-
-      setError(getErrorMessage(err));
-    } finally {
-      if (requestId === requestSequence.current) {
-        setLoading(false);
-      }
-    }
-  }, [
-    currentPage,
-    filterDate,
-    selectedBoardId,
-    selectedClientId,
-  ]);
-
-  const loadClients = useCallback(async () => {
-    try {
-      const clientsData = await clientService.getClientCatalog();
-      setClients(clientsData as Client[]);
-      setCatalogError(null);
-    } catch (err: unknown) {
-      setCatalogError(getErrorMessage(err));
-    }
-  }, []);
-
-  useEffect(() => { void loadClients(); }, [loadClients]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!selectedClientId) {
-      setBoards([]);
-      return () => { cancelled = true; };
-    }
-
-    setBoards([]);
-    void boardService.getBoardCatalog(Number(selectedClientId))
-      .then((data) => {
-        if (!cancelled) {
-          setBoards(data as Board[]);
-          setCatalogError(null);
-        }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setCatalogError(getErrorMessage(err));
-      });
-    return () => { cancelled = true; };
-  }, [selectedClientId]);
-
-  useEffect(() => {
-    void loadIntents();
-
-    return () => {
-      requestSequence.current += 1;
-    };
-  }, [loadIntents]);
+  const clientsQuery = useQuery(useCallback(() => clientService.getClientCatalog() as Promise<Client[]>, []));
+  const boardsQuery = useQuery(
+    useCallback(
+      () => (selectedClientId ? (boardService.getBoardCatalog(Number(selectedClientId)) as Promise<Board[]>) : Promise.resolve([] as Board[])),
+      [selectedClientId]
+    )
+  );
+  const clients = clientsQuery.data ?? [];
+  const boards = boardsQuery.data ?? [];
+  const catalogError = clientsQuery.error ?? boardsQuery.error;
 
   // Get boards filtered by selected client
   const availableBoards = boards;
@@ -214,7 +135,7 @@ export default function IntentsPage() {
 
   return (
     <div>
-      <PageHeader title="Intents" actions={<Button variant="primary" loading={loading} onClick={() => void loadIntents()}>
+      <PageHeader title="Intents" actions={<Button variant="primary" loading={loading} onClick={() => intentsQuery.reload()}>
           🔄 Refresh
         </Button>} />
 
